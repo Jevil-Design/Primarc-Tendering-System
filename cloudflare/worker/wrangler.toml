@@ -1,0 +1,52 @@
+name = "primarc-tendering-api"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ─── D1 ──────────────────────────────────────────────────────────
+# Create with:  wrangler d1 create primarc-tendering
+# then paste the returned database_id below.
+[[d1_databases]]
+binding = "DB"
+database_name = "primarc-tendering"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+# ─── R2 ──────────────────────────────────────────────────────────
+# Create with:  wrangler r2 bucket create primarc-tendering-documents
+[[r2_buckets]]
+binding = "DOCUMENTS"
+bucket_name = "primarc-tendering-documents"
+
+[vars]
+ENVIRONMENT = "development"
+# Exact origin of the Pages deployment. Never "*" — these APIs are cookie
+# authenticated, and a wildcard origin with credentials is rejected by browsers
+# anyway (and would be a real vulnerability if it were not).
+ALLOWED_ORIGINS = "http://localhost:8788,http://127.0.0.1:8788"
+SESSION_IDLE_MINUTES = "30"
+SESSION_ABSOLUTE_HOURS = "12"
+COOKIE_SECURE = "false"
+
+# ─── Production ──────────────────────────────────────────────────
+[env.production]
+name = "primarc-tendering-api"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+ALLOWED_ORIGINS = "https://primarc-tendering.pages.dev"
+SESSION_IDLE_MINUTES = "30"
+SESSION_ABSOLUTE_HOURS = "12"
+COOKIE_SECURE = "true"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "primarc-tendering"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+[[env.production.r2_buckets]]
+binding = "DOCUMENTS"
+bucket_name = "primarc-tendering-documents"
+
+# Secrets (never in this file — set with `wrangler secret put`):
+#   SESSION_PEPPER      extra entropy mixed into session token hashing
+#   BOOTSTRAP_TOKEN     one-time token authorising first-admin creation

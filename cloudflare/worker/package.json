@@ -1,0 +1,19 @@
+{
+  "name": "primarc-tendering-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker API for the Primarc Tendering System — D1 + R2.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --env production",
+    "db:create": "wrangler d1 create primarc-tendering",
+    "db:migrate:local": "wrangler d1 migrations apply primarc-tendering --local",
+    "db:migrate": "wrangler d1 migrations apply primarc-tendering --remote",
+    "db:console": "wrangler d1 execute primarc-tendering --remote --command",
+    "r2:create": "wrangler r2 bucket create primarc-tendering-documents",
+    "tail": "wrangler tail --env production"
+  },
+  "devDependencies": {
+    "wrangler": "^3.99.0"
+  }
+}

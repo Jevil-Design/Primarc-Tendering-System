@@ -1,0 +1,10 @@
+# Local development secrets. Copy to .dev.vars (git-ignored).
+# In production set these with: wrangler secret put <NAME> --env production
+
+# Extra entropy mixed into session-token hashing. Any long random string.
+#   openssl rand -hex 32
+SESSION_PEPPER=replace-with-a-long-random-string
+
+# One-time token that authorises POST /api/auth/bootstrap (first admin).
+# Unset or blank = the endpoint is disabled. Clear it once the admin exists.
+BOOTSTRAP_TOKEN=
