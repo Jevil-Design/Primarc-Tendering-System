@@ -9,7 +9,7 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "primarc-tendering"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "54c449b2-9fb3-4a04-b7c0-55b2a9df653d"
 
 # ─── R2 ──────────────────────────────────────────────────────────
 # Create with:  wrangler r2 bucket create primarc-tendering-documents
@@ -22,7 +22,7 @@ ENVIRONMENT = "development"
 # Exact origin of the Pages deployment. Never "*" — these APIs are cookie
 # authenticated, and a wildcard origin with credentials is rejected by browsers
 # anyway (and would be a real vulnerability if it were not).
-ALLOWED_ORIGINS = "http://localhost:8788,http://127.0.0.1:8788"
+ALLOWED_ORIGINS = "https://primarc-tendering-system.suvojt740.workers.dev"
 SESSION_IDLE_MINUTES = "30"
 SESSION_ABSOLUTE_HOURS = "12"
 COOKIE_SECURE = "false"
@@ -41,7 +41,7 @@ COOKIE_SECURE = "true"
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "primarc-tendering"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "54c449b2-9fb3-4a04-b7c0-55b2a9df653d"
 
 [[env.production.r2_buckets]]
 binding = "DOCUMENTS"
