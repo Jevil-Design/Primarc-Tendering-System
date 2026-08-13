@@ -1,2 +1,2 @@
-/* Edit this after deploying the Worker — it is the only place the URL appears. */
-window.CLOUDFLARE_API_URL = 'https://primarc-tendering-system.suvojt740.workers.dev/';
+/* Edit this after deploying the Worker ï¿½ it is the only place the URL appears. */
+window.CLOUDFLARE_API_URL = 'http://localhost:8787/';
