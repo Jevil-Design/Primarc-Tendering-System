@@ -72,12 +72,3 @@ create table if not exists designations (
 create index if not exists idx_branches_company on branches(company_id);
 create index if not exists idx_desig_dept on designations(department_id);
 create index if not exists idx_desig_reports on designations(reports_to);
-
-create trigger if not exists tg_companies_updated after update on companies
-begin update companies set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;
-create trigger if not exists tg_branches_updated after update on branches
-begin update branches set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;
-create trigger if not exists tg_departments_updated after update on departments
-begin update departments set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;
-create trigger if not exists tg_designations_updated after update on designations
-begin update designations set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;

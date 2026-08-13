@@ -48,36 +48,3 @@ create index if not exists idx_po_project on purchase_orders(project_id);
 create index if not exists idx_po_vendor on purchase_orders(vendor_id);
 create index if not exists idx_po_status on purchase_orders(status);
 create index if not exists idx_poi_po on purchase_order_items(purchase_order_id, line_no);
-
-create trigger if not exists tg_po_updated after update on purchase_orders
-begin update purchase_orders set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;
-
-create trigger if not exists tg_poi_tot_ins after insert on purchase_order_items
-begin
-  update purchase_orders set
-    amount       = (select coalesce(sum(amount),0)     from purchase_order_items where purchase_order_id = new.purchase_order_id),
-    gst_amount   = (select coalesce(sum(gst_amount),0) from purchase_order_items where purchase_order_id = new.purchase_order_id),
-    total_amount = (select coalesce(sum(amount),0) + coalesce(sum(gst_amount),0)
-                    from purchase_order_items where purchase_order_id = new.purchase_order_id)
-  where id = new.purchase_order_id;
-end;
-
-create trigger if not exists tg_poi_tot_upd after update on purchase_order_items
-begin
-  update purchase_orders set
-    amount       = (select coalesce(sum(amount),0)     from purchase_order_items where purchase_order_id = new.purchase_order_id),
-    gst_amount   = (select coalesce(sum(gst_amount),0) from purchase_order_items where purchase_order_id = new.purchase_order_id),
-    total_amount = (select coalesce(sum(amount),0) + coalesce(sum(gst_amount),0)
-                    from purchase_order_items where purchase_order_id = new.purchase_order_id)
-  where id = new.purchase_order_id;
-end;
-
-create trigger if not exists tg_poi_tot_del after delete on purchase_order_items
-begin
-  update purchase_orders set
-    amount       = (select coalesce(sum(amount),0)     from purchase_order_items where purchase_order_id = old.purchase_order_id),
-    gst_amount   = (select coalesce(sum(gst_amount),0) from purchase_order_items where purchase_order_id = old.purchase_order_id),
-    total_amount = (select coalesce(sum(amount),0) + coalesce(sum(gst_amount),0)
-                    from purchase_order_items where purchase_order_id = old.purchase_order_id)
-  where id = old.purchase_order_id;
-end;

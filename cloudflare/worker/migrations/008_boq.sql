@@ -63,41 +63,6 @@ create index if not exists idx_boqitems_boq on boq_items(boq_id, display_order);
 create index if not exists idx_boqitems_parent on boq_items(parent_id);
 create index if not exists idx_boqitems_master on boq_items(master_item_id);
 
-create trigger if not exists tg_boqs_updated after update on boqs
-begin update boqs set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;
-
--- Roll line changes up into the parent document. Three triggers because
--- SQLite has no "after insert or update or delete" form.
-create trigger if not exists tg_boqitems_ins after insert on boq_items
-begin
-  update boqs set
-    base_total   = (select coalesce(sum(amount),0)     from boq_items where boq_id = new.boq_id and item_type='item'),
-    gst_total    = (select coalesce(sum(gst_amount),0) from boq_items where boq_id = new.boq_id and item_type='item'),
-    total_amount = (select coalesce(sum(amount),0) + coalesce(sum(gst_amount),0)
-                    from boq_items where boq_id = new.boq_id and item_type='item')
-  where id = new.boq_id;
-end;
-
-create trigger if not exists tg_boqitems_upd after update on boq_items
-begin
-  update boqs set
-    base_total   = (select coalesce(sum(amount),0)     from boq_items where boq_id = new.boq_id and item_type='item'),
-    gst_total    = (select coalesce(sum(gst_amount),0) from boq_items where boq_id = new.boq_id and item_type='item'),
-    total_amount = (select coalesce(sum(amount),0) + coalesce(sum(gst_amount),0)
-                    from boq_items where boq_id = new.boq_id and item_type='item')
-  where id = new.boq_id;
-end;
-
-create trigger if not exists tg_boqitems_del after delete on boq_items
-begin
-  update boqs set
-    base_total   = (select coalesce(sum(amount),0)     from boq_items where boq_id = old.boq_id and item_type='item'),
-    gst_total    = (select coalesce(sum(gst_amount),0) from boq_items where boq_id = old.boq_id and item_type='item'),
-    total_amount = (select coalesce(sum(amount),0) + coalesce(sum(gst_amount),0)
-                    from boq_items where boq_id = old.boq_id and item_type='item')
-  where id = old.boq_id;
-end;
-
 -- Per-user working draft (replaces boq_autosave_v3). One row per user, so an
 -- in-progress BOQ survives a refresh, a different device, and a crash.
 create table if not exists boq_drafts (

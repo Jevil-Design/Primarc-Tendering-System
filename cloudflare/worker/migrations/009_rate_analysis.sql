@@ -45,6 +45,3 @@ create table if not exists rate_analysis_components (
 
 create index if not exists idx_ra_item on rate_analyses(boq_item_id);
 create index if not exists idx_rac_parent on rate_analysis_components(rate_analysis_id);
-
-create trigger if not exists tg_ra_updated after update on rate_analyses
-begin update rate_analyses set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;

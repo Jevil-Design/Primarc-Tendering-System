@@ -26,6 +26,3 @@ create table if not exists materials (
 create unique index if not exists idx_materials_norm
   on materials(name_normalized, coalesce(brand,'')) where deleted_at is null;
 create index if not exists idx_materials_cat on materials(category, subcategory);
-
-create trigger if not exists tg_materials_updated after update on materials
-begin update materials set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;

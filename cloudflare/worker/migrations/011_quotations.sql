@@ -59,34 +59,3 @@ create table if not exists vendor_quote_revisions (
 create index if not exists idx_vql_ev on vendor_quote_lines(enquiry_vendor_id);
 create index if not exists idx_vql_item on vendor_quote_lines(enquiry_item_id);
 create index if not exists idx_vqr_ev on vendor_quote_revisions(enquiry_vendor_id, revision_no desc);
-
-create trigger if not exists tg_vql_updated after update on vendor_quote_lines
-begin update vendor_quote_lines set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;
-
--- Vendor header totals follow their lines.
-create trigger if not exists tg_vql_tot_ins after insert on vendor_quote_lines
-begin
-  update enquiry_vendors set
-    base_amount  = (select coalesce(sum(amount),0)     from vendor_quote_lines where enquiry_vendor_id = new.enquiry_vendor_id),
-    gst_amount   = (select coalesce(sum(gst_amount),0) from vendor_quote_lines where enquiry_vendor_id = new.enquiry_vendor_id),
-    total_amount = (select coalesce(sum(total_amount),0) from vendor_quote_lines where enquiry_vendor_id = new.enquiry_vendor_id)
-  where id = new.enquiry_vendor_id;
-end;
-
-create trigger if not exists tg_vql_tot_upd after update on vendor_quote_lines
-begin
-  update enquiry_vendors set
-    base_amount  = (select coalesce(sum(amount),0)     from vendor_quote_lines where enquiry_vendor_id = new.enquiry_vendor_id),
-    gst_amount   = (select coalesce(sum(gst_amount),0) from vendor_quote_lines where enquiry_vendor_id = new.enquiry_vendor_id),
-    total_amount = (select coalesce(sum(total_amount),0) from vendor_quote_lines where enquiry_vendor_id = new.enquiry_vendor_id)
-  where id = new.enquiry_vendor_id;
-end;
-
-create trigger if not exists tg_vql_tot_del after delete on vendor_quote_lines
-begin
-  update enquiry_vendors set
-    base_amount  = (select coalesce(sum(amount),0)     from vendor_quote_lines where enquiry_vendor_id = old.enquiry_vendor_id),
-    gst_amount   = (select coalesce(sum(gst_amount),0) from vendor_quote_lines where enquiry_vendor_id = old.enquiry_vendor_id),
-    total_amount = (select coalesce(sum(total_amount),0) from vendor_quote_lines where enquiry_vendor_id = old.enquiry_vendor_id)
-  where id = old.enquiry_vendor_id;
-end;

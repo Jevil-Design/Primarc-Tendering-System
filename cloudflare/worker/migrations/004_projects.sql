@@ -35,9 +35,6 @@ create index if not exists idx_projects_company on projects(company_id);
 create index if not exists idx_projects_status on projects(status);
 create index if not exists idx_projects_created on projects(created_at desc);
 
-create trigger if not exists tg_projects_updated after update on projects
-begin update projects set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;
-
 -- Concurrency-safe document numbering. D1 serialises writes, and the UPSERT
 -- below is a single statement, so two callers cannot be handed the same serial
 -- the way the old client-side DB.seq[ref]++ could.

@@ -56,6 +56,3 @@ create index if not exists idx_users_username on users(username);
 create index if not exists idx_users_status on users(status);
 create index if not exists idx_sessions_user on sessions(user_id);
 create index if not exists idx_sessions_expiry on sessions(expires_at);
-
-create trigger if not exists tg_users_updated after update on users
-begin update users set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;

@@ -44,6 +44,3 @@ create index if not exists idx_vendors_pan on vendors(pan);
 create index if not exists idx_vendors_gstin on vendors(gstin);
 create index if not exists idx_vendors_skillset on vendors(skillset);
 create index if not exists idx_vendors_status on vendors(status);
-
-create trigger if not exists tg_vendors_updated after update on vendors
-begin update vendors set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;

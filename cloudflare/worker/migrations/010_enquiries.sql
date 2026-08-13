@@ -84,6 +84,3 @@ create index if not exists idx_enqitems_enq on enquiry_items(enquiry_id, item_no
 create index if not exists idx_ev_enq on enquiry_vendors(enquiry_id);
 create index if not exists idx_ev_vendor on enquiry_vendors(vendor_id);
 create index if not exists idx_ev_token on enquiry_vendors(access_token_hash);
-
-create trigger if not exists tg_enq_updated after update on enquiries
-begin update enquiries set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;

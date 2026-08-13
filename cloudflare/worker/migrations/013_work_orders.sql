@@ -81,36 +81,3 @@ create index if not exists idx_wo_vendor on work_orders(vendor_id);
 create index if not exists idx_wo_enq on work_orders(enquiry_id);
 create index if not exists idx_wo_status on work_orders(status);
 create index if not exists idx_woi_wo on work_order_items(work_order_id, line_no);
-
-create trigger if not exists tg_wo_updated after update on work_orders
-begin update work_orders set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;
-
-create trigger if not exists tg_woi_tot_ins after insert on work_order_items
-begin
-  update work_orders set
-    amount       = (select coalesce(sum(amount),0)     from work_order_items where work_order_id = new.work_order_id),
-    gst_amount   = (select coalesce(sum(gst_amount),0) from work_order_items where work_order_id = new.work_order_id),
-    total_amount = (select coalesce(sum(amount),0) + coalesce(sum(gst_amount),0)
-                    from work_order_items where work_order_id = new.work_order_id)
-  where id = new.work_order_id;
-end;
-
-create trigger if not exists tg_woi_tot_upd after update on work_order_items
-begin
-  update work_orders set
-    amount       = (select coalesce(sum(amount),0)     from work_order_items where work_order_id = new.work_order_id),
-    gst_amount   = (select coalesce(sum(gst_amount),0) from work_order_items where work_order_id = new.work_order_id),
-    total_amount = (select coalesce(sum(amount),0) + coalesce(sum(gst_amount),0)
-                    from work_order_items where work_order_id = new.work_order_id)
-  where id = new.work_order_id;
-end;
-
-create trigger if not exists tg_woi_tot_del after delete on work_order_items
-begin
-  update work_orders set
-    amount       = (select coalesce(sum(amount),0)     from work_order_items where work_order_id = old.work_order_id),
-    gst_amount   = (select coalesce(sum(gst_amount),0) from work_order_items where work_order_id = old.work_order_id),
-    total_amount = (select coalesce(sum(amount),0) + coalesce(sum(gst_amount),0)
-                    from work_order_items where work_order_id = old.work_order_id)
-  where id = old.work_order_id;
-end;

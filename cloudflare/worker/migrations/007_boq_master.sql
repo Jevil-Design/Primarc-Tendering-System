@@ -55,6 +55,3 @@ create index if not exists idx_bmr_item on boq_master_rates(master_item_id);
 create index if not exists idx_bmr_vendor on boq_master_rates(vendor_id);
 create index if not exists idx_bmr_project on boq_master_rates(project_id);
 create index if not exists idx_bmr_date on boq_master_rates(effective_date desc);
-
-create trigger if not exists tg_boqmaster_updated after update on boq_master_items
-begin update boq_master_items set updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') where id = new.id; end;
