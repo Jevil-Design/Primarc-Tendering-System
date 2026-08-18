@@ -25,6 +25,7 @@ import registerMigration from './routes/migration.js';
    the default is "authenticated", so forgetting to guard a new route fails
    closed rather than open. */
 const PUBLIC = new Set([
+  'GET /',
   'POST /auth/login',
   'POST /auth/logout',
   'GET /auth/me',
@@ -36,6 +37,14 @@ const PUBLIC = new Set([
 ]);
 
 const router = new Router();
+router.get('/', (ctx) => ({
+  ok: true,
+  service: 'Primarc Tendering API',
+  environment: ctx.env?.ENVIRONMENT || 'development',
+  status: 'running',
+  docs: '/health',
+  ts: new Date().toISOString(),
+}));
 router.get('/health', () => ({ ok: true, ts: new Date().toISOString() }));
 
 registerAuth(router);
