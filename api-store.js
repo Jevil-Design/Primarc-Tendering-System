@@ -84,20 +84,33 @@
   function currentDB() { try { return window.__tsHooks ? window.__tsHooks.getDB() : null; } catch (e) { return null; } }
   function adoptDB(state) { try { if (window.__tsHooks) window.__tsHooks.setDB(state); } catch (e) {} }
 
+  // "Empty" = none of the meaningful entities present. Used to make sure an
+  // accidentally empty server copy never overwrites a computer that has data.
+  function isEmptyDB(db) {
+    if (!db) return true;
+    var n = function (a) { return (a && a.length) || 0; };
+    return n(db.quotations) === 0 && n(db.workOrders) === 0 &&
+           n(db.vendorMaster) === 0 && n(db.deleted) === 0;
+  }
+
   var _resyncing = false;
   async function resync() {
     if (_resyncing) return; _resyncing = true;
     try {
       var r = await api.request('GET', '/app-state');
       _ver = (r && r.version) || 0;
-      if (r && r.state) {
-        adoptDB(r.state);
+      var server = r && r.state;
+      var local = currentDB();
+      if (!isEmptyDB(server)) {
+        adoptDB(server);
         emit('resynced');
-      } else {
-        // First computer to arrive seeds the server from its local data.
-        var local = currentDB();
-        if (local && !_seeded) { _seeded = true; await push(true); }
+      } else if (!isEmptyDB(local)) {
+        // Server is empty/absent but THIS computer has data — push it up rather
+        // than wiping local work. This both seeds a fresh server and repairs an
+        // accidental empty seed from another (data-less) device.
+        await push(true);
       }
+      // both empty → nothing to do
     } catch (e) {
       emit('error', { message: (e && e.message) || 'Could not reach the server' });
     } finally { _resyncing = false; }
