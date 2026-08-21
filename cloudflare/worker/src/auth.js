@@ -6,14 +6,20 @@ import { newId, nowIso, ipOf, uaOf, publicUser } from './lib/util.js';
 
    PBKDF2-SHA256 via WebCrypto rather than bcrypt: Workers have no native
    bindings, and pure-JS bcrypt is slow enough to burn the CPU-time budget.
-   210,000 iterations follows current OWASP guidance for PBKDF2-SHA256.
+
+   Iterations are capped at 100,000: the Cloudflare Workers runtime rejects
+   PBKDF2 requests above that ceiling ("iteration counts above 100000 are not
+   supported"), so anything higher makes hashPassword/verifyPassword throw and
+   breaks login, bootstrap and password changes. 100,000 is the platform max.
+   The stored hash records its own iteration count, so verifyPassword keeps
+   working if the ceiling is ever raised and the constant increased.
 
    Sessions are opaque random tokens in an httpOnly cookie. Only a SHA-256 of
    (token + pepper) is stored, so a database dump cannot be replayed. Not a JWT:
    disabling a user or revoking a session must take effect immediately.
    ═══════════════════════════════════════════════════════════════ */
 
-const ITERATIONS = 210000;
+const ITERATIONS = 100000;
 const MAX_FAILED = 8;
 const LOCK_MINUTES = 15;
 export const COOKIE = 'ts_sid';

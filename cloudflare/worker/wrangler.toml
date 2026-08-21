@@ -19,10 +19,11 @@ bucket_name = "primarc-tendering-documents"
 
 [vars]
 ENVIRONMENT = "development"
-# Exact origin of the Pages deployment. Never "*" — these APIs are cookie
-# authenticated, and a wildcard origin with credentials is rejected by browsers
-# anyway (and would be a real vulnerability if it were not).
-ALLOWED_ORIGINS = "https://primarc-tendering-system.suvojt740.workers.dev"
+# Local dev origin (web/server.js serves the app on :8000). Never "*" — these
+# APIs are cookie authenticated, and a wildcard origin with credentials is
+# rejected by browsers anyway (and would be a real vulnerability if it were not).
+# Comma-separate to allow more than one origin.
+ALLOWED_ORIGINS = "http://localhost:8000"
 SESSION_IDLE_MINUTES = "30"
 SESSION_ABSOLUTE_HOURS = "12"
 COOKIE_SECURE = "false"
@@ -33,7 +34,7 @@ name = "primarc-tendering-api"
 
 [env.production.vars]
 ENVIRONMENT = "production"
-ALLOWED_ORIGINS = "https://primarc-tendering.pages.dev"
+ALLOWED_ORIGINS = "https://primarc-tendering-system.suvojt740.workers.dev"
 SESSION_IDLE_MINUTES = "30"
 SESSION_ABSOLUTE_HOURS = "12"
 COOKIE_SECURE = "true"

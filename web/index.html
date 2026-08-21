@@ -1504,6 +1504,7 @@
 <script src="api-url.js"></script>
 <script src="cloudflare-api.js"></script>
 <script src="cloudflare-migration.js"></script>
+<script src="api-store.js"></script>
 <script>
 /* Legacy save pill, kept for the static/offline build. The Cloudflare connection
    pill is bound separately by cloudflare-api.js on DOMContentLoaded. */
@@ -6968,7 +6969,11 @@ const COMMTERMS=[
 
 let DB=loadDB();
 function loadDB(){try{const r=JSON.parse(localStorage.getItem(QKEY));if(r&&r.quotations){r.deleted=r.deleted||[];r.vendorMaster=r.vendorMaster||[];r.workOrders=r.workOrders||[];r.quotations.forEach(q=>{q.versions=q.versions||[];qMigrate(q);});[].concat(r.quotations,r.deleted||[]).forEach(q=>{if(q&&typeof q.base==='string'&&q.base.indexOf('QTN/')===0)q.base='ENQ/'+q.base.slice(4);});return r;}}catch(e){}return {quotations:[],notifications:[],seq:{},deleted:[],vendorMaster:[],workOrders:[]};}
-function saveDB(){ if(window.safeSetItem){ safeSetItem(QKEY,JSON.stringify(DB)); } else { try{localStorage.setItem(QKEY,JSON.stringify(DB));}catch(e){showToast('⚠ Storage full');} } }
+function saveDB(){ if(window.safeSetItem){ safeSetItem(QKEY,JSON.stringify(DB)); } else { try{localStorage.setItem(QKEY,JSON.stringify(DB));}catch(e){showToast('⚠ Storage full');} } try{ if(window.TSApi&&window.TSApi.active&&window.TSApi.push)window.TSApi.push(); }catch(e){} }
+/* Bridge hooks: the central-DB adapter (api-store.js) lives in another script
+   and cannot see this IIFE's DB/render. These expose exactly what it needs —
+   read the live DB to push, and replace it with the server copy then re-render. */
+window.__tsHooks={ getDB:function(){return DB;}, setDB:function(v){ DB=v; try{localStorage.setItem(QKEY,JSON.stringify(DB));}catch(e){} try{if(typeof render==='function')render();}catch(e){} } };
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const tok=()=>(Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)).slice(0,22);
 const pad=(n,l=3)=>String(n).padStart(l,'0');

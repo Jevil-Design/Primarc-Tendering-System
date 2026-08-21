@@ -11,7 +11,7 @@
 # cookie and CORS settings depend on the frontend being a distinct origin.
 # ═══════════════════════════════════════════════════════════════
 
-name = "tendering-system"
+name = "primarc-tendering-system"
 compatibility_date = "2026-08-01"
 
 [assets]

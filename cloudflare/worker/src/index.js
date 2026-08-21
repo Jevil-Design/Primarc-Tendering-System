@@ -20,6 +20,7 @@ import registerPurchaseOrders from './routes/purchase-orders.js';
 import registerNotifications from './routes/notifications.js';
 import registerDocuments from './routes/documents.js';
 import registerMigration from './routes/migration.js';
+import registerAppState from './routes/app-state.js';
 
 /* Routes that must work without a session. Everything else requires one —
    the default is "authenticated", so forgetting to guard a new route fails
@@ -64,6 +65,7 @@ registerPurchaseOrders(router);
 registerNotifications(router);
 registerDocuments(router);
 registerMigration(router);
+registerAppState(router);
 
 export default {
   async fetch(request, env) {
