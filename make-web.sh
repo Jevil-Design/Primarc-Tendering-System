@@ -5,13 +5,13 @@ set -euo pipefail
 
 OUT="web"
 
-# server.js and _routes.json live only in web/ (local-dev helpers, not generated
-# from source) — preserve them across the rebuild.
+# server.js lives only in web/ (a local-dev helper, not generated from
+# source) — preserve it across the rebuild.
 TMP="$(mktemp -d)"
-for keep in server.js _routes.json; do [ -f "$OUT/$keep" ] && cp "$OUT/$keep" "$TMP/"; done
+for keep in server.js; do [ -f "$OUT/$keep" ] && cp "$OUT/$keep" "$TMP/"; done
 rm -rf "$OUT"
 mkdir -p "$OUT"
-for keep in server.js _routes.json; do [ -f "$TMP/$keep" ] && cp "$TMP/$keep" "$OUT/"; done
+for keep in server.js; do [ -f "$TMP/$keep" ] && cp "$TMP/$keep" "$OUT/"; done
 rm -rf "$TMP"
 
 # The app itself. Pages serves index.html at the root.

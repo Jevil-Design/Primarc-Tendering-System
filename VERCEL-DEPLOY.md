@@ -1,9 +1,8 @@
 # Deploying to Vercel
 
-The app moves from Cloudflare (Pages + Workers + D1 + R2) to a single Vercel
-project: `web/` served as static output, `/api/*` served by one Edge
-Function. Nothing in `backend/` (copied from `cloudflare/worker/src/`, itself
-untouched) had to be rewritten — only the two storage bindings did:
+The app is a single Vercel project: `web/` served as static output, `/api/*`
+served by one Edge Function. `backend/` holds all API logic; only two storage
+bindings differ from a typical Cloudflare Worker setup:
 
 | Was (Cloudflare) | Now (Vercel) | Why |
 |---|---|---|
@@ -26,25 +25,14 @@ turso db show primarc-tendering --url          # -> TURSO_DATABASE_URL
 turso db tokens create primarc-tendering       # -> TURSO_AUTH_TOKEN
 ```
 
-Apply the schema (same file the Cloudflare setup used — one idempotent dump
-of all 18 migrations):
+Apply the schema (one idempotent dump of all 18 migrations):
 
 ```bash
-turso db shell primarc-tendering < cloudflare/worker/schema.sql
+turso db shell primarc-tendering < backend/schema.sql
 ```
 
-### Migrating existing data out of D1
-
-Skip this if there's nothing in the live D1 database worth keeping yet.
-Otherwise, both are SQLite, so a straight dump/load works:
-
-```bash
-wrangler d1 export primarc-tendering --remote --output=d1-export.sql
-turso db shell primarc-tendering < d1-export.sql
-```
-
-Sanity-check row counts on both sides afterwards (`select count(*) from users`,
-`vendors`, `boqs`, ...).
+Individual ordered migration files are also kept under `backend/migrations/`
+if you'd rather apply them one at a time.
 
 ---
 
@@ -129,12 +117,10 @@ URL juggling is needed.
   `ALLOWED_ORIGINS` / cookie `SameSite` only matter if you serve the frontend
   from somewhere else too. `corsHeaders()` in `backend/lib/response.js` is
   unchanged and harmless either way.
-- **`backend/` is the source of truth for API logic** going forward; keep
-  `cloudflare/worker/src/` only if you intend to keep the Cloudflare Worker
-  running in parallel. They will drift once one is edited and not the other.
+- **`backend/` is the sole source of truth for API logic.**
 - **Regenerating `web/`** after editing `Tendering System.html`: `./make-web.sh`
   (no argument needed anymore — it always emits a relative `/api`).
-- Everything in `CLOUDFLARE-README.md` about the security model (PBKDF2
-  iterations, session cookie design, fail-closed auth, permission checks
-  before every document read/write, append-only audit) is unchanged — only
+- The security model (PBKDF2 iterations, session cookie design, fail-closed
+  auth, permission checks before every document read/write, append-only
+  audit) lives in `backend/` and is unchanged by this deploy target — only
   where the bytes physically live moved.
