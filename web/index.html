@@ -1499,8 +1499,7 @@
      Set the API URL before the adapter loads. If the Worker is unreachable the
      adapter degrades to a no-op and the app runs on localStorage as before, so
      the offline single-file build keeps working. -->
-<script>window.CLOUDFLARE_API_URL = window.CLOUDFLARE_API_URL ||
-  'https://primarc-tendering-api.workers.dev/api';</script>
+<script>window.CLOUDFLARE_API_URL = window.CLOUDFLARE_API_URL || '/api';</script>
 <script src="api-url.js"></script>
 <script src="cloudflare-api.js"></script>
 <script src="cloudflare-migration.js"></script>

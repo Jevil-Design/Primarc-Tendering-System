@@ -4,22 +4,26 @@ Construction tendering and procurement — BOQ build-up, vendor enquiry, quotati
 comparison, work orders and purchase orders, with role-based approval limits and
 an append-only audit trail.
 
-Single-page frontend, Cloudflare Workers backend.
+Single-page frontend, with the API deployable to either Vercel (primary —
+see `VERCEL-DEPLOY.md`) or Cloudflare Workers (`CLOUDFLARE-README.md`). Both
+share the same route/auth/permission logic; only the two storage bindings
+differ.
 
 ---
 
 ## Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | One HTML file, vanilla JS, no build step |
-| API | Cloudflare Workers (ES modules) |
-| Database | Cloudflare D1 (SQLite) — 39 tables, 2 views |
-| File storage | Cloudflare R2 |
-| Auth | Session cookie (HttpOnly, SameSite), PBKDF2-SHA256 @ 210 000 iterations |
-| Hosting | Cloudflare Pages |
+| Layer | Vercel (`api/`, `backend/`) | Cloudflare (`cloudflare/worker/`) |
+|---|---|---|
+| Frontend | One HTML file, vanilla JS, no build step | (same) |
+| API | Vercel Edge Function | Cloudflare Worker |
+| Database | Turso (libSQL, SQLite-compatible) | Cloudflare D1 (SQLite) — 39 tables, 2 views |
+| File storage | Cloudflare R2, via its S3 API | Cloudflare R2, via a Workers binding |
+| Auth | Session cookie (HttpOnly, SameSite), PBKDF2-SHA256 @ 100 000 iterations | (same) |
+| Hosting | Vercel | Cloudflare Pages |
 
-No npm dependencies at runtime. `wrangler` is the only tool required.
+No build step for the frontend either way. `backend/` is an unmodified copy
+of `cloudflare/worker/src/` — see `VERCEL-DEPLOY.md` for what changed and why.
 
 ---
 

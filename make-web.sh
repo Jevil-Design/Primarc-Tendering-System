@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-# Assembles web/ — the folder Cloudflare Pages deploys.
-# Run from the project root:  ./make-web.sh
+# Assembles web/ — the static output Vercel deploys (outputDirectory in
+# vercel.json). Run from the project root:  ./make-web.sh
 set -euo pipefail
 
 OUT="web"
-API_URL="${1:-https://primarc-tendering-api.suvojt740.workers.dev/api}"
 
 # server.js and _routes.json live only in web/ (local-dev helpers, not generated
 # from source) — preserve them across the rebuild.
@@ -26,17 +25,15 @@ for f in cloudflare-api.js cloudflare-migration.js api-store.js vendor-master.js
   [ -f "$f" ] && cp "$f" "$OUT/" || echo "  skip (not present): $f"
 done
 
-# Where the API lives. Loaded before cloudflare-api.js.
-cat > "$OUT/api-url.js" <<EOF
+# Where the API lives. Loaded before cloudflare-api.js. Frontend and API are
+# one Vercel project on one origin, so a relative path is always correct.
+cat > "$OUT/api-url.js" <<'EOF'
 /* The one place the API URL is set.
-   Served locally (localhost / 127.0.0.1) it targets the local wrangler dev
-   Worker; anywhere else it targets the deployed production API. This keeps a
-   single committed file correct for both local dev and deployment. */
+   Frontend and API are now one Vercel project on one origin (web/ served as
+   static output, /api/* served by api/[...path].js) — a relative path is
+   correct for `vercel dev`, preview deployments and production alike. */
 (function () {
-  var local = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-  window.CLOUDFLARE_API_URL = local
-    ? 'http://localhost:8787/'
-    : '$API_URL';
+  window.CLOUDFLARE_API_URL = '/api';
 })();
 EOF
 
