@@ -63,14 +63,5 @@ function withAbsoluteUrl(request) {
    at exporting a named `fetch` function instead, which gets a real
    Web-standard Request/Response, Node.js builtins and all. */
 export function fetch(request) {
-  const req = withAbsoluteUrl(request);
-  if (new URL(req.url).pathname === '/api/__diag') {
-    const report = {};
-    for (const k of ['TURSO_DATABASE_URL', 'TURSO_AUTH_TOKEN', 'SESSION_PEPPER', 'BOOTSTRAP_TOKEN']) {
-      const v = process.env[k];
-      report[k] = v ? `SET (len=${v.length})` : 'EMPTY/MISSING';
-    }
-    return new Response(JSON.stringify(report), { headers: { 'Content-Type': 'application/json' } });
-  }
-  return worker.fetch(req, buildEnv());
+  return worker.fetch(withAbsoluteUrl(request), buildEnv());
 }
