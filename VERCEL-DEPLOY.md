@@ -1,13 +1,14 @@
 # Deploying to Vercel
 
 The app is a single Vercel project: `web/` served as static output, `/api/*`
-served by one Edge Function. `backend/` holds all API logic; only two storage
-bindings differ from a typical Cloudflare Worker setup:
+served by one Edge Function (`api/handler.js`). `backend/` holds all API
+logic; only two storage bindings differ from a typical Cloudflare Worker
+setup:
 
 | Was (Cloudflare) | Now (Vercel) | Why |
 |---|---|---|
 | D1 (binding) | **Turso / libSQL** | SQLite-compatible — `schema.sql` and every query in `backend/routes/*.js` work unchanged |
-| R2 (binding) | **R2, via its S3 API** | Same bucket, same files, no data migration — just a different way to reach it, since Vercel has no R2 binding |
+| R2 (binding) | **Vercel Blob** (private store) | Same private-storage model — files are only ever streamed through this server, never a public URL — with no external account or manual API token: OIDC auth is automatic once a store is connected |
 
 `api/_lib/db.js` and `api/_lib/storage.js` are the only new backend code;
 they present the same `prepare/bind/first/all/run/batch` and `put/get/delete`
@@ -25,6 +26,10 @@ turso db show primarc-tendering --url          # -> TURSO_DATABASE_URL
 turso db tokens create primarc-tendering       # -> TURSO_AUTH_TOKEN
 ```
 
+No CLI for your platform (e.g. Windows)? Use the [Turso dashboard](https://turso.tech)
+instead — create a database there, and its page shows the URL plus a
+**Create Token** button.
+
 Apply the schema (one idempotent dump of all 18 migrations):
 
 ```bash
@@ -32,22 +37,24 @@ turso db shell primarc-tendering < backend/schema.sql
 ```
 
 Individual ordered migration files are also kept under `backend/migrations/`
-if you'd rather apply them one at a time.
+if you'd rather apply them one at a time, or via the dashboard's SQL console
+if the CLI isn't available.
 
 ---
 
-## 2 · R2 API token (S3-compatible access)
+## 2 · Vercel Blob store (file storage)
 
-The bucket stays exactly where it is — `primarc-tendering-documents` — and no
-file needs to move. Vercel just reaches it over R2's S3-compatible endpoint
-instead of a Workers binding:
+No external account, no manual API token:
 
-Cloudflare dashboard → **R2 → Manage R2 API Tokens → Create API Token**, with
-Object Read & Write scoped to `primarc-tendering-documents`. Note down:
+1. Project → **Storage** tab → **Create Database** → **Blob**
+2. Set access to **Private** (documents must never be reachable by a bare
+   URL — `backend/routes/documents.js` always checks permissions before
+   streaming a file back, which only works if reads require auth)
+3. Connect the store to this project (Production + Preview; add Development
+   too if you want `vercel dev` to work locally)
 
-- Account ID (top-right of the R2 dashboard) → `R2_ACCOUNT_ID`
-- Access Key ID → `R2_ACCESS_KEY_ID`
-- Secret Access Key → `R2_SECRET_ACCESS_KEY`
+That's it — Vercel adds `BLOB_STORE_ID` and `VERCEL_OIDC_TOKEN` to the
+project automatically, and `api/_lib/storage.js` authenticates with them.
 
 ---
 
@@ -58,23 +65,24 @@ npm install -g vercel
 vercel link
 ```
 
-Set the environment variables from `.env.vercel.example` in the dashboard
-(**Settings → Environment Variables**) — `TURSO_DATABASE_URL`,
-`TURSO_AUTH_TOKEN`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
-`R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `SESSION_PEPPER`, and
-`BOOTSTRAP_TOKEN` (temporarily — see below).
+Set the remaining environment variables from `.env.vercel.example` in the
+dashboard (**Settings → Environment Variables**) — `TURSO_DATABASE_URL`,
+`TURSO_AUTH_TOKEN`, `SESSION_PEPPER`, and `BOOTSTRAP_TOKEN` (temporarily —
+see below).
 
 ```bash
 vercel --prod
 ```
 
-`vercel.json` points `outputDirectory` at `web/`; `api/[...path].js` (an Edge
-Function) handles everything under `/api/*` automatically — no rewrite needed
-for it, only the SPA fallback that sends unknown paths to `index.html`.
+`vercel.json` points `outputDirectory` at `web/` and rewrites `/api/:path*`
+to `api/handler.js` explicitly — Vercel's own filesystem-based catch-all
+route detection for a bracket-named file (`[...path].js`) generates a
+routes-manifest entry that only matches a single path segment outside
+Next.js, so a plain-named handler reached via an explicit rewrite is used
+instead. The second rewrite rule is the SPA fallback that sends unknown
+non-`/api` paths to `index.html`.
 
 ### First administrator
-
-Same bootstrap flow as before:
 
 ```bash
 curl -X POST https://<your-project>.vercel.app/api/auth/bootstrap \
@@ -89,7 +97,7 @@ refuses once any admin exists.
 ### Verify
 
 ```bash
-curl https://<your-project>.vercel.app/api/health         # {"success":true,...}
+curl https://<your-project>.vercel.app/api/health         # {"success":true,"data":{"ok":true,...}}
 ```
 
 In the browser: sign in, open the console, `await CloudflareAPI.probe()` →
@@ -102,6 +110,7 @@ keep the diff small; it now talks to `/api` on the same Vercel origin.)
 ## 4 · Local development
 
 ```bash
+vercel env pull   # pulls TURSO_*, SESSION_PEPPER, and the Blob store's OIDC token
 vercel dev
 ```
 

@@ -16,7 +16,7 @@ full deploy instructions.
 | Frontend | One HTML file, vanilla JS, no build step |
 | API | Vercel Edge Function (`api/`, `backend/`) |
 | Database | Turso (libSQL, SQLite-compatible) — 39 tables, 2 views |
-| File storage | Cloudflare R2, via its S3-compatible API |
+| File storage | Vercel Blob (private store), streamed through the API — never a public URL |
 | Auth | Session cookie (HttpOnly, SameSite), PBKDF2-SHA256 @ 100 000 iterations |
 | Hosting | Vercel |
 
@@ -36,9 +36,9 @@ vendor-master.js             vendor master data module
 erp-admin.js, erp-admin-2.js admin modules
 
 api/
-  [...path].js                Vercel Edge Function entry — wires env into backend/
-  _lib/db.js                  D1-shaped adapter over Turso/libSQL
-  _lib/storage.js              R2-shaped adapter using aws4fetch (S3 API)
+  handler.js                   Vercel Edge Function entry — wires env into backend/
+  _lib/db.js                   D1-shaped adapter over Turso/libSQL
+  _lib/storage.js               R2-shaped adapter over Vercel Blob (private store)
 
 backend/
   schema.sql                  all 18 migrations, idempotent, one command
@@ -72,7 +72,7 @@ provable after a lock.
 ## Enforced server-side
 
 Approval ceilings, permission checks, session expiry (30 min idle / 12 h absolute)
-and R2 download authorisation all live in `backend/`. A patched frontend cannot
+and document download authorisation all live in `backend/`. A patched frontend cannot
 raise its own approval limit or read a document it lacks permission for —
 downloads stream through the API rather than via presigned URLs that would
 outlive the permission that issued them.
@@ -81,5 +81,5 @@ outlive the permission that issued them.
 
 ## Deploy
 
-Full instructions, including the first-admin bootstrap and the Turso/R2 setup,
-are in [VERCEL-DEPLOY.md](./VERCEL-DEPLOY.md).
+Full instructions, including the first-admin bootstrap and the Turso/Blob
+store setup, are in [VERCEL-DEPLOY.md](./VERCEL-DEPLOY.md).

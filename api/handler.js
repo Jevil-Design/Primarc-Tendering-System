@@ -10,7 +10,7 @@
    through `env.DB` / `env.DOCUMENTS`. Vercel's Edge Runtime is, like Workers,
    plain Web APIs (fetch, Request/Response, WebCrypto) with no Node globals,
    which is what let backend/ move over with zero code changes — only the two
-   bindings below had to be re-homed onto Turso and R2-over-S3. */
+   bindings below had to be re-homed onto Turso and Vercel Blob. */
 export const config = { runtime: 'edge' };
 
 import worker from '../backend/index.js';

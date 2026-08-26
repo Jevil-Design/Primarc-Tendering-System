@@ -2,9 +2,9 @@
   "name": "primarc-tendering-system",
   "private": true,
   "type": "module",
-  "description": "Vercel deployment: static frontend (web/) + Edge Function API (api/), Turso DB, R2 file storage.",
+  "description": "Vercel deployment: static frontend (web/) + Edge Function API (api/), Turso DB, Vercel Blob file storage.",
   "dependencies": {
     "@libsql/client": "^0.14.0",
-    "aws4fetch": "^1.0.20"
+    "@vercel/blob": "^2.8.0"
   }
 }
