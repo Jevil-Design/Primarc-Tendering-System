@@ -1,6 +1,7 @@
 {
   "outputDirectory": "web",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/api/:path*", "destination": "/api/handler" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

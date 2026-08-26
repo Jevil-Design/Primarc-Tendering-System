@@ -1,4 +1,9 @@
-/* Vercel Edge Function — catch-all for /api/*.
+/* Vercel Edge Function — catch-all for /api/*, reached via the explicit
+   "/api/:path*" rewrite in vercel.json (NOT the filesystem [...path] bracket
+   convention: that generates a routes-manifest entry — ^/api/([^/]+)$ — that
+   only matches a single path segment, so anything with an extra slash, like
+   /api/auth/login, 404s. This handler already reads the full path itself
+   from request.url, so it doesn't need Vercel's route param at all.
 
    backend/ is an unmodified copy of the Cloudflare Worker's src/: it exports
    the same `{ fetch(request, env) }` shape and only ever touches storage
