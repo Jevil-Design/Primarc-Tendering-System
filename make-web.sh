@@ -30,28 +30,24 @@ done
 cat > "$OUT/api-url.js" <<'EOF'
 /* The one place the API URL is set.
    Frontend and API are now one Vercel project on one origin (web/ served as
-   static output, /api/* served by api/[...path].js) — a relative path is
+   static output, /api/* served by api/handler.js) — a relative path is
    correct for `vercel dev`, preview deployments and production alike. */
 (function () {
   window.CLOUDFLARE_API_URL = '/api';
 })();
 EOF
 
-# Inject the api-url.js tag ahead of cloudflare-api.js, once.
+# Inject the api-url.js tag ahead of cloudflare-api.js, once. Plain sed (no
+# python3 dependency — this silently no-ops on machines without it, which
+# leaves the deployed frontend with no API URL at all).
 if ! grep -q 'api-url.js' "$OUT/index.html"; then
-  python3 - "$OUT/index.html" <<'EOF'
-import sys, io
-p = sys.argv[1]
-s = io.open(p, encoding='utf-8').read()
-needle = '<script src="cloudflare-api.js">'
-tag = '<script src="api-url.js"></script>\n'
-if needle in s:
-    s = s.replace(needle, tag + needle, 1)
-    io.open(p, 'w', encoding='utf-8').write(s)
-    print("  injected api-url.js before cloudflare-api.js")
-else:
-    print("  WARNING: cloudflare-api.js tag not found — add api-url.js by hand")
-EOF
+  if grep -q '<script src="cloudflare-api.js">' "$OUT/index.html"; then
+    # 0,/pattern/ limits the substitution to the first match only.
+    sed -i '0,\|<script src="cloudflare-api.js">|s||<script src="api-url.js"></script>\n<script src="cloudflare-api.js">|' "$OUT/index.html"
+    echo "  injected api-url.js before cloudflare-api.js"
+  else
+    echo "  WARNING: cloudflare-api.js tag not found — add api-url.js by hand"
+  fi
 fi
 
 echo

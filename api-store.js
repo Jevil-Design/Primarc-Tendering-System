@@ -116,35 +116,42 @@
     } finally { _resyncing = false; }
   }
 
-  var _pushTimer = null, _pushing = false, _pendingForce = false;
-  async function doPush(force) {
-    if (_pushing) { _pendingForce = _pendingForce || force; return; }
-    _pushing = true;
+  /* _pushingPromise, not a boolean flag: a caller that finds a push already in
+     flight must be able to await its actual completion (not just fire another
+     one to run "later" and return immediately) — logout() depends on this to
+     guarantee the last edit really reached the server before the session it
+     would ride in on is revoked. */
+  var _pushTimer = null, _pushingPromise = null, _pendingForce = false;
+  function doPush(force) {
+    if (_pushingPromise) { _pendingForce = _pendingForce || force; return _pushingPromise; }
     var db = currentDB();
-    if (!db) { _pushing = false; return; }
+    if (!db) return Promise.resolve();
     emit('saving');
-    try {
-      var body = { data: db };
-      if (!force) body.baseVersion = _ver;             // omit on force = seed / accept-server
-      var r = await api.request('PUT', '/app-state', body);
-      _ver = (r && r.version) || (_ver + 1);
-      emit('saved');
-    } catch (e) {
-      if (e && (e.status === 409 || e.code === 'CONFLICT')) {
-        // Someone else saved first. Take the server copy so nothing is lost.
-        var sv = e.details && e.details.state;
-        if (sv) { _ver = (e.details.serverVersion) || _ver; adoptDB(sv); }
-        else { await resync(); }
-        emit('conflict', e);
-      } else if (e && e.status && e.status >= 400 && e.status < 500) {
-        emit('rejected', e);
-      } else {
-        emit('error', { message: (e && e.message) || 'Could not reach the server' });
+    _pushingPromise = (async () => {
+      try {
+        var body = { data: db };
+        if (!force) body.baseVersion = _ver;             // omit on force = seed / accept-server
+        var r = await api.request('PUT', '/app-state', body);
+        _ver = (r && r.version) || (_ver + 1);
+        emit('saved');
+      } catch (e) {
+        if (e && (e.status === 409 || e.code === 'CONFLICT')) {
+          // Someone else saved first. Take the server copy so nothing is lost.
+          var sv = e.details && e.details.state;
+          if (sv) { _ver = (e.details.serverVersion) || _ver; adoptDB(sv); }
+          else { await resync(); }
+          emit('conflict', e);
+        } else if (e && e.status && e.status >= 400 && e.status < 500) {
+          emit('rejected', e);
+        } else {
+          emit('error', { message: (e && e.message) || 'Could not reach the server' });
+        }
+      } finally {
+        _pushingPromise = null;
+        if (_pendingForce) { _pendingForce = false; await doPush(true); }
       }
-    } finally {
-      _pushing = false;
-      if (_pendingForce !== false && _pendingForce !== undefined && _pendingForce) { _pendingForce = false; doPush(true); }
-    }
+    })();
+    return _pushingPromise;
   }
   function push(force) {
     // debounce rapid saveDB() bursts into one network write
@@ -153,7 +160,7 @@
     if (_pushTimer) clearTimeout(_pushTimer);
     _pushTimer = setTimeout(function () { _pushTimer = null; doPush(false); }, 800);
   }
-  async function flushNow() { if (_pushTimer) { clearTimeout(_pushTimer); _pushTimer = null; } return doPush(true); }
+  function flushNow() { if (_pushTimer) { clearTimeout(_pushTimer); _pushTimer = null; } return doPush(true); }
 
   /* ═══ the public TSApi surface the HTML expects ═══ */
   window.TSApi = {
@@ -167,7 +174,11 @@
       setSession(r.user);
       return { user: mapUser(r.user, await uiRoles()), perms: await uiPerms() };
     },
-    logout: async function () { try { await api.auth.logout(); } catch (e) {} session = null; },
+    logout: async function () {
+      try { await flushNow(); } catch (e) {}   // last edit must reach the server before the session that carries it is revoked
+      try { await api.auth.logout(); } catch (e) {}
+      session = null;
+    },
     me: async function () {
       var r = await api.auth.me();
       if (r && r.user) { setSession(r.user); scheduleResync(); }

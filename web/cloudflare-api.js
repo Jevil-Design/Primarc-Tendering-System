@@ -14,7 +14,7 @@
   'use strict';
 
   var API_BASE = (window.CLOUDFLARE_API_URL || '').replace(/\/$/, '') ||
-                 'https://primarc-tendering-api.workers.dev/api';
+                 'https://primarc-tendering-api.suvojt740.workers.dev/api';
 
   var listeners = [];
   var online = navigator.onLine;
