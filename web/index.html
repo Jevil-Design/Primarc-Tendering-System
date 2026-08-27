@@ -4589,8 +4589,12 @@ function showToastUndo(msg,undoFn,dur=6000){
      sk-…      → OpenAI      others    → Mistral (32-char)
 */
 const AI = {
-  KEY_LS:'boq_ai_key', PROVIDER_LS:'boq_ai_provider', MODEL_LS:'boq_ai_model',
   CACHE_PFX:'boq_aic_', CACHE_TTL:3600000,
+  // One org-wide key, held server-side (POST /ai/config, never read back) —
+  // set once by an admin, used by everyone. _cfg is populated by
+  // refreshConfig() and only ever carries {configured, provider, model}:
+  // the actual key never reaches the browser once saved.
+  _cfg:{configured:false, provider:null, model:null},
 
   PROVIDERS:{
     gemini:{
@@ -4673,22 +4677,9 @@ const AI = {
     },
   },
 
-  get key(){try{return localStorage.getItem(this.KEY_LS)||'';}catch(e){return '';}},
-  set key(v){try{localStorage.setItem(this.KEY_LS,v);}catch(e){}},
-  get provider(){
-    try{
-      const stored=localStorage.getItem(this.PROVIDER_LS);
-      if(stored && this.PROVIDERS[stored]) return stored;
-    }catch(e){}
-    return this.detectProvider(this.key)||'';
-  },
-  set provider(v){try{localStorage.setItem(this.PROVIDER_LS,v);}catch(e){}},
-  get model(){
-    try{const m=localStorage.getItem(this.MODEL_LS);if(m)return m;}catch(e){}
-    return this.PROVIDERS[this.provider]?.defaultModel||'';
-  },
-  set model(v){try{localStorage.setItem(this.MODEL_LS,v);}catch(e){}},
-  get providerInfo(){return this.PROVIDERS[this.provider]||null;},
+  get provider(){return this._cfg.provider;},
+  get model(){return this._cfg.model||this.PROVIDERS[this._cfg.provider]?.defaultModel||'';},
+  get providerInfo(){return this.PROVIDERS[this._cfg.provider]||null;},
 
   detectProvider(key){
     if(!key||!key.trim()) return null;
@@ -4699,17 +4690,36 @@ const AI = {
     return null;
   },
 
-  hasKey(){return !!this.key;},
-  ready(){return this.hasKey()&&navigator.onLine&&!!this.provider;},
+  /** Pulls {configured, provider, model} from the server. Call after login
+      and whenever the shared config might have changed (save/remove). */
+  async refreshConfig(){
+    try{
+      const api=window.CloudflareAPI;
+      if(!api) return this._cfg;
+      const r=await api.request('GET','/ai/config');
+      this._cfg={configured:!!(r&&r.configured), provider:(r&&r.provider)||null, model:(r&&r.model)||null};
+    }catch(e){ /* not logged in yet, or offline — leave _cfg as-is */ }
+    return this._cfg;
+  },
 
+  hasKey(){return this._cfg.configured;},
+  ready(){return this.hasKey()&&navigator.onLine;},
+
+  /** opts.direct = {key, provider, model} calls the provider straight from
+      the browser with a not-yet-saved key — used only by the admin-only
+      "test before save" flow in AI Settings. Without it, every call goes
+      through POST /api/ai/call, which uses the org's saved key server-side;
+      the browser never sees it. */
   async call(prompt, maxTokens=1000, opts){
     opts=opts||{};
-    if(!this.hasKey()) throw new Error('NO_KEY');
     if(!navigator.onLine) throw new Error('OFFLINE');
-    const pid=this.provider;
+
+    const direct=opts.direct;
+    const pid=direct?direct.provider:this.provider;
     const pinfo=this.PROVIDERS[pid];
+    if(!direct && !this.hasKey()) throw new Error('NO_KEY');
     if(!pinfo) throw new Error('Unknown provider — re-save key in AI Settings to auto-detect.');
-    const model=this.model||pinfo.defaultModel;
+    const model=(direct?direct.model:this.model)||pinfo.defaultModel;
 
     // Cache (read skipped when opts.noCache — manual "Enhance" clicks must always run fresh)
     // Key on a hash of the FULL prompt (+ provider + model). A previous prefix-slice
@@ -4721,44 +4731,55 @@ const AI = {
       try{const c=JSON.parse(localStorage.getItem(ck)||'null');if(c&&Date.now()-c.ts<this.CACHE_TTL){console.log('[AI] cache hit');return c.d;}}catch(e){}
     }
 
-    let rawText='';
-    if(pid==='gemini'){
-      const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.key}`,{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens,temperature:0.3}})
-      });
-      if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||pinfo.name+' '+res.status);}
-      const d=await res.json();
-      rawText=(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
-    }else if(pid==='anthropic'){
-      const res=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'x-api-key':this.key,
-          'anthropic-version':'2023-06-01',
-          'anthropic-dangerous-direct-browser-access':'true'
-        },
-        body:JSON.stringify({model,max_tokens:maxTokens,messages:[{role:'user',content:prompt}]})
-      });
-      if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||pinfo.name+' '+res.status);}
-      const d=await res.json();
-      rawText=(d.content?.[0]?.text||'').trim();
+    let result;
+    if(direct){
+      // Admin-only pre-save test: talk to the provider directly with the
+      // candidate key, exactly as the old client-side call used to.
+      let rawText='';
+      if(pid==='gemini'){
+        const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${direct.key}`,{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens,temperature:0.3}})
+        });
+        if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||pinfo.name+' '+res.status);}
+        const d=await res.json();
+        rawText=(d.candidates?.[0]?.content?.parts?.[0]?.text||'').trim();
+      }else if(pid==='anthropic'){
+        const res=await fetch('https://api.anthropic.com/v1/messages',{
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'x-api-key':direct.key,
+            'anthropic-version':'2023-06-01',
+            'anthropic-dangerous-direct-browser-access':'true'
+          },
+          body:JSON.stringify({model,max_tokens:maxTokens,messages:[{role:'user',content:prompt}]})
+        });
+        if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||pinfo.name+' '+res.status);}
+        const d=await res.json();
+        rawText=(d.content?.[0]?.text||'').trim();
+      }else{
+        // OpenAI-compatible: OpenAI, Groq, OpenRouter, Mistral
+        const headers={'Content-Type':'application/json','Authorization':'Bearer '+direct.key};
+        if(pid==='openrouter'){headers['HTTP-Referer']=location.origin;headers['X-Title']='BOQ Builder';}
+        const res=await fetch(`${pinfo.baseURL}/chat/completions`,{
+          method:'POST',headers,
+          body:JSON.stringify({model,messages:[{role:'user',content:prompt}],max_tokens:maxTokens,temperature:0.3})
+        });
+        if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||pinfo.name+' '+res.status);}
+        const d=await res.json();
+        rawText=(d.choices?.[0]?.message?.content||'').trim();
+      }
+      const clean=rawText.replace(/```json|```/g,'').trim();
+      try{result=JSON.parse(clean);}catch(e){result={text:rawText};}
     }else{
-      // OpenAI-compatible: OpenAI, Groq, OpenRouter, Mistral
-      const headers={'Content-Type':'application/json','Authorization':'Bearer '+this.key};
-      if(pid==='openrouter'){headers['HTTP-Referer']=location.origin;headers['X-Title']='BOQ Builder';}
-      const res=await fetch(`${pinfo.baseURL}/chat/completions`,{
-        method:'POST',headers,
-        body:JSON.stringify({model,messages:[{role:'user',content:prompt}],max_tokens:maxTokens,temperature:0.3})
-      });
-      if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||pinfo.name+' '+res.status);}
-      const d=await res.json();
-      rawText=(d.choices?.[0]?.message?.content||'').trim();
+      // Normal path: proxied through the backend, which holds the org's key.
+      const api=window.CloudflareAPI;
+      if(!api) throw new Error('API client not loaded.');
+      const r=await api.request('POST','/ai/call',{prompt,maxTokens});
+      result=(r&&r.result)||{text:''};
     }
 
-    const clean=rawText.replace(/```json|```/g,'').trim();
-    let result;try{result=JSON.parse(clean);}catch(e){result={text:rawText};}
     try{localStorage.setItem(ck,JSON.stringify({d:result,ts:Date.now()}));}catch(e){}
     return result;
   },
@@ -5082,21 +5103,18 @@ function openAIStudioForNewItem(){
 function updateGemStatus(){
   const el=$('#gemStatus');if(!el)return;
   const pinfo=AI.providerInfo;
-  if(!AI.hasKey()){el.className='gem-status none';el.textContent='⚪ No API key configured';}
+  if(!AI.hasKey()){el.className='gem-status none';el.textContent='⚪ No AI provider configured — an admin can add one below';}
   else if(!pinfo){el.className='gem-status offline';el.textContent='⚠ Unknown provider — re-save key';}
   else if(!navigator.onLine){el.className='gem-status offline';el.textContent='🔴 '+pinfo.name+' saved · Offline';}
   else{el.className='gem-status ready';el.textContent='🟢 '+pinfo.name+' active · '+(AI.model||pinfo.defaultModel);}
   const gear=$('#topGemBtn'); if(gear) gear.classList.toggle('active',AI.hasKey());
 }
 
-function refreshProviderCard(rawKey){
-  const card=$('#providerDetected'); if(!card) return;
-  const pid = AI.detectProvider(rawKey);
-  if(!pid || !rawKey || rawKey.includes('•')){
-    card.style.display='none';
-    return;
-  }
-  const pinfo=AI.PROVIDERS[pid];
+/** Populates the "Detected: <provider>" card + model dropdown for a known
+    provider id (already-saved config, or a freshly-typed key). */
+function showProviderCardFor(pid){
+  const card=$('#providerDetected'); if(!card||!pid) return;
+  const pinfo=AI.PROVIDERS[pid]; if(!pinfo){ card.style.display='none'; return; }
   card.style.display='';
   $('#provEmoji').textContent=pinfo.emoji||'✦';
   $('#provName').textContent='Detected: '+pinfo.name;
@@ -5113,18 +5131,30 @@ function refreshProviderCard(rawKey){
       o.value=m.id; o.textContent=m.label;
       sel.appendChild(o);
     });
-    // Preserve saved model if it belongs to this provider
-    const savedModel=AI.model;
+    // Preserve the saved model if it belongs to this provider
+    const savedModel=AI.provider===pid?AI.model:null;
     if(savedModel && pinfo.models.some(m=>m.id===savedModel)){ sel.value=savedModel; }
     else { sel.value=pinfo.defaultModel; }
   }
 }
 
-function openGemSettings(){
+function refreshProviderCard(rawKey){
+  const pid=AI.detectProvider(rawKey);
+  if(!pid || !rawKey){ const card=$('#providerDetected'); if(card) card.style.display='none'; return; }
+  showProviderCardFor(pid);
+}
+
+async function openGemSettings(){
+  await AI.refreshConfig();
   const ki=$('#gemKeyInput');
-  if(ki) ki.value = AI.hasKey() ? ('•'.repeat(Math.max(0,AI.key.length-4))+AI.key.slice(-4)) : '';
-  // If a key is already saved, show its detected provider card too
-  if(AI.hasKey()) refreshProviderCard(AI.key);
+  if(ki){
+    ki.value='';
+    ki.placeholder = AI.hasKey()
+      ? `Key already set for ${AI.providerInfo?.name||'a provider'} — paste a new key to replace it`
+      : 'Paste your API key…';
+  }
+  if(AI.provider) showProviderCardFor(AI.provider);
+  else { const card=$('#providerDetected'); if(card) card.style.display='none'; }
   updateGemStatus();
   $('#geminiOverlay')?.classList.add('on');
 }
@@ -5132,22 +5162,20 @@ function closeGemSettings(){$('#geminiOverlay')?.classList.remove('on');}
 
 async function testGeminiConn(){
   const btn=$('#gemTestBtn'); if(!btn) return;
-  let rawKey=($('#gemKeyInput')?.value||'').trim();
+  const rawKey=($('#gemKeyInput')?.value||'').trim();
   if(!rawKey){ alert('Enter an API key first.'); return; }
-  if(rawKey.includes('•')) rawKey=AI.key;          // use saved key when input is masked
   const pid=AI.detectProvider(rawKey);
   if(!pid){ alert('Could not recognise this key format.\n\nSupported prefixes:\n• Gemini: AIza…\n• Groq: gsk_…\n• OpenRouter: sk-or-…\n• OpenAI: sk-…\n• Anthropic: sk-ant-…\n• Mistral: 32-char alphanumeric'); return; }
   const pinfo=AI.PROVIDERS[pid];
+  const model=$('#gemModelSel')?.value || pinfo.defaultModel;
   btn.disabled=true; const old=btn.innerHTML; btn.innerHTML='Testing '+pinfo.name+'…';
-  // Temporarily set key + provider + model for the test, restore on failure
-  const prevKey=AI.key, prevProvider=AI.provider, prevModel=AI.model;
   try{
-    AI.key=rawKey; AI.provider=pid; AI.model=pinfo.defaultModel;
-    const r=await AI.call('Reply with the single character: K',20);
+    // Tests the pasted key directly from the browser -- it hasn't been
+    // saved yet, so there's nothing server-side to proxy through.
+    await AI.call('Reply with the single character: K',20,{direct:{key:rawKey,provider:pid,model}});
     btn.innerHTML='✓ Connected to '+pinfo.name;
     btn.style.cssText='color:var(--green);border-color:var(--green)';
   }catch(e){
-    AI.key=prevKey; AI.provider=prevProvider; AI.model=prevModel;
     btn.innerHTML='✗ '+(e.message||'').slice(0,32);
     btn.style.cssText='color:var(--red);border-color:var(--red)';
     setTimeout(()=>alert('Connection test failed:\n\n'+(e.message||'Unknown error')+'\n\nCheck your API key, network and any ad-blocker / VPN.'),200);
@@ -5168,36 +5196,37 @@ function bindGemSettings(){
   $('#gemKeyInput')?.addEventListener('input',e=>refreshProviderCard(e.target.value.trim()));
   $('#gemKeyInput')?.addEventListener('paste',e=>setTimeout(()=>refreshProviderCard(e.target.value.trim()),20));
 
-  $('#gemSaveKey')?.addEventListener('click',()=>{
-    let raw=($('#gemKeyInput')?.value||'').trim();
+  $('#gemSaveKey')?.addEventListener('click',async()=>{
+    const raw=($('#gemKeyInput')?.value||'').trim();
     if(!raw){alert('Paste your API key first.');return;}
-    if(raw.includes('•')) raw=AI.key;
-    if(!raw){alert('Invalid key.');return;}
     const pid=AI.detectProvider(raw);
-    if(!pid){
-      if(!confirm('Could not auto-detect the provider from this key.\n\nSave anyway? (You will need to choose a provider manually.)')) return;
+    if(!pid){alert('Could not recognise this key format.\n\nSupported prefixes:\n• Gemini: AIza…\n• Groq: gsk_…\n• OpenRouter: sk-or-…\n• OpenAI: sk-…\n• Anthropic: sk-ant-…\n• Mistral: 32-char alphanumeric');return;}
+    const pinfo=AI.PROVIDERS[pid];
+    const model=$('#gemModelSel')?.value || pinfo.defaultModel;
+    const btn=$('#gemSaveKey'); const old=btn?btn.textContent:'';
+    if(btn){btn.disabled=true;btn.textContent='Saving…';}
+    try{
+      await window.CloudflareAPI.request('POST','/ai/config',{provider:pid,model,key:raw});
+      await AI.refreshConfig();
+      const ki=$('#gemKeyInput'); if(ki) ki.value='';
+      showToast('✓ '+pinfo.name+' saved — shared with everyone on the team');
+      showProviderCardFor(pid);
+      updateGemStatus();
+      if(typeof updateNiBanner==='function') updateNiBanner();
+      closeGemSettings();
+    }catch(e){
+      alert('Could not save the key:\n\n'+(e.message||'Unknown error'));
+    }finally{
+      if(btn){btn.disabled=false;btn.textContent=old;}
     }
-    AI.key=raw;
-    if(pid){
-      AI.provider=pid;
-      const selModel=$('#gemModelSel')?.value;
-      if(selModel) AI.model=selModel;
-      showToast('✓ '+AI.PROVIDERS[pid].name+' connected');
-    }else{
-      showToast('Key saved (provider unknown)');
-    }
-    updateGemStatus();
-    if(typeof updateNiBanner==='function') updateNiBanner();
-    closeGemSettings();
   });
 
-  $('#gemRemoveKey')?.addEventListener('click',()=>{
-    if(!confirm('Remove the saved API key?')) return;
+  $('#gemRemoveKey')?.addEventListener('click',async()=>{
+    if(!confirm('Remove the shared API key? This turns off AI enhancement for everyone until an admin adds a new one.')) return;
     try{
-      localStorage.removeItem(AI.KEY_LS);
-      localStorage.removeItem(AI.PROVIDER_LS);
-      localStorage.removeItem(AI.MODEL_LS);
-    }catch(e){}
+      await window.CloudflareAPI.request('DELETE','/ai/config');
+      await AI.refreshConfig();
+    }catch(e){alert('Could not remove the key:\n\n'+(e.message||'Unknown error'));return;}
     const ki=$('#gemKeyInput'); if(ki) ki.value='';
     const card=$('#providerDetected'); if(card) card.style.display='none';
     updateGemStatus();
@@ -5205,11 +5234,16 @@ function bindGemSettings(){
     showToast('API key removed');
   });
 
-  $('#gemModelSel')?.addEventListener('change',e=>{
-    AI.model=e.target.value;
-    updateGemStatus();
-    if(typeof updateNiBanner==='function') updateNiBanner();
-    showToast('Model: '+e.target.value);
+  $('#gemModelSel')?.addEventListener('change',async e=>{
+    const model=e.target.value;
+    if(!AI.provider){return;}   // nothing saved yet — picking a model here does nothing until a key is saved
+    try{
+      await window.CloudflareAPI.request('POST','/ai/config',{provider:AI.provider,model});
+      await AI.refreshConfig();
+      updateGemStatus();
+      if(typeof updateNiBanner==='function') updateNiBanner();
+      showToast('Model: '+model);
+    }catch(err){ alert('Could not update the model:\n\n'+(err.message||'Unknown error')); }
   });
 
   window.addEventListener('online',updateGemStatus);
@@ -9058,6 +9092,7 @@ const Auth=(function(){
           g.style.display='none';
           applyRole(); startIdle();
           if(typeof TSApi.resync==='function')TSApi.resync().catch(()=>{});
+          if(typeof AI!=='undefined'&&AI.refreshConfig)AI.refreshConfig().then(()=>{if(typeof updateNiBanner==='function')updateNiBanner();if(typeof updateGemStatus==='function')updateGemStatus();}).catch(()=>{});
           if(r.user.mustChange){ setTimeout(()=>changePassword(true),300); }
         }catch(ex){
           err.textContent=ex.message||'Sign-in failed.'; go.disabled=false;
@@ -9386,6 +9421,7 @@ const Auth=(function(){
       buildChip();
       if(session){ applyRole(); startIdle();
         if(window.TSApi.session&&window.TSApi.session.mustChange)setTimeout(()=>changePassword(true),300);
+        if(typeof AI!=='undefined'&&AI.refreshConfig)AI.refreshConfig().then(()=>{if(typeof updateNiBanner==='function')updateNiBanner();if(typeof updateGemStatus==='function')updateGemStatus();}).catch(()=>{});
       } else showLogin();
       return;
     }
