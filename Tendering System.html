@@ -1492,9 +1492,13 @@
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<!-- Excel/PDF export libraries — only ever called from inside a click handler
+     (Export to Excel/PDF), never during initial load, so `defer` lets the
+     browser keep parsing the rest of the page instead of blocking on these
+     three downloads first. -->
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <!-- ═══ Cloudflare backend (Workers + D1 + R2) — the only backend ═══
      Set the API URL before the adapter loads. If the Worker is unreachable the
      adapter degrades to a no-op and the app runs on localStorage as before, so
@@ -9409,8 +9413,12 @@ const Auth=(function(){
   async function boot(){
     injectCSS();
     if(API()){
-      // Server owns users, perms and session. Pull them before the gate renders.
-      try{ await window.TSApi.listUsers(); }catch(e){}
+      // Server owns users, perms and session. listUsers() needs a session (it
+      // 401s otherwise), so it used to run before me() unconditionally --
+      // wasting a full round trip on every anonymous visit before the login
+      // gate could even render. Check the session first; only fetch the user
+      // list afterward, and in the background, since nothing needs it before
+      // the gate or the dashboard's first paint.
       try{ const me=await window.TSApi.me();
         if(me&&me.perms)PERM=Object.assign(JSON.parse(JSON.stringify(PERM_DEFAULT)),me.perms);
         if(me&&me.user){ const u=me.user;
@@ -9419,6 +9427,7 @@ const Auth=(function(){
       }catch(e){}
       buildChip();
       if(session){ applyRole(); startIdle();
+        window.TSApi.listUsers().catch(()=>{});
         if(window.TSApi.session&&window.TSApi.session.mustChange)setTimeout(()=>changePassword(true),300);
         if(typeof AI!=='undefined'&&AI.refreshConfig)AI.refreshConfig().then(()=>{if(typeof updateNiBanner==='function')updateNiBanner();if(typeof updateGemStatus==='function')updateGemStatus();}).catch(()=>{});
       } else showLogin();
