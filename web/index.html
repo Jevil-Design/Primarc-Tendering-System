@@ -9066,8 +9066,8 @@ const Auth=(function(){
     if(!g){g=document.createElement('div');g.id='authGate';document.body.appendChild(g);}
     g.innerHTML=`<div class="card">
       <h2>Tendering System</h2><div class="sub">Sign in to continue</div>
-      <label>Username</label><input type="text" id="auU" autocomplete="username" autofocus>
-      <label>Password</label><input type="password" id="auP" autocomplete="current-password">
+      <label>Username</label><input type="text" id="auU" autocomplete="off" autofocus>
+      <label>Password</label><input type="password" id="auP" autocomplete="off">
       <div class="row"><input type="checkbox" id="auR"><label for="auR" style="margin:0;text-transform:none;letter-spacing:0;font-size:12px;color:var(--dim)">Remember me on this device</label></div>
       <button class="go" id="auGo">Sign In</button>
       <div class="err" id="auErr"></div>
