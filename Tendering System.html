@@ -58,7 +58,13 @@
 
   /* ===== TOP BAR ===== */
   .topbar{position:relative;z-index:100;background:linear-gradient(180deg,#1a1e27,#13161d);border-bottom:2px solid var(--accent);
-    padding:0 18px;height:56px;display:flex;align-items:center;gap:20px;flex-shrink:0}
+    padding:0 18px;height:56px;display:flex;align-items:center;gap:20px;flex-shrink:0;
+    /* Fallback for anything still too wide to fit after the responsive rules
+       below: a horizontal scrollbar beats silently clipping the user chip
+       past the edge of the window with no way to reach it (body has
+       overflow:hidden, so there was nowhere for the overflow to go). */
+    overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+  .topbar::-webkit-scrollbar{height:4px}
   .brand{display:flex;align-items:center;gap:11px}
   .brand h1{font-size:17px;font-weight:900;letter-spacing:-.5px;text-transform:uppercase}
   .brand h1 i{color:var(--accent);font-style:normal}
@@ -73,10 +79,15 @@
   .modes button svg{width:15px;height:15px;stroke-width:2}
   .modes button.on{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(255,106,44,.3)}
   .modes button:not(.on):hover{background:var(--hi);color:var(--ink)}
-  .topspace{margin-left:auto;display:flex;gap:18px;align-items:center}
+  .topspace{margin-left:auto;display:flex;gap:18px;align-items:center;flex-shrink:0}
   .tstat{text-align:right}
   .tstat .n{font-family:'Spline Sans Mono',monospace;font-size:15px;font-weight:600;color:var(--accent2);line-height:1}
   .tstat .l{font-size:8.5px;color:var(--faint);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+  /* The catalog/compared counters are the least essential thing in the top
+     bar (both are visible again inside their own screens) -- drop them
+     first on narrower windows so the user chip and action icons, which
+     have nowhere else to go, keep their room. */
+  @media (max-width:1400px){ .topspace .tstat{display:none} }
 
   .view{flex:1;overflow:hidden;display:none}
   .view.on{display:flex}
@@ -9048,10 +9059,15 @@ const Auth=(function(){
       #authGate button.go:disabled{opacity:.6}
       #authGate .err{color:var(--red);font-size:12px;margin-top:12px;min-height:16px}
       #authGate .hint{margin-top:18px;padding:10px 12px;background:var(--amber-soft,rgba(217,154,6,.12));border:1px solid rgba(217,154,6,.3);border-radius:8px;font-size:11.5px;color:var(--dim)}
-      #authChip{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer;height:34px}
-      #authChip .av{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
-      #authChip .an{font-size:12px;font-weight:600;color:var(--ink);line-height:1.1}
-      #authChip .ar{font-size:9px;color:var(--faint);line-height:1.1}
+      #authChip{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer;height:34px;flex-shrink:0;max-width:180px}
+      #authChip .av{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+      /* min-width:0 lets this text column actually shrink inside the flex
+         chip instead of forcing the chip past the edge of the window --
+         name/role now truncate with an ellipsis rather than disappearing
+         off-screen entirely. */
+      #authChip>div{min-width:0}
+      #authChip .an{font-size:12px;font-weight:600;color:var(--ink);line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      #authChip .ar{font-size:9px;color:var(--faint);line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
       #authMenu{position:fixed;z-index:100001;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.45);padding:6px;min-width:230px;display:none;animation:authMenuIn .14s ease}
       @keyframes authMenuIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
       #authMenu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;color:var(--ink);font-size:13px;font-weight:500;padding:10px 12px;border-radius:8px;cursor:pointer;font-family:inherit;transition:background .12s}
