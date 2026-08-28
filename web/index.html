@@ -82,7 +82,12 @@
   .view.on{display:flex}
 
   /* ===== HOME ===== */
-  #home{flex-direction:column;align-items:center;justify-content:center;gap:0;overflow:auto;position:relative}
+  /* justify-content:center here used to hide the top of the page above the
+     fold on any window shorter than the content: a flex container centers
+     overflowing content by pushing half of it out of both ends equally, and
+     the top half isn't reachable by scrolling back up past the topbar. Pins
+     to the top instead -- always fully visible/scrollable, never clipped. */
+  #home{flex-direction:column;align-items:center;justify-content:flex-start;gap:0;overflow:auto;position:relative}
   .home-bg{position:absolute;inset:0;background:
     radial-gradient(800px 400px at 20% 10%, rgba(255,106,44,.07), transparent),
     radial-gradient(700px 400px at 85% 90%, rgba(94,155,240,.06), transparent);pointer-events:none}
