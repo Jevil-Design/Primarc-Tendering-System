@@ -99,21 +99,24 @@
   .kpi.k-amber .kpi-val{color:var(--accent2)}
   .kpi.k-violet .kpi-val{color:var(--violet)}
 
-  /* Quick actions — compact, functional, not marketing tiles */
+  /* Quick actions — compact, functional, not marketing tiles.
+     Scoped to #home .card: the auth gate (#authGate) reuses the bare
+     .card class name for its own, unrelated login/setup screens —
+     unscoped rules here previously broke that layout entirely. */
   .home-section{margin-bottom:22px}
   .home-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
   .home-section-head h3{font-size:var(--fs-heading);font-weight:700}
-  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:left}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;transition:.12s;display:flex;align-items:center;gap:12px;cursor:pointer}
-  .card:hover{border-color:var(--accent)}
-  .card .ic{flex-shrink:0;width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center}
-  .card .ic svg{width:19px;height:19px;stroke-width:1.8}
-  .card.c1 .ic{background:rgba(255,106,44,.14)} .card.c1 .ic svg{stroke:var(--accent)}
-  .card.c2 .ic{background:rgba(94,155,240,.14)} .card.c2 .ic svg{stroke:var(--blue)}
-  .card.c3 .ic{background:rgba(52,211,153,.14)} .card.c3 .ic svg{stroke:var(--green)}
-  .card h3{font-size:13.5px;font-weight:700;margin-bottom:2px}
-  .card p{font-size:11.5px;color:var(--dim);line-height:1.4}
-  .card .go{display:none}
+  #home .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:left}
+  #home .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;transition:.12s;display:flex;align-items:center;gap:12px;cursor:pointer}
+  #home .card:hover{border-color:var(--accent)}
+  #home .card .ic{flex-shrink:0;width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+  #home .card .ic svg{width:19px;height:19px;stroke-width:1.8}
+  #home .card.c1 .ic{background:rgba(255,106,44,.14)} #home .card.c1 .ic svg{stroke:var(--accent)}
+  #home .card.c2 .ic{background:rgba(94,155,240,.14)} #home .card.c2 .ic svg{stroke:var(--blue)}
+  #home .card.c3 .ic{background:rgba(52,211,153,.14)} #home .card.c3 .ic svg{stroke:var(--green)}
+  #home .card h3{font-size:13.5px;font-weight:700;margin-bottom:2px}
+  #home .card p{font-size:11.5px;color:var(--dim);line-height:1.4}
+  #home .card .go{display:none}
 
   /* Recent enquiries table */
   .home-tbl{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
