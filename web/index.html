@@ -14,6 +14,10 @@
     --line2:#232936; --accent-deep:#c9501a; --amber-soft:rgba(255,210,63,.12); --green-soft:rgba(52,211,153,.13);
     --accent:#ff6a2c; --accent2:#ffd23f; --green:#34d399; --blue:#5e9bf0; --red:#f87171; --violet:#a78bfa;
     --hi:#1f2530;
+    /* Type scale — a work tool's hierarchy, not a marketing page's. New
+       screens/components should reach for these instead of one-off px
+       values; existing hardcoded sizes are unaffected until touched. */
+    --fs-page-title:24px; --fs-heading:16px; --fs-body:13px; --fs-secondary:12px; --fs-meta:11px;
   }
   /* ===== LIGHT THEME ===== remaps the core tokens; everything built on var(--*) flips automatically */
   html[data-theme="light"]{
@@ -128,6 +132,15 @@
   .btn.green:hover{background:#4ade8c;color:#06281d}
   .btn.xfer{border-color:var(--blue);color:var(--blue)}
   .btn.xfer:hover{background:var(--blue);border-color:var(--blue);color:#06203f}
+  /* Destructive action — same weight as .primary/.green, red instead */
+  .btn.danger{background:var(--red);border-color:var(--red);color:#2c0b0b}
+  .btn.danger:hover{background:#fb8a8a;color:#2c0b0b}
+  .btn:disabled,.btn.danger:disabled,.btn.primary:disabled,.btn.green:disabled{opacity:.45;cursor:not-allowed;filter:none;transform:none}
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  /* Compact square icon-only button — for the many ad-hoc icon buttons
+     scattered through toolbars/tables, so new ones don't need one-off CSS */
+  .btn.icon{padding:8px;width:32px;height:32px;justify-content:center}
+  .btn.icon svg{width:15px;height:15px}
 
   /* ===== CREATE BOQ : split layout ===== */
   #create{flex-direction:column}
