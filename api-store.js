@@ -51,7 +51,12 @@
 
   /* ── user shape mapping (backend → the UI's ts_users record) ── */
   function mapUser(u, roles) {
-    var role = u.is_admin ? 'Super Admin' : ((roles && roles[u.id]) || 'Viewer');
+    // The explicitly-chosen role label always wins. is_admin only supplies a
+    // default for users who were never assigned one (both 'Super Admin' and
+    // 'Admin' set is_admin=true on the backend, so that flag alone can't tell
+    // them apart — trusting it unconditionally is what made role changes into
+    // an admin-tagged role appear to silently revert to 'Super Admin').
+    var role = (roles && roles[u.id]) || (u.is_admin ? 'Super Admin' : 'Viewer');
     return {
       id: u.id, username: u.username, name: u.full_name || u.username,
       email: u.email || '', role: role, active: u.status !== 'inactive' && u.status !== 'suspended',
@@ -70,8 +75,9 @@
       role: u.is_admin ? 'Super Admin' : 'Viewer', ts: Date.now(), last: Date.now(),
       mustChange: !!u.must_change_password,
     } : null;
-    // enrich role from the UI-role map without blocking
-    if (u && !u.is_admin) uiRoles().then(function (r) { if (session && r[u.id]) session.role = r[u.id]; }).catch(function () {});
+    // enrich role from the UI-role map without blocking (also for admins —
+    // 'Super Admin' vs 'Admin' is a label choice, not implied by is_admin)
+    if (u) uiRoles().then(function (r) { if (session && r[u.id]) session.role = r[u.id]; }).catch(function () {});
     return session;
   }
 
