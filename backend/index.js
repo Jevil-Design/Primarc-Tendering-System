@@ -74,7 +74,7 @@ export default {
     if (request.method === 'OPTIONS') return preflight(request, env);
 
     const url = new URL(request.url);
-    const path = (url.pathname.replace(/^\/api/, '') || '/').replace(/\/$/, '') || '/';
+    const path = (url.pathname.replace(/^\/api(\/|$)/, '/') || '/').replace(/\/$/, '') || '/';
     const key = `${request.method} ${path}`;
 
     let user = null, sessionId = null, permissions = {};

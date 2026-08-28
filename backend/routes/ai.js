@@ -101,16 +101,23 @@ export default function register(router) {
     let rawText = '';
 
     if (provider === 'gemini') {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-        {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: v.prompt }] }],
-            generationConfig: { maxOutputTokens: maxTokens, temperature: 0.3 },
-          }),
-        }
-      );
+      let res;
+      try {
+        res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+          {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: v.prompt }] }],
+              generationConfig: { maxOutputTokens: maxTokens, temperature: 0.3 },
+            }),
+          }
+        );
+      } catch {
+        // Caught here (not left to the router's generic handler) so a network-level
+        // failure can never put the key-bearing URL into an error log.
+        throw errors.validation('Could not reach Gemini. Please try again.');
+      }
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw errors.validation(e.error?.message || `Gemini ${res.status}`); }
       const d = await res.json();
       rawText = (d.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();

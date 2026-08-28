@@ -43,7 +43,7 @@ export class Router {
 
 export async function handle(router, request, env, ctxExtra) {
   const url = new URL(request.url);
-  let path = url.pathname.replace(/^\/api/, '') || '/';
+  let path = url.pathname.replace(/^\/api(\/|$)/, '/') || '/';
   if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
 
   const hit = router.match(request.method, path);

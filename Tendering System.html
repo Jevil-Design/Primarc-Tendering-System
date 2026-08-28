@@ -7107,7 +7107,7 @@ function qSectionEnd(items,si){const lv=items[si].level||0;let j=si+1;while(j<it
 function qSectionTotal(q,v,si){const end=qSectionEnd(q.items,si);let t=0;for(let k=si+1;k<end;k++){if(qQuotable(q.items[k]))t+=lineAmt(q,v,k);}return t;}
 
 /* ---------- calculations ---------- */
-function lineAmt(q,v,i){const it=q.items[i];if(!it||!qQuotable(it))return 0;const ln=v.lines[i]||{};return num(ln.rate)*num(it.qty);}
+function lineAmt(q,v,i){const it=q.items[i];if(!it||!qQuotable(it))return 0;const bt=BTYPES[qType(it)];if(bt&&bt.excludeTotal)return 0;const ln=v.lines[i]||{};let qty=num(it.qty);if(bt&&bt.fixedQty)qty=1;return num(ln.rate)*qty;}
 function lineGst(q,v,i){const ln=v.lines[i]||{};return lineAmt(q,v,i)*num(ln.gst)/100;}
 function vendorBase(q,v){let s=0;q.items.forEach((it,i)=>s+=lineAmt(q,v,i));return s;}
 function vendorGst(q,v){let s=0;q.items.forEach((it,i)=>s+=lineGst(q,v,i));return s;}
@@ -7116,12 +7116,12 @@ function hasQuote(v){return v.lines&&v.lines.some(l=>num(l.rate)>0);}
 
 /* item-wise ranking: returns [{vi, amt}] sorted asc among quoted vendors */
 function itemRank(q,i){
-  const arr=q.vendors.map((v,vi)=>({vi,amt:lineAmt(q,v,i),rate:num(v.lines[i]&&v.lines[i].rate)})).filter(x=>x.rate>0);
-  arr.sort((a,b)=>a.amt-b.amt);return arr;
+  const arr=q.vendors.map((v,vi)=>({vi,amt:lineAmt(q,v,i),withGst:lineAmt(q,v,i)+lineGst(q,v,i),rate:num(v.lines[i]&&v.lines[i].rate)})).filter(x=>x.rate>0);
+  arr.sort((a,b)=>csGst?(a.withGst-b.withGst):(a.amt-b.amt));return arr;
 }
 function vendorRank(q){
-  const arr=q.vendors.map((v,vi)=>({vi,total:vendorBase(q,v)})).filter(x=>hasQuote(q.vendors[x.vi]));
-  arr.sort((a,b)=>a.total-b.total);return arr;
+  const arr=q.vendors.map((v,vi)=>({vi,total:vendorBase(q,v),withGst:vendorTotal(q,v)})).filter(x=>hasQuote(q.vendors[x.vi]));
+  arr.sort((a,b)=>csGst?(a.withGst-b.withGst):(a.total-b.total));return arr;
 }
 
 /* ════════════ SHELL / ROUTING ════════════ */

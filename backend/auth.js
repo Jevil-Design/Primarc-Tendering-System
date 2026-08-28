@@ -123,8 +123,9 @@ export async function resolveSession(env, request) {
 
   const th = await tokenHash(token, env);
   const row = await env.DB.prepare(
-    `select s.id as sid, s.expires_at, s.absolute_expires_at, u.*
+    `select s.id as sid, s.expires_at, s.absolute_expires_at, u.*, d.financial_limits as financial_limits
      from sessions s join users u on u.id = s.user_id
+     left join designations d on d.id = u.designation_id
      where s.token_hash = ? and s.revoked_at is null`
   ).bind(th).first();
   if (!row) return null;
@@ -165,7 +166,9 @@ export const revokeAllForUser = (env, userId) =>
 export async function login(env, request, identifier, password) {
   const id = String(identifier || '').trim().toLowerCase();
   const row = await env.DB.prepare(
-    'select * from users where (lower(username) = ? or lower(email) = ?) and deleted_at is null'
+    `select u.*, d.financial_limits as financial_limits
+     from users u left join designations d on d.id = u.designation_id
+     where (lower(u.username) = ? or lower(u.email) = ?) and u.deleted_at is null`
   ).bind(id, id).first();
 
   // Always spend comparable time so a missing user is not distinguishable.

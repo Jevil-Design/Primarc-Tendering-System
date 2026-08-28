@@ -108,8 +108,8 @@ export default function register(router) {
   router.delete('/documents/:id', async (ctx) => {
     const doc = await ctx.env.DB.prepare('select * from documents where id = ?').bind(ctx.params.id).first();
     if (!doc) throw errors.notFound('Document not found.');
-    const rule = PERM_FOR[doc.owner_type];
-    if (rule) requirePerm(ctx, rule[0], rule[1]);
+    const rule = PERM_FOR[doc.owner_type] || [MODULE.ENQUIRY, 'edit'];
+    requirePerm(ctx, rule[0], rule[1]);
 
     await ctx.env.DOCUMENTS.delete(doc.file_key).catch(() => {});
     await ctx.env.DB.prepare('update documents set deleted_at = ? where id = ?').bind(nowIso(), ctx.params.id).run();

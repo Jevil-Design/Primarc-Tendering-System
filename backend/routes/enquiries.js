@@ -233,14 +233,14 @@ export default function register(router) {
 
   router.delete('/enquiries/:id/vendors/:evId', async (ctx) => {
     requirePerm(ctx, MODULE.ENQUIRY, 'edit');
-    const ev = await ctx.env.DB.prepare('select invitation_status, vendor_name from enquiry_vendors where id = ?')
-      .bind(ctx.params.evId).first();
+    const ev = await ctx.env.DB.prepare('select invitation_status, vendor_name from enquiry_vendors where id = ? and enquiry_id = ?')
+      .bind(ctx.params.evId, ctx.params.id).first();
     if (!ev) throw errors.notFound('That vendor is not on this enquiry.');
     if (['submitted', 'revised', 'locked'].includes(ev.invitation_status)) {
       throw errors.locked('This vendor has already submitted a quotation and cannot be removed.');
     }
-    await ctx.env.DB.prepare('update enquiry_vendors set deleted_at = ? where id = ?')
-      .bind(nowIso(), ctx.params.evId).run();
+    await ctx.env.DB.prepare('update enquiry_vendors set deleted_at = ? where id = ? and enquiry_id = ?')
+      .bind(nowIso(), ctx.params.evId, ctx.params.id).run();
     await logAudit(ctx, { module: 'Enquiry', action: 'remove_vendor', entityType: 'enquiry_vendors',
                           entityId: ctx.params.evId, target: ev.vendor_name });
     return { ok: true };
