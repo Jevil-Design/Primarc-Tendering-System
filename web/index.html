@@ -5324,33 +5324,12 @@ function scheduleAutosave(){
   _undoCapture();
 }
 function doAutosave(){
-  if(!cInit||!boq.length)return;
-  try{
-    const draft={proj:$('#bProj')?.value||'',client:$('#bClient')?.value||'',
-      boq:JSON.parse(JSON.stringify(boq)),notes:JSON.parse(JSON.stringify(bNotes)),
-      seq,rev:currentRevision,revHistory:JSON.parse(JSON.stringify(revHistory)),ts:Date.now()};
-    if(!safeSetItem(AS_KEY,JSON.stringify(draft)))return;
-    const ind=$('#autosaveInd');
-    if(ind){ind.classList.add('show');clearTimeout(ind._t);ind._t=setTimeout(()=>ind.classList.remove('show'),2200);}
-  }catch(e){}
+  /* Local-browser draft autosave disabled — nothing is written to localStorage. */
 }
 function checkRestoreDraft(){
-  try{
-    const raw=localStorage.getItem(AS_KEY);if(!raw)return;
-    const d=JSON.parse(raw);if(!d.boq?.length)return;
-    const age=Math.round((Date.now()-d.ts)/60000);
-    const label=(d.proj?` "${d.proj}" `:'')+ `Rev-${d.rev||0}, ${d.boq.length} items, ${age} min ago`;
-    if(!confirm(`🔄 Restore auto-saved draft?\n${label}`))return;
-    if(!cInit){initCreate();cInit=true;}
-    boq=d.boq; seq=d.seq||boq.length; bNotes=d.notes||[];
-    migrateBOQ();
-    currentRevision=d.rev||0;
-    revHistory=Array.isArray(d.revHistory)?d.revHistory:[];
-    if($('#bProj'))$('#bProj').value=d.proj||'';
-    if($('#bClient'))$('#bClient').value=d.client||'';
-    renderBOQ();cRender();renderNotes('b',bNotes);updateRevBadge();
-    setMode('create');showToast('Draft restored');
-  }catch(e){}
+  /* Disabled along with doAutosave(); also purge any pre-existing draft so the
+     restore prompt never resurfaces for browsers that saved one previously. */
+  try{ localStorage.removeItem(AS_KEY); }catch(e){}
 }
 
 /* ── Revision control ─────────────────────────────────── */
