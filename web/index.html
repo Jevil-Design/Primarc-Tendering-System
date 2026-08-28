@@ -81,69 +81,33 @@
   .view{flex:1;overflow:hidden;display:none}
   .view.on{display:flex}
 
-  /* ===== HOME / DASHBOARD ===== */
-  #home{flex-direction:column;align-items:stretch;overflow:auto}
-  .home-inner{padding:22px 28px 32px;max-width:1320px;width:100%;margin:0 auto}
-  .home-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
-  .home-head h2{font-size:var(--fs-page-title);font-weight:800;letter-spacing:-.2px}
-  .home-head p.sub{font-size:var(--fs-secondary);color:var(--dim);margin-top:2px}
-
-  /* KPI row */
-  .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:22px}
-  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
-  .kpi .kpi-lbl{font-size:var(--fs-meta);color:var(--dim);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
-  .kpi .kpi-val{font-family:'Spline Sans Mono',monospace;font-size:24px;font-weight:700;line-height:1}
-  .kpi.k-accent .kpi-val{color:var(--accent)}
-  .kpi.k-blue .kpi-val{color:var(--blue)}
-  .kpi.k-green .kpi-val{color:var(--green)}
-  .kpi.k-amber .kpi-val{color:var(--accent2)}
-  .kpi.k-violet .kpi-val{color:var(--violet)}
-
-  /* Quick actions — compact, functional, not marketing tiles */
-  .home-section{margin-bottom:22px}
-  .home-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-  .home-section-head h3{font-size:var(--fs-heading);font-weight:700}
-  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:left}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;transition:.12s;display:flex;align-items:center;gap:12px;cursor:pointer}
-  .card:hover{border-color:var(--accent)}
-  .card .ic{flex-shrink:0;width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center}
-  .card .ic svg{width:19px;height:19px;stroke-width:1.8}
+  /* ===== HOME ===== */
+  #home{flex-direction:column;align-items:center;justify-content:center;gap:0;overflow:auto;position:relative}
+  .home-bg{position:absolute;inset:0;background:
+    radial-gradient(800px 400px at 20% 10%, rgba(255,106,44,.07), transparent),
+    radial-gradient(700px 400px at 85% 90%, rgba(94,155,240,.06), transparent);pointer-events:none}
+  .home-inner{position:relative;text-align:center;padding:40px 24px;max-width:1140px}
+  .home-kicker{font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:14px}
+  .home-inner h2{font-size:46px;font-weight:900;letter-spacing:-1.5px;line-height:1.02;margin-bottom:14px}
+  .home-inner h2 em{font-style:normal;color:var(--accent)}
+  .home-inner p.sub{font-size:15px;color:var(--dim);max-width:560px;margin:0 auto 40px;line-height:1.6}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:left}
+  .card{background:linear-gradient(165deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:26px;transition:.18s;position:relative;overflow:hidden}
+  .card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 14px 40px rgba(0,0,0,.4)}
+  .card .ic{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+  .card .ic svg{width:24px;height:24px;stroke-width:1.8}
   .card.c1 .ic{background:rgba(255,106,44,.14)} .card.c1 .ic svg{stroke:var(--accent)}
   .card.c2 .ic{background:rgba(94,155,240,.14)} .card.c2 .ic svg{stroke:var(--blue)}
   .card.c3 .ic{background:rgba(52,211,153,.14)} .card.c3 .ic svg{stroke:var(--green)}
-  .card h3{font-size:13.5px;font-weight:700;margin-bottom:2px}
-  .card p{font-size:11.5px;color:var(--dim);line-height:1.4}
-  .card .go{display:none}
-
-  /* Recent enquiries table */
-  .home-tbl{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-  .home-tbl th{text-align:left;padding:8px 12px;font-size:var(--fs-meta);text-transform:uppercase;letter-spacing:.5px;color:var(--dim);font-weight:600;border-bottom:1px solid var(--line);background:var(--panel2)}
-  .home-tbl td{padding:9px 12px;font-size:var(--fs-secondary);border-bottom:1px solid var(--line);vertical-align:middle}
-  .home-tbl tr:last-child td{border-bottom:none}
-  .home-tbl tr:hover td{background:var(--hi)}
-  .home-tbl .mono{font-family:'Spline Sans Mono',monospace;font-size:11.5px}
-  .home-empty{padding:28px;text-align:center;color:var(--faint);font-size:12.5px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
-
-  /* Status pill — reused for recent-enquiries + attention list */
-  .st-pill{display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:2px 8px;border-radius:20px}
-  .st-pill.st-draft{background:var(--panel3);color:var(--dim)}
-  .st-pill.st-sent,.st-pill.st-opened{background:rgba(94,155,240,.14);color:var(--blue)}
-  .st-pill.st-submitted{background:rgba(255,210,63,.14);color:var(--accent2)}
-  .st-pill.st-approved{background:rgba(52,211,153,.14);color:var(--green)}
-  .st-pill.st-expired{background:rgba(248,113,113,.14);color:var(--red)}
-
-  /* Attention required */
-  .attn-list{display:flex;flex-direction:column;gap:6px}
-  .attn-row{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:8px;padding:9px 12px;font-size:var(--fs-secondary)}
-  .attn-row.warn{border-left-color:var(--accent2)}
-  .attn-row .attn-txt{flex:1}
-  .attn-row .attn-txt b{color:var(--ink)}
-  .attn-row .attn-tag{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--red)}
-  .attn-row.warn .attn-tag{color:var(--accent2)}
-
-  .home-foot{margin-top:6px;font-size:10.5px;color:var(--faint)}
+  .card.c3 .go{color:var(--green)}
+  .card h3{font-size:20px;font-weight:800;margin-bottom:8px}
+  .card p{font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:18px}
+  .card .go{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13px;color:var(--accent)}
+  .card.c2 .go{color:var(--blue)}
+  .card .go svg{width:16px;height:16px;stroke-width:2.4;transition:.15s}
+  .card:hover .go svg{transform:translateX(4px)}
+  .home-foot{margin-top:34px;font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:var(--faint)}
   .home-foot b{color:var(--accent2)}
-  .home-foot a{color:var(--accent2)}
 
   /* ===== SHARED CONTROL BAR ===== */
   .ctrl{background:var(--panel);border-bottom:1px solid var(--line);padding:11px 16px;display:flex;gap:9px;align-items:center;flex-wrap:wrap;flex-shrink:0}
@@ -1054,56 +1018,37 @@
     </div>
   </div>
 
-  <!-- HOME / DASHBOARD -->
+  <!-- HOME -->
   <div class="view on" id="home">
+    <div class="home-bg"></div>
     <div class="home-inner">
-      <div class="home-head">
-        <div>
-          <h2>Tender &amp; Procurement Overview</h2>
-          <p class="sub">Live status across your enquiries, quotations and vendor comparisons.</p>
+      <svg class="home-logo" viewBox="0 0 307 48" xmlns="http://www.w3.org/2000/svg" aria-label="Primarc"><g><path fill-rule="evenodd" d="m0.31 1.44h15.85c8.73 0 15.87 6.86 15.87 15.26 0 8.37-7.14 15.21-15.87 15.21h-6.78v14.67h-9.07zm22.65 15.18c0-3.42-3.05-6.19-6.8-6.19h-6.78v12.49l6.78 0.02c3.75 0.03 6.8-2.82 6.8-6.32z"/><path fill-rule="evenodd" d="m67.47 46.58l-14.36-21.34v21.34h-9.07l-0.03-45.14h14.73c8.42 0 15.34 6.5 15.34 14.62 0 5.79-3.5 10.86-8.34 12.57l12.82 17.95zm-14.39-24.81l5.82 0.03c3.08 0.03 5.83-2.47 5.83-5.69 0-3.22-2.78-5.68-5.83-5.68h-5.82z"/><path fill-rule="evenodd" d="m98.82 1.44v45.14h-9.07v-45.14z"/><path d="m157.76 0.32v46.26h-9.08v-19.66l-12.99 18.9h-0.05l-13.02-18.9v19.66h-9.08v-46.26h0.51l21.61 29.82 21.59-29.82z"/><path fill-rule="evenodd" d="m247.42 46.58l-14.36-21.34v21.34h-9.07l-0.03-45.14h14.73c8.43 0 15.34 6.5 15.34 14.62 0 5.79-3.5 10.86-8.34 12.57l12.82 17.95zm-14.39-24.81l5.82 0.03c3.08 0.03 5.83-2.47 5.83-5.69 0-3.22-2.77-5.68-5.83-5.68h-5.82z"/><path d="m267.74 24.04c0-12.74 10.73-23.52 23.44-23.52 5.88 0.08 11.09 2.41 15.82 6.97l-5.24 7.14c-3.08-3.02-6.77-4.87-10.66-4.87-7.26 0-14.17 6.44-14.17 14.33 0 8.04 7.17 14.26 14.14 14.26 4.14 0 7.73-2.22 10.72-5.16l5.21 7.34c-3.98 3.95-8.82 6.92-15.65 6.92-13.02 0-23.61-10.73-23.61-23.41z"/><path d="m190.98 0.32h-0.28l-21.56 46.26h17.85v-7.74h-4.5l8.38-18.36 8.36 18.36h-4.51v7.74h17.85z"/></g></svg>
+      <div class="home-kicker">Construction Estimating Toolkit</div>
+      <h2>Build a BOQ.<br>Compare <em>vendor</em> rates.</h2>
+      <p class="sub">Pick line items from your master library, drop their descriptions straight into a fresh Bill of Quantities, and compare what every vendor charges — ranked L1, L2, L3.</p>
+      <div class="cards">
+        <div class="card c1" id="goCreate">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M9 11H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-4M12 3v8m0 0 3-3m-3 3L9 8"/></svg></div>
+          <h3>Create BOQ</h3>
+          <p>Search your catalog, group items into sections, set quantities &amp; rates, and watch the total build live. Export when done.</p>
+          <span class="go">Start building <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </div>
+        <div class="card c3" id="goQuote">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M9 7h6m-6 4h6m-6 4h4M16 3l4 4-9 9H7v-4z"/></svg></div>
+          <h3>Enquiry Management</h3>
+          <p>Issue project-coded RFQs to multiple vendors, collect quotes through secure vendor links, then auto-rank L1–L5 with comparative statements &amp; bid analysis.</p>
+          <span class="go">Open enquiries <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </div>
+        <div class="card c2" id="goCompare">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/></svg></div>
+          <h3>BOQ Master</h3>
+          <p>Browse every item quoted by two or more vendors from history, ranked lowest-to-highest. Add new master items here. Search by project or vendor.</p>
+          <span class="go">Open BOQ Master <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
         </div>
       </div>
-
-      <div class="kpi-grid" id="homeKpis">
-        <div class="kpi k-accent"><div class="kpi-lbl">Active Enquiries</div><div class="kpi-val" id="kpiActive">0</div></div>
-        <div class="kpi k-blue"><div class="kpi-lbl">Awaiting Response</div><div class="kpi-val" id="kpiAwaiting">0</div></div>
-        <div class="kpi k-amber"><div class="kpi-lbl">Quotes Received</div><div class="kpi-val" id="kpiReceived">0</div></div>
-        <div class="kpi k-green"><div class="kpi-lbl">Awarded</div><div class="kpi-val" id="kpiAwarded">0</div></div>
-        <div class="kpi k-violet"><div class="kpi-lbl">Vendors Engaged</div><div class="kpi-val" id="kpiVendors">0</div></div>
-        <div class="kpi"><div class="kpi-lbl">Catalog Items</div><div class="kpi-val" id="kpiCatalog">0</div></div>
-      </div>
-
-      <div class="home-section">
-        <div class="home-section-head"><h3>Quick Actions</h3></div>
-        <div class="cards">
-          <div class="card c1" id="goCreate">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M9 11H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-4M12 3v8m0 0 3-3m-3 3L9 8"/></svg></div>
-            <div><h3>Create BOQ</h3><p>Build a fresh Bill of Quantities from your catalog</p></div>
-          </div>
-          <div class="card c3" id="goQuote">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M9 7h6m-6 4h6m-6 4h4M16 3l4 4-9 9H7v-4z"/></svg></div>
-            <div><h3>New Enquiry</h3><p>Issue an RFQ and invite vendors to quote</p></div>
-          </div>
-          <div class="card c2" id="goCompare">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/></svg></div>
-            <div><h3>BOQ Master</h3><p>Browse historical multi-vendor rate comparisons</p></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="home-section">
-        <div class="home-section-head"><h3>Recent Enquiries</h3></div>
-        <div id="homeRecentWrap"></div>
-      </div>
-
-      <div class="home-section" id="homeAttnSection" style="display:none">
-        <div class="home-section-head"><h3>Attention Required</h3></div>
-        <div class="attn-list" id="homeAttnList"></div>
-      </div>
-
       <div class="home-foot">Master library: <b id="hf1">0</b> unique items &nbsp;·&nbsp; Multi-vendor comparisons: <b id="hf2">0</b> items
-        &nbsp;·&nbsp; <a href="#" id="hfBackup">⤓ Backup all data</a>
-        &nbsp;·&nbsp; <a href="#" id="hfRestore">⤒ Restore</a>
+        &nbsp;·&nbsp; <a href="#" id="hfBackup" style="color:var(--accent2);text-decoration:none">⤓ Backup all data</a>
+        &nbsp;·&nbsp; <a href="#" id="hfRestore" style="color:var(--accent2);text-decoration:none">⤒ Restore</a>
         <input type="file" id="hfRestoreFile" accept="application/json,.json" style="display:none">
       </div>
     </div>
@@ -2128,7 +2073,6 @@ function setMode(m){
   if(m==='create'&&!cInit){initCreate();cInit=true}
   if(m==='compare'&&!mInit){initCompare();mInit=true}
   if(m==='quote'){ if(typeof QM!=='undefined') QM.open(); }
-  if(m==='home'){ if(typeof renderHomeDash==='function') renderHomeDash(); }
 }
 document.querySelectorAll('#modes button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.m)));
 $('#goCreate').addEventListener('click',()=>setMode('create'));
@@ -7114,66 +7058,6 @@ function qStatus(q){
 }
 function audit(q,action,detail){q.audit=q.audit||[];q.audit.push({action,by:detail&&detail.by||'Admin',ts:now(),detail:detail&&detail.txt||''});}
 function notify(type,msg,qid){DB.notifications.unshift({id:uid(),type,msg,qid,ts:now(),read:false});DB.notifications=DB.notifications.slice(0,80);}
-
-/* ---------- home / dashboard: real numbers only, derived from DB.quotations ---------- */
-function renderHomeDash(){
-  try{
-    const qs=(DB.quotations||[]);
-    const active=qs.filter(q=>qStatus(q)!=='approved').length;
-    const awaiting=qs.filter(q=>['sent','opened'].includes(qStatus(q))).length;
-    const received=qs.filter(q=>qStatus(q)==='submitted').length;
-    const awarded=qs.filter(q=>qStatus(q)==='approved').length;
-    const vendSet=new Set();
-    qs.forEach(q=>(q.vendors||[]).forEach(v=>{if(v.name&&v.name.trim())vendSet.add(v.name.trim().toLowerCase());}));
-    const setTxt=(id,v)=>{const el=$(id);if(el)el.textContent=v;};
-    setTxt('#kpiActive',active); setTxt('#kpiAwaiting',awaiting); setTxt('#kpiReceived',received);
-    setTxt('#kpiAwarded',awarded); setTxt('#kpiVendors',vendSet.size);
-    setTxt('#kpiCatalog',inr((typeof CATALOG!=='undefined'?CATALOG.length:(DB.vendorMaster||[]).length)));
-
-    const wrap=$('#homeRecentWrap');
-    if(wrap){
-      const recent=qs.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,5);
-      if(!recent.length){
-        wrap.innerHTML='<div class="home-empty">No enquiries yet<br><span style="font-size:11px;color:var(--faint)">Create your first RFQ from Quick Actions above to see it here.</span></div>';
-      }else{
-        wrap.innerHTML='<table class="home-tbl"><thead><tr><th>Reference</th><th>Project</th><th>Client</th><th>Vendors</th><th>Received</th><th>Due</th><th>Status</th><th></th></tr></thead><tbody>'+
-          recent.map(q=>{
-            const st=qStatus(q);
-            const respCount=(q.vendors||[]).filter(v=>['submitted','revised','approved'].includes(v.status)).length;
-            return '<tr><td class="mono">'+esc(q.base||'—')+'</td><td>'+esc(q.projectName||'—')+'</td><td>'+esc(q.client||'—')+
-              '</td><td>'+(q.vendors||[]).length+'</td><td>'+respCount+'</td><td>'+esc(q.dueDate||'—')+
-              '</td><td><span class="st-pill st-'+st+'">'+st+'</span></td>'+
-              '<td><button class="btn" style="font-size:11px" onclick="setMode(\'quote\');QM.openQ(\''+q.id+'\')">Open</button></td></tr>';
-          }).join('')+'</tbody></table>';
-      }
-    }
-
-    const attnSec=$('#homeAttnSection'), attnList=$('#homeAttnList');
-    if(attnSec&&attnList){
-      const attn=[];
-      qs.forEach(q=>{
-        if(qStatus(q)==='approved')return;
-        if(isExpired(q)){attn.push({q,tag:'Overdue',warn:false});}
-        else if(q.dueDate){
-          const days=Math.ceil((new Date(q.dueDate+'T23:59:59').getTime()-now())/86400000);
-          if(days>=0&&days<=3)attn.push({q,tag:days===0?'Due today':'Due in '+days+'d',warn:true});
-        }
-      });
-      if(attn.length){
-        attnSec.style.display='';
-        attnList.innerHTML=attn.slice(0,8).map(a=>
-          '<div class="attn-row'+(a.warn?' warn':'')+'"><span class="attn-tag">'+esc(a.tag)+'</span>'+
-          '<span class="attn-txt"><b>'+esc(a.q.base||'Enquiry')+'</b> — '+esc(a.q.projectName||'')+(a.q.client?' · '+esc(a.q.client):'')+'</span>'+
-          '<button class="btn" style="font-size:11px" onclick="setMode(\'quote\');QM.openQ(\''+a.q.id+'\')">Open</button></div>'
-        ).join('');
-      }else{
-        attnSec.style.display='none';
-      }
-    }
-  }catch(e){console.error('[renderHomeDash]',e);}
-}
-// Home is the default visible view at load, before any setMode('home') call fires it.
-try{renderHomeDash();}catch(e){}
 
 /* ---------- vendor factory ---------- */
 function lineFor(){return {rate:'',gst:18};}
