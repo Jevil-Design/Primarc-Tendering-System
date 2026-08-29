@@ -7320,7 +7320,9 @@ function renderDetail(m){
       ${stPill(v.status)}
       ${q.cloud&&q.cloud.published?`<span class="qm-cloud-tag ${v.cloud&&v.cloud.lastSubTs?'live':''}">${v.cloud&&v.cloud.lastSubTs?'submitted online':'link live'}</span>`:''}
       <button class="btn" style="font-size:11px" onclick="QM.openPortal('${q.id}','${v.vid}')">Open Portal</button>
-      ${q.cloud&&q.cloud.published?`<button class="btn green" style="font-size:11px" onclick="QM.openCloudLinks('${q.id}')">Share ☁</button>`:`<button class="btn" style="font-size:11px" onclick="QM.copyLink('${v.token}')">Copy Link</button>`}
+      ${q.cloud&&q.cloud.published?`<button class="btn green" style="font-size:11px" onclick="QM.openCloudLinks('${q.id}')">Share ☁</button>`:`<button class="btn" style="font-size:11px" onclick="QM.copyLink('${v.token}')">Copy Link</button>
+      <button class="btn green" style="font-size:11px" title="Share this vendor's secure link on WhatsApp" onclick="QM.shareWhatsAppPlain('${q.id}','${v.vid}')">WhatsApp</button>
+      <button class="btn" style="font-size:11px" title="Share this vendor's secure link by email" onclick="QM.shareEmailPlain('${q.id}','${v.vid}')">Email</button>`}
       ${v.status==='draft'?`<button class="btn primary" style="font-size:11px" onclick="QM.sendVendor('${q.id}','${v.vid}')">Send</button>`:''}
       ${hasQuote(v)&&v.status!=='approved'?`<button class="btn green" style="font-size:11px" onclick="QM.approve('${q.id}','${v.vid}')">Award L1</button>`:''}
       <button class="btn" style="font-size:11px" title="OTP for the secure portal link" onclick="QM.editOtp('${q.id}','${v.vid}')">🔒 OTP${v.otpEnabled?' · '+v.otp:' off'}</button>
@@ -7737,8 +7739,14 @@ function refreshBell(){const dot=$('#qmBellDot');if(dot)dot.style.display=DB.not
 let portalCtx=null,portalTimer=null;
 function findByToken(token){for(const q of DB.quotations){const v=q.vendors.find(v=>v.token===token);if(v)return {q,v};}return null;}
 function openPortal(qid,vid){const q=DB.quotations.find(x=>x.id===qid);const v=q.vendors.find(x=>x.vid===vid);location.hash='v='+v.token;renderPortal(v.token,true);}
-function copyLink(token){const url=location.href.split('#')[0]+'#v='+token;
+function plainLink(token){return location.href.split('#')[0]+'#v='+token;}
+function copyLink(token){const url=plainLink(token);
   navigator.clipboard&&navigator.clipboard.writeText(url).then(()=>showToast('🔗 Secure vendor link copied'),()=>prompt('Copy link:',url))||prompt('Copy link:',url);}
+/* Share the vendor's own secure link over WhatsApp/Email without needing Cloud
+   Sync set up — copyLink()'s plain #v=token link works the same either way,
+   this just puts it in front of the vendor instead of the clipboard. */
+function shareWhatsAppPlain(qid,vid){const {q,v}=_qv(qid,vid);window.open('https://wa.me/?text='+encodeURIComponent(shareMsg(q,v,plainLink(v.token))),'_blank');}
+function shareEmailPlain(qid,vid){const {q,v}=_qv(qid,vid);location.href='mailto:?subject='+encodeURIComponent('RFQ '+q.base+' — '+(q.projectName||''))+'&body='+encodeURIComponent(shareMsg(q,v,plainLink(v.token)));}
 function detectDevice(){const w=Math.min(screen.width,screen.height);const ua=navigator.userAgent;let dev=/Mobi|Android|iPhone/i.test(ua)?'Mobile':/iPad|Tablet/i.test(ua)||(w>=600&&w<=900)?'Tablet':'Desktop';let br=/Edg/.test(ua)?'Edge':/Chrome/.test(ua)?'Chrome':/Firefox/.test(ua)?'Firefox':/Safari/.test(ua)?'Safari':'Browser';return {dev,br};}
 function checkPortal(){
   const mt=location.hash.match(/t=([a-z0-9]+)~([A-Za-z0-9\-_]+)/i);   // Power Automate: app-hosted portal + embedded flow endpoint
@@ -8850,7 +8858,7 @@ const api={
   sendVendor(qid,vid){const q=DB.quotations.find(x=>x.id===qid);const v=q.vendors.find(x=>x.vid===vid);v.status='sent';v.sentTs=now();audit(q,'RFQ sent to vendor',{txt:v.name});notify('sent','RFQ '+vendorId(q,v)+' sent to '+v.name,q.id);saveDB();copyLink(v.token);render();},
   approve(qid,vid){const q=DB.quotations.find(x=>x.id===qid);q.vendors.forEach(v=>{if(v.status==='approved')v.status='submitted';});const v=q.vendors.find(x=>x.vid===vid);v.status='approved';audit(q,'Awarded (L1)',{txt:v.name+' — '+money(vendorBase(q,v))});notify('award',v.name+' awarded L1 on '+q.base,q.id);saveDB();render();},
   _awardSelected(qid){const sel=$('#bidSel').value;api.approve(qid,sel);showToast('Award confirmed');},
-  openPortal,copyLink,
+  openPortal,copyLink,shareWhatsAppPlain,shareEmailPlain,
   editOtp(qid,vid){const q=DB.quotations.find(x=>x.id===qid);const v=q.vendors.find(x=>x.vid===vid);
     if(!v.otpEnabled){if(!confirm('Turn ON OTP for "'+v.name+'"? They will need a 6-digit code to open the secure portal link.'))return;v.otpEnabled=true;if(!/^\d{6}$/.test(v.otp||''))v.otp=String(Math.floor(100000+Math.random()*900000));audit(q,'OTP enabled',{by:v.name,txt:v.otp});saveDB();render();showToast('🔒 OTP on — code '+v.otp);return;}
     const inp=prompt('OTP for "'+v.name+'":\n• Type a new 6-digit code\n• Leave EMPTY to generate a random one\n• Type OFF to disable OTP',v.otp);
