@@ -38,8 +38,18 @@
   var _settings = null;
   async function settings(force) {
     if (_settings && !force) return _settings;
-    try { var r = await api.request('GET', '/settings'); _settings = (r && r.settings) || {}; }
-    catch (e) { _settings = {}; }
+    try {
+      var r = await api.request('GET', '/settings');
+      _settings = (r && r.settings) || {};
+    } catch (e) {
+      // A transient failure must NOT be cached as if it were real (empty)
+      // settings: saveSetting() merges into whatever this returns and writes
+      // the merged object back, so a poisoned {} here would silently destroy
+      // every previously-saved role/permission on the next save. Leave
+      // _settings untouched (still null, or the last good value) so the next
+      // call retries instead of working from empty data forever.
+      return {};
+    }
     return _settings;
   }
   async function saveSetting(key, value) {
@@ -47,7 +57,11 @@
     if (_settings) _settings[key] = value;
   }
   async function uiPerms() { return (await settings()).ui_perms || {}; }
-  async function uiRoles() { return (await settings()).ui_user_roles || {}; }
+  // force=true bypasses the cache — used right before a read-merge-write save
+  // so the merge starts from the latest known state, not a snapshot from
+  // earlier in the session (narrows, doesn't eliminate, the lost-update
+  // window against a concurrent edit from another admin).
+  async function uiRoles(force) { return (await settings(force)).ui_user_roles || {}; }
 
   /* ── user shape mapping (backend → the UI's ts_users record) ── */
   function mapUser(u, roles) {
@@ -205,7 +219,7 @@
       var r = await api.users.create({ username: dto.username, fullName: dto.name, email: dto.email, password: dto.password });
       var id = r && r.userId;
       if (id && dto.role) {
-        var roles = await uiRoles(); roles[id] = dto.role; await saveSetting('ui_user_roles', roles);
+        var roles = await uiRoles(true); roles[id] = dto.role; await saveSetting('ui_user_roles', roles);
         if (ADMIN_ROLES[dto.role]) { try { await api.users.update(id, { isAdmin: true }); } catch (e) {} }
       }
       return r;
@@ -218,7 +232,7 @@
       if (patch.password) body.password = patch.password;
       if (patch.role !== undefined) body.isAdmin = !!ADMIN_ROLES[patch.role];
       var r = await api.users.update(id, body);
-      if (patch.role !== undefined) { var roles = await uiRoles(); roles[id] = patch.role; await saveSetting('ui_user_roles', roles); }
+      if (patch.role !== undefined) { var roles = await uiRoles(true); roles[id] = patch.role; await saveSetting('ui_user_roles', roles); }
       return r;
     },
     resetPassword: async function (id) { return api.users.resetPassword(id); },
