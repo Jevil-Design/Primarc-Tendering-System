@@ -74,7 +74,13 @@
     return {
       id: u.id, username: u.username, name: u.full_name || u.username,
       email: u.email || '', role: role, active: u.status !== 'inactive' && u.status !== 'suspended',
-      invite: !!u.must_change_password,
+      // Named to match what every consumer actually reads: the login
+      // handler's r.user.mustChange (forces the change-password prompt right
+      // after sign-in) and pwStatus()'s x.mustChange (the "Temporary" badge
+      // in User Management). This used to be called `invite`, which nothing
+      // checked — so a freshly invited/reset-password backend user was never
+      // prompted to change their password, and never showed as temporary.
+      mustChange: !!u.must_change_password,
     };
   }
   function setLocal(key, val) {
