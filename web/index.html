@@ -675,8 +675,13 @@
   /* Hide splitter on mobile (panels stack vertically) */
   @media(max-width:860px){.split-handle{display:none}}
 
-  /* Collapse the item library entirely, via the chevron on the splitter */
-  .create-body.lib-collapsed > .lib{width:0!important;min-width:0!important;border-right:none}
+  /* Collapse the item library entirely, via the chevron on the splitter.
+     flex:0 0 0 must be !important too: once the splitter has ever been
+     dragged, .lib carries an inline flex:0 0 <px> from applyWidth(), and in
+     a flex item an explicit flex-basis overrides `width` outright — so
+     `width:0!important` alone silently does nothing for anyone who has
+     ever resized the panel. */
+  .create-body.lib-collapsed > .lib{width:0!important;min-width:0!important;flex:0 0 0!important;border-right:none}
   .split-toggle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:34px;background:var(--panel2);border:1px solid var(--line);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--dim);z-index:6}
   .split-toggle:hover{background:var(--hi);color:var(--ink);border-color:var(--accent)}
 
