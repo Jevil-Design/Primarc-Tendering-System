@@ -110,7 +110,8 @@
     if (!db) return true;
     var n = function (a) { return (a && a.length) || 0; };
     return n(db.quotations) === 0 && n(db.workOrders) === 0 &&
-           n(db.vendorMaster) === 0 && n(db.deleted) === 0;
+           n(db.vendorMaster) === 0 && n(db.deleted) === 0 &&
+           n(db.masterCustom) === 0;
   }
 
   var _resyncing = false;

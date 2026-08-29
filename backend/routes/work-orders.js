@@ -161,6 +161,10 @@ export default function register(router) {
 
   router.post('/work-orders/:id/reject', async (ctx) => {
     requirePerm(ctx, MODULE.WORK_ORDER, 'reject');
+    const wo = await ctx.env.DB.prepare('select status from work_orders where id = ? and deleted_at is null')
+      .bind(ctx.params.id).first();
+    if (!wo) throw errors.notFound('Work order not found.');
+    if (wo.status === 'approved') throw errors.conflict('An already-approved work order cannot be rejected.');
     await ctx.env.DB.prepare("update work_orders set status = 'rejected' where id = ?").bind(ctx.params.id).run();
     await logAudit(ctx, { module: 'Work Order', action: 'reject', entityType: 'work_orders',
                           entityId: ctx.params.id, reason: ctx.body?.reason });

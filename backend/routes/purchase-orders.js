@@ -79,6 +79,7 @@ export default function register(router) {
     const po = await ctx.env.DB.prepare('select * from purchase_orders where id = ? and deleted_at is null')
       .bind(ctx.params.id).first();
     if (!po) throw errors.notFound('Purchase order not found.');
+    if (po.status === 'approved') throw errors.conflict('This purchase order is already approved.');
     assertCanApprove(ctx, 'purchase', po.total_amount);
     await ctx.env.DB.prepare(
       "update purchase_orders set status = 'approved', approved_by = ?, approved_at = ? where id = ?"

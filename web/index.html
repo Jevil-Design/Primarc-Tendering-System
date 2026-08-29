@@ -3434,10 +3434,18 @@ $('#bExpPdf').addEventListener('click',()=>{
     }
     const gPct=r.gst||18; const gAmt=r.gstAmt?pdfRs(r.gstAmt):''; const woPart=r.wo?'\nWO: '+r.wo:''; return [r.sl,(r.name?r.name+'\n':'')+(r.desc||'')+woPart,r.uom,r.qty===''?'':inr(parseFloat(r.qty)),r.rate===''?'':pdfRs(parseFloat(r.rate)),r.amt?pdfRs(r.amt):'',gPct+'%',gAmt,r.remarks||''];
   });
+  const gstSum=Math.round(rows.filter(r=>r.kind==='line').reduce((s,r)=>s+(parseFloat(r.gstAmt)||0),0)*100)/100;
   doc.autoTable(Object.assign(pdfTableBase(chrome,M),{
     head:[['#','Item / Description','Unit','Qty','Rate','Amount','GST %','GST Amt','Remarks']],
     body,
-    foot:[[{content:'GRAND TOTAL (excl. GST)',colSpan:8,styles:{halign:'right',fontStyle:'bold'}},{content:pdfRs(grand),styles:{halign:'right',fontStyle:'bold',textColor:255}}]],
+    // Matches the CSV/Excel export and the on-screen total exactly (base, GST,
+    // grand incl. GST) — this used to show only a "GRAND TOTAL (excl. GST)"
+    // row, so the PDF quoted a different figure than every other export format.
+    foot:[
+      [{content:'BASE TOTAL',colSpan:8,styles:{halign:'right',fontStyle:'bold'}},{content:pdfRs(grand),styles:{halign:'right',fontStyle:'bold'}}],
+      [{content:'GST TOTAL',colSpan:8,styles:{halign:'right',fontStyle:'bold'}},{content:pdfRs(gstSum),styles:{halign:'right',fontStyle:'bold'}}],
+      [{content:'GRAND TOTAL (incl. GST)',colSpan:8,styles:{halign:'right',fontStyle:'bold'}},{content:pdfRs(grand+gstSum),styles:{halign:'right',fontStyle:'bold',textColor:255}}]
+    ],
     startY,styles:{fontSize:7.5,cellPadding:1.6,overflow:'linebreak',valign:'top',lineColor:B.LINE,lineWidth:0.1,textColor:[45,50,58]},
     headStyles:{fillColor:B.INK,textColor:255,fontSize:8,fontStyle:'bold'},
     footStyles:{fillColor:B.ACC,textColor:255},
@@ -8144,7 +8152,7 @@ function renderVendorMaster(m){
   const f=vmFilter.toLowerCase().trim();
   const shown=f?list.filter(v=>((v.name||'')+(v.code||'')+(v.category||'')+(v.gst||'')).toLowerCase().includes(f)):list;
   const cats=['','Civil','Structural','Architectural','Finishing','Electrical','Plumbing','Fire Fighting','HVAC','Infrastructure','Landscaping','Supply'];
-  const star=(n,id)=>{let s='';for(let i=1;i<=5;i++)s+=`<span onclick="QM._vmRate('${id}',${i})" style="cursor:pointer;color:${i<=n?'var(--accent2)':'var(--line)'};font-size:14px">★</span>`;return s;};
+  const star=(n,id)=>{let s='';for(let i=1;i<=5;i++)s+=`<span class="vmStar" onclick="QM._vmRate('${id}',${i})" style="cursor:pointer;color:${i<=n?'var(--accent2)':'var(--line)'};font-size:14px">★</span>`;return s;};
   let rows=shown.map(v=>{
     const st=vmStats(v.name);
     return `<tr>
@@ -8169,7 +8177,7 @@ function renderVendorMaster(m){
     <div class="qm-sub">Centralized vendor directory — contacts, statutory IDs, performance rating and bid history. Imported from the master vendor list &amp; enquiry history; edits save instantly.</div>
     <div style="display:flex;gap:10px;align-items:center;margin:8px 0 14px">
       <input id="vmSearch" placeholder="Search vendors, code, category, GST…" value="${esc(vmFilter)}" style="flex:1;max-width:380px;background:var(--panel2);border:1px solid var(--line);border-radius:7px;color:var(--ink);padding:9px 12px;font-size:13px">
-      <button class="btn primary" onclick="QM._vmAdd()"><svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2"/></svg>Add Vendor</button>
+      <button class="btn primary vm-add" onclick="QM._vmAdd()"><svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2"/></svg>Add Vendor</button>
       <div style="flex:1"></div><span style="font-size:11px;color:var(--faint)">${shown.length} vendor${shown.length!==1?'s':''}</span>
     </div>
     <div class="qm-scrollx"><table class="qm-tbl"><thead><tr>
@@ -8718,7 +8726,7 @@ const api={
   exportQ(qid){rfqPdf(DB.quotations.find(x=>x.id===qid));},
   filterStatus,deleteQ,restoreQ,permDelete,bulkInvite,sendAll,rollback,
   /* vendor master / approvals / work orders */
-  _vmAdd(){const nm=prompt('Vendor name:');if(!nm)return;DB.vendorMaster.push({id:uid(),name:nm.trim(),code:'',category:'',contact:'',mobile:'',email:'',gst:'',pan:'',address:'',rating:0});saveDB();render();showToast('✓ Vendor added');},
+  _vmAdd(){const nm=prompt('Vendor name:');if(!nm)return;const name=nm.trim();if(!name)return;const key=name.toLowerCase();if((DB.vendorMaster||[]).some(v=>(v.name||'').trim().toLowerCase()===key)){alert('"'+name+'" is already in the vendor master directory.');return;}DB.vendorMaster.push({id:uid(),name,code:'',category:'',contact:'',mobile:'',email:'',gst:'',pan:'',address:'',rating:0});saveDB();render();showToast('✓ Vendor added');},
   _vmDel(id){if(!confirm('Remove this vendor from the master directory? (Enquiry history is not affected.)'))return;DB.vendorMaster=DB.vendorMaster.filter(v=>v.id!==id);saveDB();render();showToast('Vendor removed');},
   _vmRate(id,n){const v=DB.vendorMaster.find(x=>x.id===id);if(v){v.rating=(v.rating===n?n-1:n);saveDB();render();}},
   _apprAct(qid,action){const q=DB.quotations.find(x=>x.id===qid);if(!q)return;const a=apprState(q);const comment=prompt((action==='approved'?'Approve':'Reject')+' at "'+APPR_STAGES[a.stage]+'" — comment (optional):')||'';a.history=a.history||[];a.history.push({stage:APPR_STAGES[a.stage],action,by:'Admin',comment,ts:now()});if(action==='rejected'){a.status='rejected';audit(q,'Approval rejected',{txt:APPR_STAGES[a.stage]+(comment?' — '+comment:'')});}else{audit(q,'Approved',{txt:APPR_STAGES[a.stage]});if(a.stage>=APPR_STAGES.length-1){a.status='approved';notify('approved','Enquiry '+q.base+' fully approved — ready for Work Order.',q.id);}else{a.stage++;}}saveDB();render();showToast(action==='approved'?'✓ Approved — '+(a.status==='approved'?'fully signed off':'advanced to '+APPR_STAGES[a.stage]):'✕ Rejected');},
@@ -8762,6 +8770,9 @@ function csExport(q,fmt){
   const head=['#','Description','Qty','UOM',...q.vendors.map(v=>v.name+' Rate'),...q.vendors.map(v=>v.name+' Amt'),'Low','High','Avg'];
   const rows=q.items.map((it,i)=>{const amts=q.vendors.map((v,vi)=>lineAmt(q,v,i)).filter(a=>a>0);const low=amts.length?Math.min(...amts):0,high=amts.length?Math.max(...amts):0,avg=amts.length?amts.reduce((a,b)=>a+b,0)/amts.length:0;return [i+1,it.desc,it.qty,it.uom,...q.vendors.map(v=>num(v.lines[i].rate)||''),...q.vendors.map((v,vi)=>lineAmt(q,v,i)||''),low||'',high||'',Math.round(avg)||''];});
   rows.push(['','TOTAL (base)','','',...q.vendors.map(()=>''),...q.vendors.map(v=>vendorBase(q,v)),'','','']);
+  // Matches the on-screen table and PDF export, both of which add this row
+  // when "Include GST in ranking" is on — CSV/Excel used to silently drop it.
+  if(csGst)rows.push(['','TOTAL (incl GST)','','',...q.vendors.map(()=>''),...q.vendors.map(v=>vendorTotal(q,v)),'','','']);
   if(fmt==='xls'||fmt==='csv'){exportTable(fmt,head,rows,'CS_'+q.base.replace(/\//g,'-'));return;}
   if(fmt==='print'){printHTML('Comparative Statement — '+q.base,csPrintHtml(q));return;}
   /* ── PDF: faithful mirror of the on-screen comparative statement ── */
@@ -9095,6 +9106,12 @@ const Auth=(function(){
       /* permission-based hiding, driven by the editable Access Control matrix */
       html[data-nodel="1"] .del,html[data-nodel="1"] .qm-irow-del{display:none!important}
       html[data-nocreate="1"] .bq-airow{display:none!important}
+      /* Vendor Master had no gating at all before — every field/button was
+         editable regardless of role. Matches the same client-side convention
+         as the rest of the app (a courtesy, not a substitute for the missing
+         server-side check on this feature). */
+      html[data-nocreate="1"] .vm-add{display:none!important}
+      html[data-noedit="1"] .vmF,html[data-noedit="1"] .vmStar{pointer-events:none!important;opacity:.55}
     `;
     document.head.appendChild(s);
   }
