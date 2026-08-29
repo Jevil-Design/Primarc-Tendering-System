@@ -5,9 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="ext-resource-dependency" content="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" data-resource-id="pdfjsLib" />
 <meta name="ext-resource-dependency" content="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js" data-resource-id="pdfjsWorker" />
+<!-- A @import inside <style> is only discovered once the browser starts
+     parsing that CSS, blocking style rendering until it resolves. A <link>
+     is found by the preload scanner immediately, in parallel with everything
+     else — same font files, strictly faster first paint. preconnect gets the
+     connection to both font hosts (and the CDN the deferred export libraries
+     load from) underway before anything actually needs them yet. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
 <title>BOQ Builder</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Spline+Sans+Mono:wght@400;500;600&display=swap');
   :root{
     --bg:#0e1014; --panel:#161922; --panel2:#1c2029; --panel3:#222732; --line:#2b313d;
     --ink:#e9ebef; --dim:#9aa3b2; --faint:#646d7d; --fg:var(--ink); /* --fg was undefined; alias to --ink */
