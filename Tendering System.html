@@ -1667,6 +1667,17 @@ let MASTER_CUSTOM=[];
 const MC_KEY='tnd_master_custom_v1';
 function saveMasterCustom(){
   try{(window.safeSetItem||localStorage.setItem.bind(localStorage))(MC_KEY,JSON.stringify(MASTER_CUSTOM));}catch(e){}
+  // Also push through the server-synced DB blob so an Excel/CSV import — or a
+  // single "Add to BOQ Master" — reaches the backend instead of staying stuck
+  // in this browser only. DB itself lives inside the QM module's own closure
+  // (a separate scope from this function), so __tsHooks — the same bridge
+  // api-store.js uses to reach it — is how this function reaches it too.
+  try{
+    if(window.__tsHooks){
+      const db=window.__tsHooks.getDB();
+      if(db){ db.masterCustom=MASTER_CUSTOM; if(window.__tsHooks.push)window.__tsHooks.push(); }
+    }
+  }catch(e){}
 }
 function loadMasterCustom(){
   try{
@@ -7015,12 +7026,24 @@ const COMMTERMS=[
 ];
 
 let DB=loadDB();
-function loadDB(){try{const r=JSON.parse(localStorage.getItem(QKEY));if(r&&r.quotations){r.deleted=r.deleted||[];r.vendorMaster=r.vendorMaster||[];r.workOrders=r.workOrders||[];r.quotations.forEach(q=>{q.versions=q.versions||[];qMigrate(q);});[].concat(r.quotations,r.deleted||[]).forEach(q=>{if(q&&typeof q.base==='string'&&q.base.indexOf('QTN/')===0)q.base='ENQ/'+q.base.slice(4);});return r;}}catch(e){}return {quotations:[],notifications:[],seq:{},deleted:[],vendorMaster:[],workOrders:[]};}
+function loadDB(){try{const r=JSON.parse(localStorage.getItem(QKEY));if(r&&r.quotations){r.deleted=r.deleted||[];r.vendorMaster=r.vendorMaster||[];r.workOrders=r.workOrders||[];r.masterCustom=r.masterCustom||[];r.quotations.forEach(q=>{q.versions=q.versions||[];qMigrate(q);});[].concat(r.quotations,r.deleted||[]).forEach(q=>{if(q&&typeof q.base==='string'&&q.base.indexOf('QTN/')===0)q.base='ENQ/'+q.base.slice(4);});return r;}}catch(e){}return {quotations:[],notifications:[],seq:{},deleted:[],vendorMaster:[],workOrders:[],masterCustom:[]};}
 function saveDB(){ if(window.safeSetItem){ safeSetItem(QKEY,JSON.stringify(DB)); } else { try{localStorage.setItem(QKEY,JSON.stringify(DB));}catch(e){showToast('⚠ Storage full');} } try{ if(window.TSApi&&window.TSApi.active&&window.TSApi.push)window.TSApi.push(); }catch(e){} }
+/* BOQ Master custom items (added singly or via Excel/CSV import) used to live
+   only in their own localStorage key (tnd_master_custom_v1) — never reaching
+   the server, so an import on one computer was invisible everywhere else.
+   They now live in DB.masterCustom, riding the same server-synced blob as
+   quotations/etc. Reconcile with whatever the legacy key already holds on
+   this machine so nothing already saved locally gets silently dropped. */
+if(!Array.isArray(DB.masterCustom))DB.masterCustom=[];
+if(DB.masterCustom.length){ MASTER_CUSTOM=DB.masterCustom; }
+else if(MASTER_CUSTOM.length){ DB.masterCustom=MASTER_CUSTOM; saveDB(); }
 /* Bridge hooks: the central-DB adapter (api-store.js) lives in another script
    and cannot see this IIFE's DB/render. These expose exactly what it needs —
-   read the live DB to push, and replace it with the server copy then re-render. */
-window.__tsHooks={ getDB:function(){return DB;}, setDB:function(v){ DB=v; try{localStorage.setItem(QKEY,JSON.stringify(DB));}catch(e){} try{if(typeof render==='function')render();}catch(e){} } };
+   read the live DB to push, and replace it with the server copy then re-render.
+   push() lets code in yet another, outer scope (saveMasterCustom(), which
+   can't see this IIFE's DB/saveDB either) trigger a real save+sync after it
+   has mutated DB.masterCustom via getDB(). */
+window.__tsHooks={ getDB:function(){return DB;}, setDB:function(v){ DB=v; if(!Array.isArray(DB.masterCustom))DB.masterCustom=[]; MASTER_CUSTOM=DB.masterCustom; try{localStorage.setItem(QKEY,JSON.stringify(DB));}catch(e){} try{if(typeof render==='function')render();}catch(e){} }, push:function(){ saveDB(); } };
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const tok=()=>(Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)).slice(0,22);
 const pad=(n,l=3)=>String(n).padStart(l,'0');
