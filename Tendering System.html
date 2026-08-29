@@ -9732,16 +9732,33 @@ const Auth=(function(){
       const el=document.getElementById('aumPw'); if(el){el.type='text';el.value=p;}
       if(typeof showToast==='function')showToast('Generated — copy it before sending');
     },
-    _invite:(id)=>{
+    _invite:async(id)=>{
       const r=users().find(x=>x.id===id); if(!r)return;
-      const link=makeInvite(r);
-      try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(link).catch(()=>{}); } }catch(e){}
+      // The old flow (still used when the backend is unreachable) encoded a
+      // one-time token into a URL fragment and only worked if the invited
+      // person opened it in a browser that already had this admin's own
+      // localStorage — i.e. never, for anyone actually being invited. When
+      // the backend is live, issue a real temporary password the same way
+      // "Reset password" already does; that's an account the invited user
+      // can actually sign into.
+      let p=null, link=location.href.split('#')[0];
+      if(API()){
+        if(!confirm('Generate an access link for '+r.name+'?\n\nA new temporary password is issued and their current password (if any) stops working immediately.'))return;
+        try{ const res=await window.TSApi.resetPassword(id); p=res.temporaryPassword; await window.TSApi.listUsers(); }
+        catch(ex){ alert(ex.message||'Could not generate an invite.'); return; }
+      }else{
+        link=makeInvite(r);
+      }
+      const creds=p?('Username: '+r.username+'\nTemporary password: '+p+'\nLink: '+link):link;
+      try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(creds).catch(()=>{}); } }catch(e){}
+      const body=p
+        ?'Hello '+r.name+',\n\nYou have been given access to the Tendering System.\n\nSign in here:\n'+link+'\n\n  Username           : '+r.username+'\n  Temporary password : '+p+'\n\nYou will be asked to choose your own password on first sign-in.\n\nRegards,\n'+(session?session.name:'Administrator')
+        :'Hello '+r.name+',\n\nYou have been given access to the Tendering System.\n\nClick this link to set your password and activate your account:\n'+link+'\n\n  Username : '+r.username+'\n  Role     : '+r.role+'\n\nRegards,\n'+(session?session.name:'Administrator');
       if(r.email){
-        const body='Hello '+r.name+',\n\nYou have been given access to the Tendering System.\n\nClick this link to set your password and activate your account:\n'+link+'\n\n  Username : '+r.username+'\n  Role     : '+r.role+'\n\nRegards,\n'+(session?session.name:'Administrator');
         window.open('mailto:'+encodeURIComponent(r.email)+'?subject='+encodeURIComponent('Your Tendering System access')+'&body='+encodeURIComponent(body),'_blank');
-        if(typeof showToast==='function')showToast('✉ Email drafted + link copied');
+        if(typeof showToast==='function')showToast('✉ Email drafted + credentials copied');
       } else {
-        prompt('Invite link for '+r.name+' — copied to clipboard. Send it to the user:',link);
+        prompt((p?'Access details':'Invite link')+' for '+r.name+' — copied to clipboard. Send it to the user:',creds);
       }
       userMgmtModal();
     },
