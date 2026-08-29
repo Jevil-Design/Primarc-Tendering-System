@@ -675,6 +675,11 @@
   /* Hide splitter on mobile (panels stack vertically) */
   @media(max-width:860px){.split-handle{display:none}}
 
+  /* Collapse the item library entirely, via the chevron on the splitter */
+  .create-body.lib-collapsed > .lib{width:0!important;min-width:0!important;border-right:none}
+  .split-toggle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:16px;height:34px;background:var(--panel2);border:1px solid var(--line);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--dim);z-index:6}
+  .split-toggle:hover{background:var(--hi);color:var(--ink);border-color:var(--accent)}
+
   /* ═══ BOQ MASTER: 5-column vendor layout + frozen header ═══ */
   /* Force horizontal scroll instead of squeezing when there isn't room for all vendor columns */
   table.cmpt{min-width:1500px;table-layout:auto}
@@ -6231,6 +6236,24 @@ function initAdjustablePanels(){
 
     const viewId=container.closest('.view')?.id||'view';
     const lsKey='boq_split_w_'+viewId;
+    const collapseKey='boq_lib_collapsed_'+viewId;
+    const chevL='<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 6l-6 6 6 6"/></svg>';
+    const chevR='<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 6l6 6-6 6"/></svg>';
+    const toggle=document.createElement('div');
+    toggle.className='split-toggle';
+    toggle.innerHTML=chevL;
+    toggle.title='Hide item library';
+    handle.appendChild(toggle);
+    function setLibCollapsed(on){
+      container.classList.toggle('lib-collapsed',on);
+      toggle.innerHTML=on?chevR:chevL;
+      toggle.title=on?'Show item library':'Hide item library';
+      try{ localStorage.setItem(collapseKey,on?'1':'0'); }catch(e){}
+    }
+    toggle.addEventListener('mousedown',e=>e.stopPropagation());
+    toggle.addEventListener('touchstart',e=>e.stopPropagation(),{passive:true});
+    toggle.addEventListener('click',e=>{ e.stopPropagation(); setLibCollapsed(!container.classList.contains('lib-collapsed')); });
+    try{ if(localStorage.getItem(collapseKey)==='1') setLibCollapsed(true); }catch(e){}
 
     // Restore saved width
     try{
@@ -6252,6 +6275,7 @@ function initAdjustablePanels(){
     let dragging=false,startX=0,startW=0;
 
     handle.addEventListener('mousedown',e=>{
+      if(container.classList.contains('lib-collapsed'))return;
       dragging=true;
       startX=e.clientX;
       startW=lib.getBoundingClientRect().width;
@@ -6278,7 +6302,7 @@ function initAdjustablePanels(){
 
     // Touch support
     handle.addEventListener('touchstart',e=>{
-      if(!e.touches.length) return;
+      if(!e.touches.length||container.classList.contains('lib-collapsed')) return;
       dragging=true;
       startX=e.touches[0].clientX;
       startW=lib.getBoundingClientRect().width;
