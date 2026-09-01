@@ -94,7 +94,8 @@ export default function register(router) {
   router.post('/vendor-portal/save', (ctx) => submitQuote(ctx, false));
   router.post('/vendor-portal/submit', (ctx) => submitQuote(ctx, true));
 
-  /* ── Staff-side quotation entry (for quotes received offline) ── */
+  /* ── Staff-side quotation entry (for quotes received offline, and for
+     negotiating an already-submitted rate) ── */
   router.put('/enquiries/:id/vendors/:evId/lines', async (ctx) => {
     requirePerm(ctx, MODULE.COMPARISON, 'edit');
     const ev = await ctx.env.DB.prepare('select * from enquiry_vendors where id = ? and enquiry_id = ?')
@@ -103,9 +104,11 @@ export default function register(router) {
     if (ev.locked_at && !ctx.user.is_admin) {
       throw errors.locked('This quotation is locked. Create a revision instead of editing it.');
     }
+    const before = await snapshotBeforeStaffEdit(ctx, ev);
     const written = await writeLines(ctx.env, ev, ctx.body?.lines || {}, ctx.body?.terms);
     await logAudit(ctx, { module: 'Comparison', action: 'enter_quote', entityType: 'enquiry_vendors',
-                          entityId: ev.id, target: ev.vendor_name, newValue: { lines: written } });
+                          entityId: ev.id, target: ev.vendor_name,
+                          oldValue: before && { lines: before }, newValue: { lines: written } });
     return { saved: written };
   });
 
@@ -127,6 +130,35 @@ export default function register(router) {
     ).bind(ctx.params.evId).all();
     return { revisions: rows.results.map((r) => ({ ...r, snapshot: JSON.parse(r.snapshot_json || '{}') })) };
   });
+}
+
+/** Preserve whatever is about to be overwritten by a staff edit (offline entry
+    or negotiation) as its own revision — the same append-only pattern a vendor
+    resubmission already uses below (see submitQuote) — so a negotiated rate
+    never silently erases what the vendor actually submitted. Returns the
+    preserved lines, or null when there was nothing recorded yet to preserve
+    (the very first offline entry has no prior value). */
+async function snapshotBeforeStaffEdit(ctx, ev) {
+  const lines = await ctx.env.DB.prepare(
+    'select * from vendor_quote_lines where enquiry_vendor_id = ?').bind(ev.id).all();
+  if (!lines.results.length) return null;
+
+  const terms = await ctx.env.DB.prepare(
+    'select * from vendor_quote_terms where enquiry_vendor_id = ?').bind(ev.id).first();
+  const next = await ctx.env.DB.prepare(
+    'select coalesce(max(revision_no), 0) + 1 as n from vendor_quote_revisions where enquiry_vendor_id = ?'
+  ).bind(ev.id).first();
+
+  await ctx.env.DB.prepare(
+    `insert into vendor_quote_revisions (id, enquiry_vendor_id, revision_no, submitted_by,
+      base_amount, gst_amount, total_amount, snapshot_json, status, remarks)
+     values (?,?,?,?,?,?,?,?,?,?)`
+  ).bind(newId(), ev.id, next.n, ctx.user?.full_name || ctx.user?.username || 'Staff',
+         ev.base_amount || 0, ev.gst_amount || 0, ev.total_amount || 0,
+         JSON.stringify({ lines: lines.results, terms: terms || {} }),
+         'pre_edit', 'Snapshot taken automatically before a staff edit overwrote these values').run();
+
+  return lines.results;
 }
 
 /** Writes this vendor's lines. Items are verified to belong to THIS enquiry, so

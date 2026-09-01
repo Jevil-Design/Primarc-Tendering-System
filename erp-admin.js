@@ -689,14 +689,14 @@
     { id: 'organization', label: 'Organization', icon: 'org' },
     { sec: 'Access' },
     { id: 'permissions', label: 'Permissions', icon: 'perm' },
-    { id: 'projects', label: 'Project Access', icon: 'project' },
+    { id: 'projects', label: 'Projects', icon: 'project', cnt: () => projects().length },
     { id: 'workflow', label: 'Approval & Limits', icon: 'flow' },
     { id: 'security', label: 'Security', icon: 'security' },
     { sec: 'Monitor' },
     { id: 'audit', label: 'Audit Trail', icon: 'audit' },
     { id: 'notifications', label: 'Notifications', icon: 'bell' }
   ];
-  const TITLES = { dashboard: 'Dashboard', users: 'User Management', designations: 'Designation Master', departments: 'Department Master', organization: 'Organization Hierarchy', permissions: 'Permission Management', projects: 'Project Access Control', workflow: 'Approval Workflow & Financial Limits', security: 'Security & Access Control', audit: 'Audit Trail', notifications: 'Notification Center' };
+  const TITLES = { dashboard: 'Dashboard', users: 'User Management', designations: 'Designation Master', departments: 'Department Master', organization: 'Organization Hierarchy', permissions: 'Permission Management', projects: 'Projects', workflow: 'Approval Workflow & Financial Limits', security: 'Security & Access Control', audit: 'Audit Trail', notifications: 'Notification Center' };
 
   const S = {
     view: 'dashboard',

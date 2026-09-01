@@ -249,7 +249,11 @@
           }, 1200);
         });
       },
-      clear: () => del('/boq-draft'),
+      clear: () => {
+        if (draftTimer) { clearTimeout(draftTimer); draftTimer = null; }   // a pending save() must not resurrect this after clear
+        try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+        return del('/boq-draft');
+      },
       flush: flushDraft,
     },
 

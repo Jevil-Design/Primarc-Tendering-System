@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
-# Assembles web/ — the static output Vercel deploys (outputDirectory in
-# vercel.json). Run from the project root:  ./make-web.sh
+# DEPRECATED — do not run this. web/ (in particular web/index.html) is now
+# hand-edited directly and IS the source of truth; "Tendering System.html"
+# at the repo root is a stale, no-longer-updated copy. This script starts
+# with `rm -rf web/` and rebuilds it from that stale root file, which would
+# silently discard every change made directly in web/ since the last time
+# this ran. Kept only for reference until the root file / this script are
+# formally removed.
 set -euo pipefail
+echo "make-web.sh is deprecated and unsafe to run: it would rm -rf web/ and" >&2
+echo "replace web/index.html with the stale 'Tendering System.html', discarding" >&2
+echo "any changes made directly in web/ since this last ran. Refusing to run." >&2
+exit 1
 
 OUT="web"
 

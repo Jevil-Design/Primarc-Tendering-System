@@ -346,6 +346,25 @@
       <div class="erp-dfoot"><span class="msg" id="dpMsg"></span><button class="erp-btn" onclick="ERP._closeOv()">Cancel</button><button class="erp-btn primary" onclick="ERP._saveDept('${editId || ''}')">${ic('check')}${d ? 'Save' : 'Create'}</button></div>`);
     setTimeout(() => { const n = $('#dpName'); if (n) n.focus(); }, 60);
   }
+  function projectEditor(editId) {
+    const p = editId ? projects().find(x => x.id === editId) : null;
+    const mgrOpts = '<option value="">— Unassigned —</option>' + users().map(u =>
+      `<option value="${u.id}" ${p && p.managerId === u.id ? 'selected' : ''}>${esc(u.name)} · ${esc(desigName(u.designationId))}</option>`).join('');
+    openOv('modal', `
+      <div class="erp-dh"><div><h3>${p ? 'Edit Project' : 'New Project'}</h3></div><button class="erp-x" onclick="ERP._closeOv()">×</button></div>
+      <div class="erp-dbody"><div class="erp-fgrid">
+        <div><label class="erp-flbl">Project Name <span class="req">*</span></label><input class="erp-fin" id="prName" value="${p ? esc(p.name) : ''}" placeholder="e.g. Aaranya Phase 2"></div>
+        <div><label class="erp-flbl">Project Code</label><input class="erp-fin mono" id="prCode" value="${p ? esc(p.code || '') : ''}" placeholder="e.g. ARNY2"></div>
+        <div><label class="erp-flbl">Client</label><input class="erp-fin" id="prClient" value="${p ? esc(p.client || '') : ''}" placeholder="Client / owner name"></div>
+        <div><label class="erp-flbl">Location</label><input class="erp-fin" id="prLocation" value="${p ? esc(p.location || '') : ''}" placeholder="Site location"></div>
+        <div><label class="erp-flbl">Project Manager</label><select class="erp-fsel" id="prManager">${mgrOpts}</select></div>
+        <div><label class="erp-flbl">Status</label><select class="erp-fsel" id="prStatus"><option value="active" ${!p || p.status !== 'inactive' ? 'selected' : ''}>Active</option><option value="inactive" ${p && p.status === 'inactive' ? 'selected' : ''}>Closed</option></select></div>
+        <div><label class="erp-flbl">Start Date</label><input class="erp-fin" type="date" id="prStart" value="${p && p.startDate ? p.startDate : ''}"></div>
+        <div><label class="erp-flbl">Target Completion</label><input class="erp-fin" type="date" id="prEnd" value="${p && p.endDate ? p.endDate : ''}"></div>
+      </div></div>
+      <div class="erp-dfoot"><span class="msg" id="prMsg"></span><button class="erp-btn" onclick="ERP._closeOv()">Cancel</button><button class="erp-btn primary" onclick="ERP._saveProject('${editId || ''}')">${ic('check')}${p ? 'Save' : 'Create'}</button></div>`);
+    setTimeout(() => { const n = $('#prName'); if (n) n.focus(); }, 60);
+  }
 
   /* ════════════════════════════════════════════════════════════════════
      PERMISSIONS  (module × action matrix)
@@ -393,8 +412,22 @@
       const on = mode === 'all' || ids.includes(p.id);
       return `<label class="erp-notif" style="cursor:pointer;border-bottom:1px solid var(--line)"><input type="checkbox" class="erp-chk paChk" data-id="${p.id}" ${on ? 'checked' : ''} ${mode !== 'selected' ? 'disabled' : ''} style="margin-top:3px"><div style="flex:1"><div class="ttl">${esc(p.name)}</div><div class="ms">Project code ${esc(p.code)}</div></div></label>`;
     }).join('');
+    const masterRows = projects().map(p => `<tr>
+        <td><div class="nm">${esc(p.name)}</div></td>
+        <td class="mono">${esc(p.code || '—')}</td>
+        <td>${esc(p.client || '—')}</td>
+        <td>${esc(p.location || '—')}</td>
+        <td>${p.managerId && userById(p.managerId) ? esc(userName(p.managerId)) : '<span style="color:var(--faint)">—</span>'}</td>
+        <td>${p.status === 'inactive' ? '<span style="color:var(--faint)">○ Closed</span>' : '<span style="color:var(--green)">● Active</span>'}</td>
+        <td style="text-align:right"><button class="erp-btn sm" onclick="ERP.editProject('${p.id}')">${ic('edit')}Edit</button><button class="erp-btn sm danger" onclick="ERP._delProject('${p.id}')">${ic('trash')}</button></td>
+      </tr>`).join('');
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Project Access Control</h1><div class="erp-sub">Restrict which projects each user can see and work on</div></div></div>
+      <div class="erp-sec-head"><div><h1 class="erp-h">Projects</h1><div class="erp-sub">${projects().length} project${projects().length === 1 ? '' : 's'} · master list and per-user access</div></div>
+        <button class="erp-btn primary" onclick="ERP.editProject('')">${ic('plus')}New Project</button></div>
+      <div class="erp-card" style="margin-bottom:22px"><div class="erp-tbl-wrap"><table class="erp-tbl">
+        <thead><tr><th class="nosort">Project</th><th class="nosort">Code</th><th class="nosort">Client</th><th class="nosort">Location</th><th class="nosort">Project Manager</th><th class="nosort">Status</th><th class="nosort"></th></tr></thead>
+        <tbody>${masterRows || '<tr><td colspan="7" style="text-align:center;color:var(--faint);padding:24px">No projects yet — click “New Project” to add one.</td></tr>'}</tbody></table></div></div>
+      <div class="erp-sec-head" style="margin-bottom:12px"><div><h1 class="erp-h" style="font-size:16px">Project Access Control</h1><div class="erp-sub">Restrict which projects each user can see and work on</div></div></div>
       <div class="erp-grid2">
         <div class="erp-card"><div class="erp-card-head"><div class="ttl">Assign projects</div><button class="erp-btn sm primary" onclick="ERP._saveProjAccess()">${ic('check')}Save</button></div>
           <div class="erp-card-body">
@@ -683,6 +716,7 @@
     editUser: (id) => userDrawer(id),
     editDesig: (id) => desigEditor(id),
     editDept: (id) => deptEditor(id),
+    editProject: (id) => projectEditor(id),
 
     _uPage: (p) => { const f = S.u; const pages = Math.max(1, Math.ceil(filteredUsers().length / f.per)); f.page = Math.max(1, Math.min(pages, p)); renderMain(); },
     _clearSel: () => { S.u.sel = []; renderMain(); },
@@ -865,6 +899,31 @@
       save(K.dept, dl); logAudit({ module: 'Administration', action: editId ? 'Department Edited' : 'Department Created', target: name }); toast('✓ Saved'); closeOv(); renderNav(); renderMain();
     },
     _delDept: (id) => { const d = depts().find(x => x.id === id); const n = users().filter(u => u.departmentId === id).length; if (n) { alert('Cannot delete — ' + n + ' user(s) in this department.'); return; } if (!confirm('Delete department “' + d.name + '”?')) return; save(K.dept, depts().filter(x => x.id !== id)); toast('🗑 Deleted'); renderNav(); renderMain(); },
+
+    /* project master */
+    _saveProject: (editId) => {
+      const name = val('prName').trim(); const msg = $('#prMsg'); if (!name) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Enter a project name'; } return; }
+      const code = val('prCode').trim();
+      const pl = projects();
+      const dupe = pl.find(x => x.id !== editId && code && (x.code || '').toLowerCase() === code.toLowerCase());
+      if (dupe) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Project code already used by “' + dupe.name + '”'; } return; }
+      const fields = { name, code, client: val('prClient').trim(), location: val('prLocation').trim(),
+        managerId: val('prManager') || null, startDate: val('prStart') || null, endDate: val('prEnd') || null,
+        status: val('prStatus') };
+      if (editId) { const p = pl.find(x => x.id === editId); Object.assign(p, fields); }
+      else pl.push(Object.assign({ id: uid('pr') }, fields));
+      save(K.proj, pl); logAudit({ module: 'Administration', action: editId ? 'Project Edited' : 'Project Created', target: name }); toast('✓ Saved'); closeOv(); renderMain();
+    },
+    _delProject: (id) => {
+      const p = projects().find(x => x.id === id); if (!p) return;
+      const n = users().filter(u => typeof u.projectAccess === 'object' && (u.projectAccess.ids || []).includes(id)).length;
+      if (!confirm('Delete project “' + p.name + '”?' + (n ? ' It is individually assigned to ' + n + ' user(s) — they will lose that assignment.' : ''))) return;
+      save(K.proj, projects().filter(x => x.id !== id));
+      const ul = users();
+      ul.forEach(u => { if (typeof u.projectAccess === 'object') u.projectAccess.ids = (u.projectAccess.ids || []).filter(x => x !== id); });
+      setUsers(ul);
+      logAudit({ module: 'Administration', action: 'Project Deleted', target: p.name }); toast('🗑 Deleted'); renderMain();
+    },
 
     /* permissions */
     _permTog: (mId, act) => { const d = desigById(S.permDesig); d.perms = d.perms || {}; d.perms[mId] = d.perms[mId] || {}; d.perms[mId][act] = d.perms[mId][act] ? 0 : 1; save(K.desig, desigs().map(x => x.id === d.id ? d : x)); logAudit({ module: 'Administration', action: 'Permission Modified', target: d.name, newVal: (modules().find(m => m.id === mId) || {}).name + ': ' + act + ' ' + (d.perms[mId][act] ? 'ON' : 'OFF') }); renderMain(); },
