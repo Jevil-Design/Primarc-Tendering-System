@@ -190,6 +190,23 @@
   .modal-body .req{color:var(--accent)}
   .modal-body input,.modal-body textarea{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:9px 11px;color:var(--ink);font-size:14px;font-family:'Archivo',sans-serif;resize:vertical}
   .modal-body input:focus,.modal-body textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,106,44,.12)}
+  .modal-body select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:9px 11px;color:var(--ink);font-size:14px;font-family:'Archivo',sans-serif;cursor:pointer}
+  .modal-body select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,106,44,.12)}
+  .vm-sec{font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin:20px 0 6px;padding-bottom:6px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px}
+  .vm-sec:first-child{margin-top:0}
+  .vm-sec svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+  .vm-row{display:flex;gap:8px;align-items:flex-end}
+  .vm-row .vm-field{flex:1;min-width:0}
+  .vm-verify{flex-shrink:0;padding:9px 14px;border-radius:7px;font-size:12px;font-weight:700;font-family:'Archivo',sans-serif;cursor:pointer;border:1px solid var(--accent);background:transparent;color:var(--accent);transition:.15s;margin-bottom:0;white-space:nowrap}
+  .vm-verify:hover{background:var(--accent);color:#fff}
+  .vm-verify:disabled{opacity:.5;cursor:wait}
+  .vm-status{font-size:11px;margin-top:4px;min-height:16px;line-height:1.4}
+  .vm-status.ok{color:var(--green)}
+  .vm-status.err{color:var(--red)}
+  .vm-status.busy{color:var(--faint)}
+  .vm-field-err{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(248,113,113,.12)!important}
+  @keyframes vmSpin{to{transform:rotate(360deg)}}
+  .vm-spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:vmSpin .6s linear infinite;vertical-align:middle;margin-right:5px}
   .modal-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .modal-note{font-size:11px;color:var(--faint);margin-top:14px;line-height:1.5}
   /* ═══ CLOUD SYNC ═══ */
@@ -8374,7 +8391,7 @@ function renderVendorMaster(m){
       <td class="mono" style="text-align:center">${st.l3}</td>
       <td class="mono" style="text-align:center">${st.wos||'—'}</td>
       <td class="mono" style="text-align:right;color:var(--accent2)">${st.avgBase?money(Math.round(st.avgBase)):'—'}</td>
-      <td><button class="qm-irow-del" title="Remove from master" onclick="QM._vmDel('${v.id}')">×</button></td>
+      <td><button class="qm-irow-del" title="Edit vendor details" onclick="QM._vmEdit('${v.id}')" style="color:var(--accent);font-size:13px">✎</button><button class="qm-irow-del" title="Remove from master" onclick="QM._vmDel('${v.id}')">×</button></td>
     </tr>`;
   }).join('');
   m.innerHTML=`<div class="qm-wrap">
@@ -8393,6 +8410,216 @@ function renderVendorMaster(m){
   </div>`;
   const s=$('#vmSearch');if(s)s.addEventListener('input',e=>{vmFilter=e.target.value;const p=e.target.selectionStart;renderVendorMaster(m);const s2=$('#vmSearch');if(s2){s2.focus();s2.setSelectionRange(p,p);}});
   m.querySelectorAll('.vmF').forEach(el=>el.addEventListener('change',e=>{const v=DB.vendorMaster.find(x=>x.id===e.target.dataset.id);if(v){v[e.target.dataset.k]=e.target.value;saveDB();showToast('✓ Saved');}}));
+}
+
+/* ── Vendor Form — validation helpers ── */
+function _vmValidGSTIN(g){
+  if(!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(g))return false;
+  const chars='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let sum=0;
+  for(let i=0;i<14;i++){const idx=chars.indexOf(g[i]);const v=i%2===0?idx:idx*2;sum+=Math.floor(v/36)+v%36;}
+  const rem=sum%36;const check=(36-rem)%36;
+  return chars[check]===g[14];
+}
+function _vmValidPAN(p){return /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(p);}
+function _vmValidMobile(m){return /^[6-9]\d{9}$/.test(m);}
+function _vmValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
+function _vmValidIFSC(c){return /^[A-Z]{4}0[A-Z0-9]{6}$/.test(c);}
+function _vmValidAccNum(n){return /^\d{9,18}$/.test(n);}
+
+/* ── Vendor Form — modal ── */
+function openVendorForm(editId){
+  const isEdit=!!editId;
+  const existing=isEdit?DB.vendorMaster.find(v=>v.id===editId):null;
+  if(isEdit&&!existing)return;
+  const v=existing||{};
+  const bk=v.bank||{};
+  const cats=['','Civil','Structural','Architectural','Finishing','Electrical','Plumbing','Fire Fighting','HVAC','Infrastructure','Landscaping','Supply'];
+  const vtypes=['','Contractor','Sub-Contractor','Supplier','Consultant','Labour','Equipment','Transporter'];
+  const ptypes=['','Advance','Against Delivery','30 Days Credit','45 Days Credit','60 Days Credit','Progressive Billing','Milestone Based','Other'];
+  const atypes=['','Savings','Current'];
+  const ov=ensureOv('vmFormOv');
+  ov.innerHTML=`<div class="modal" style="width:min(640px,94vw)">
+  <div class="modal-head"><h3>${isEdit?'Edit Vendor':'Add New Vendor'}</h3><button class="modal-x" onclick="$('#vmFormOv').classList.remove('on')">&times;</button></div>
+  <div class="modal-body" style="max-height:68vh;overflow:auto">
+
+    <div class="vm-sec"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Basic Information</div>
+    <label>Vendor Name <span class="req">*</span></label>
+    <input id="vmFName" value="${esc(v.name||'')}" placeholder="Full name / company name">
+    <div class="modal-2col">
+      <div><label>Vendor Type</label>
+      <select id="vmFType">${vtypes.map(t=>`<option${t===(v.vendorType||'')?` selected`:''}>${esc(t)}</option>`).join('')}</select></div>
+      <div><label>Contact Person</label>
+      <input id="vmFContact" value="${esc(v.contact||'')}" placeholder="Name"></div>
+    </div>
+    <div class="modal-2col">
+      <div><label>Mobile Number</label>
+      <input id="vmFMobile" value="${esc(v.mobile||'')}" placeholder="10 digits" maxlength="10"></div>
+      <div><label>Email</label>
+      <input id="vmFEmail" value="${esc(v.email||'')}" placeholder="vendor@email.com" type="email"></div>
+    </div>
+    <label>Address</label>
+    <textarea id="vmFAddr" rows="2" placeholder="Full address">${esc(v.address||'')}</textarea>
+
+    <div class="vm-sec"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>GST Details</div>
+    <div class="vm-row">
+      <div class="vm-field"><label>GSTIN</label>
+      <input id="vmFGST" value="${esc(v.gst||'')}" placeholder="22AAAAA0000A1Z5" maxlength="15" style="text-transform:uppercase"></div>
+      <button class="vm-verify" id="vmFGSTBtn" onclick="_vmVerifyGST()" style="margin-bottom:0;align-self:flex-end">Verify GST</button>
+    </div>
+    <div id="vmFGSTStatus" class="vm-status"></div>
+    <label>PAN</label>
+    <input id="vmFPAN" value="${esc(v.pan||'')}" placeholder="Auto-filled from GST or enter manually" maxlength="10" style="text-transform:uppercase">
+
+    <div class="vm-sec"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Bank Details</div>
+    <div class="modal-2col">
+      <div><label>Account Holder Name</label>
+      <input id="vmFBHolder" value="${esc(bk.holderName||'')}" placeholder="Name as per bank"></div>
+      <div><label>Account Number</label>
+      <input id="vmFBAccNum" value="${esc(bk.accountNumber||'')}" placeholder="9–18 digits" maxlength="18"></div>
+    </div>
+    <div class="vm-row">
+      <div class="vm-field"><label>IFSC Code <span class="req">*</span></label>
+      <input id="vmFBIFSC" value="${esc(bk.ifsc||'')}" placeholder="e.g. SBIN0001234" maxlength="11" style="text-transform:uppercase"></div>
+    </div>
+    <div id="vmFIFSCStatus" class="vm-status"></div>
+    <div class="modal-2col">
+      <div><label>Bank Name</label>
+      <input id="vmFBBank" value="${esc(bk.bankName||'')}" placeholder="Auto-filled from IFSC"></div>
+      <div><label>Branch</label>
+      <input id="vmFBBranch" value="${esc(bk.branch||'')}" placeholder="Auto-filled from IFSC"></div>
+    </div>
+    <label>Account Type</label>
+    <select id="vmFBAccType">${atypes.map(t=>`<option${t===(bk.accountType||'')?` selected`:''}>${esc(t)}</option>`).join('')}</select>
+
+    <div class="vm-sec"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Other Details</div>
+    <div class="modal-2col">
+      <div><label>Payment Terms</label>
+      <select id="vmFPayTerms">${ptypes.map(t=>`<option${t===(v.paymentTerms||'')?` selected`:''}>${esc(t)}</option>`).join('')}</select></div>
+      <div><label>Vendor Category</label>
+      <select id="vmFCat">${cats.map(c=>`<option${c===(v.category||'')?` selected`:''}>${esc(c)}</option>`).join('')}</select></div>
+    </div>
+    <label>Remarks</label>
+    <textarea id="vmFRemarks" rows="2" placeholder="Any notes…">${esc(v.remarks||'')}</textarea>
+
+    <div id="vmFormMsg" class="vm-status err" style="margin-top:10px"></div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn" onclick="$('#vmFormOv').classList.remove('on')">Cancel</button>
+    <button class="btn primary" onclick="_vmSaveForm('${editId||''}')">${isEdit?'Update Vendor':'Save Vendor'}</button>
+  </div>
+</div>`;
+  ov.classList.add('on');
+
+  /* IFSC auto-fetch on blur */
+  const ifscEl=$('#vmFBIFSC');
+  if(ifscEl)ifscEl.addEventListener('blur',_vmFetchIFSC);
+}
+
+/* GST verify */
+function _vmVerifyGST(){
+  const inp=$('#vmFGST');const st=$('#vmFGSTStatus');const btn=$('#vmFGSTBtn');
+  if(!inp||!st)return;
+  const gstin=inp.value.trim().toUpperCase();inp.value=gstin;
+  if(!gstin){st.className='vm-status err';st.textContent='Enter a GSTIN to verify.';return;}
+  if(!_vmValidGSTIN(gstin)){st.className='vm-status err';st.textContent='✕ Invalid GSTIN format or checksum.';inp.classList.add('vm-field-err');return;}
+  inp.classList.remove('vm-field-err');
+  st.className='vm-status ok';st.innerHTML='✓ GSTIN format verified';
+  /* auto-extract PAN from GSTIN (chars 2..12) */
+  const pan=gstin.substring(2,12);
+  const panEl=$('#vmFPAN');
+  if(panEl&&!panEl.value.trim())panEl.value=pan;
+}
+
+/* IFSC auto-fetch */
+async function _vmFetchIFSC(){
+  const inp=$('#vmFBIFSC');const st=$('#vmFIFSCStatus');
+  if(!inp||!st)return;
+  const ifsc=inp.value.trim().toUpperCase();inp.value=ifsc;
+  if(!ifsc)return;
+  if(!_vmValidIFSC(ifsc)){st.className='vm-status err';st.textContent='✕ Invalid IFSC format.';inp.classList.add('vm-field-err');return;}
+  inp.classList.remove('vm-field-err');
+  st.className='vm-status busy';st.innerHTML='<span class="vm-spinner"></span>Fetching bank details…';
+  try{
+    const res=await fetch('https://ifsc.razorpay.com/'+ifsc);
+    if(!res.ok)throw new Error('Not found');
+    const data=await res.json();
+    const bankEl=$('#vmFBBank');const brEl=$('#vmFBBranch');
+    if(bankEl)bankEl.value=data.BANK||'';
+    if(brEl)brEl.value=data.BRANCH||'';
+    st.className='vm-status ok';st.textContent='✓ '+data.BANK+' — '+data.BRANCH;
+  }catch(e){
+    st.className='vm-status err';st.textContent='✕ Could not fetch details for '+ifsc+'. Enter bank name manually.';
+  }
+}
+
+/* Save vendor form */
+function _vmSaveForm(editId){
+  const msg=$('#vmFormMsg');
+  const name=($('#vmFName').value||'').trim();
+  const mobile=($('#vmFMobile').value||'').trim();
+  const email=($('#vmFEmail').value||'').trim();
+  const gst=($('#vmFGST').value||'').trim().toUpperCase();
+  const pan=($('#vmFPAN').value||'').trim().toUpperCase();
+  const accNum=($('#vmFBAccNum').value||'').trim();
+  const ifsc=($('#vmFBIFSC').value||'').trim().toUpperCase();
+
+  /* clear previous errors */
+  msg.textContent='';msg.className='vm-status err';
+  document.querySelectorAll('#vmFormOv .vm-field-err').forEach(el=>el.classList.remove('vm-field-err'));
+
+  /* mandatory */
+  if(!name){msg.textContent='Vendor Name is required.';$('#vmFName').classList.add('vm-field-err');$('#vmFName').focus();return;}
+
+  /* format validations */
+  if(mobile&&!_vmValidMobile(mobile)){msg.textContent='Mobile must be 10 digits starting with 6-9.';$('#vmFMobile').classList.add('vm-field-err');$('#vmFMobile').focus();return;}
+  if(email&&!_vmValidEmail(email)){msg.textContent='Invalid email address.';$('#vmFEmail').classList.add('vm-field-err');$('#vmFEmail').focus();return;}
+  if(gst&&!_vmValidGSTIN(gst)){msg.textContent='Invalid GSTIN format or checksum.';$('#vmFGST').classList.add('vm-field-err');$('#vmFGST').focus();return;}
+  if(pan&&!_vmValidPAN(pan)){msg.textContent='PAN must be 10 characters (e.g. ABCDE1234F).';$('#vmFPAN').classList.add('vm-field-err');$('#vmFPAN').focus();return;}
+  if(accNum&&!_vmValidAccNum(accNum)){msg.textContent='Account number must be 9–18 digits.';$('#vmFBAccNum').classList.add('vm-field-err');$('#vmFBAccNum').focus();return;}
+  if(ifsc&&!_vmValidIFSC(ifsc)){msg.textContent='Invalid IFSC format.';$('#vmFBIFSC').classList.add('vm-field-err');$('#vmFBIFSC').focus();return;}
+
+  /* duplicate check (skip self if editing) */
+  const key=name.toLowerCase();
+  if((DB.vendorMaster||[]).some(v=>v.id!==editId&&(v.name||'').trim().toLowerCase()===key)){msg.textContent='"'+name+'" already exists in the vendor master.';$('#vmFName').classList.add('vm-field-err');$('#vmFName').focus();return;}
+
+  /* build vendor object */
+  const vendorData={
+    name,
+    vendorType:$('#vmFType').value||'',
+    contact:$('#vmFContact').value.trim(),
+    mobile,
+    email,
+    address:$('#vmFAddr').value.trim(),
+    gst,
+    pan,
+    bank:{
+      holderName:$('#vmFBHolder').value.trim(),
+      accountNumber:accNum,
+      ifsc,
+      bankName:$('#vmFBBank').value.trim(),
+      branch:$('#vmFBBranch').value.trim(),
+      accountType:$('#vmFBAccType').value||''
+    },
+    paymentTerms:$('#vmFPayTerms').value||'',
+    category:$('#vmFCat').value||'',
+    remarks:$('#vmFRemarks').value.trim()
+  };
+
+  if(editId){
+    /* update existing */
+    const v=DB.vendorMaster.find(x=>x.id===editId);
+    if(v)Object.assign(v,vendorData);
+  }else{
+    /* create new */
+    vendorData.id=uid();
+    vendorData.code='';
+    vendorData.rating=0;
+    DB.vendorMaster.push(vendorData);
+  }
+  saveDB();render();
+  $('#vmFormOv').classList.remove('on');
+  showToast(editId?'✓ Vendor updated':'✓ Vendor added');
 }
 
 /* ════════════ APPROVAL WORKFLOW (QS → Sr QS → PM → Commercial → Management) ════════════ */
@@ -8932,7 +9159,8 @@ const api={
   exportQ(qid){rfqPdf(DB.quotations.find(x=>x.id===qid));},
   filterStatus,deleteQ,restoreQ,permDelete,bulkInvite,sendAll,rollback,
   /* vendor master / approvals / work orders */
-  _vmAdd(){const nm=prompt('Vendor name:');if(!nm)return;const name=nm.trim();if(!name)return;const key=name.toLowerCase();if((DB.vendorMaster||[]).some(v=>(v.name||'').trim().toLowerCase()===key)){alert('"'+name+'" is already in the vendor master directory.');return;}DB.vendorMaster.push({id:uid(),name,code:'',category:'',contact:'',mobile:'',email:'',gst:'',pan:'',address:'',rating:0});saveDB();render();showToast('✓ Vendor added');},
+  _vmAdd(){openVendorForm();},
+  _vmEdit(id){openVendorForm(id);},
   _vmDel(id){if(!confirm('Remove this vendor from the master directory? (Enquiry history is not affected.)'))return;DB.vendorMaster=DB.vendorMaster.filter(v=>v.id!==id);saveDB();render();showToast('Vendor removed');},
   _vmRate(id,n){const v=DB.vendorMaster.find(x=>x.id===id);if(v){v.rating=(v.rating===n?n-1:n);saveDB();render();}},
   _vmTemplate(){vmtplDownload();},
