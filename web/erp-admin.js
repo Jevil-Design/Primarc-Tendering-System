@@ -381,12 +381,17 @@
     .erp-search svg{position:absolute;left:11px;top:9px;width:15px;height:15px;stroke:var(--faint);fill:none;stroke-width:2}
     .erp-search .kbd{position:absolute;right:9px;top:8px;font-size:9.5px;font-family:'Spline Sans Mono',monospace;color:var(--faint);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
     .erp-bar-sp{flex:1}
-    .erp-iconbtn{position:relative;width:34px;height:34px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s}
+    .erp-iconbtn{position:relative;width:34px;height:34px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,color .15s,transform .1s}
     .erp-iconbtn:hover{border-color:var(--accent);color:var(--accent)}
+    .erp-iconbtn:active{transform:scale(.94)}
     .erp-iconbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
     #erpBellDot{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 3px;border-radius:9px;background:var(--red);color:#fff;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;font-family:'Spline Sans Mono',monospace}
 
     .erp-body{flex:1;overflow-y:auto;padding:22px}
+    @media (prefers-reduced-motion: no-preference) {
+      .erp-fade-in{animation:erpFadeIn .32s cubic-bezier(.22,.61,.36,1)}
+      @keyframes erpFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    }
     .erp-h{font-size:19px;font-weight:800;color:var(--ink);margin:0 0 3px}
     .erp-sub{font-size:12.5px;color:var(--faint);margin-bottom:18px}
     .erp-sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
@@ -417,9 +422,10 @@
     .erp-input:focus,.erp-select:focus{border-color:var(--accent)}
     .erp-select{cursor:pointer}
     .erp-tb-sp{flex:1}
-    .erp-btn{display:inline-flex;align-items:center;gap:7px;background:var(--panel2);border:1px solid var(--line);color:var(--dim);font-size:12px;font-weight:600;padding:8px 13px;border-radius:8px;cursor:pointer;font-family:inherit;transition:.12s;white-space:nowrap}
+    .erp-btn{display:inline-flex;align-items:center;gap:7px;background:var(--panel2);border:1px solid var(--line);color:var(--dim);font-size:12px;font-weight:600;padding:8px 13px;border-radius:8px;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s,background-color .15s,filter .15s,transform .1s;white-space:nowrap}
     .erp-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
     .erp-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .erp-btn:active{transform:scale(.96)}
     .erp-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
     .erp-btn.primary:hover{filter:brightness(1.08);color:#fff}
     .erp-btn.danger:hover{border-color:var(--red);color:var(--red)}
@@ -433,7 +439,7 @@
     .erp-tbl th.nosort{cursor:default}
     .erp-tbl th .ar{color:var(--accent);margin-left:3px}
     .erp-tbl td{padding:10px 12px;border-bottom:1px solid var(--line);color:var(--dim);vertical-align:middle}
-    .erp-tbl tbody tr{transition:.1s}
+    .erp-tbl tbody tr{transition:background-color .15s ease}
     .erp-tbl tbody tr:hover{background:var(--hi)}
     .erp-tbl tbody tr.sel{background:rgba(255,106,44,.07)}
     .erp-tbl .mono{font-family:'Spline Sans Mono',monospace;font-size:11px}
@@ -469,12 +475,12 @@
     .erp-empty svg{width:40px;height:40px;stroke:var(--line);fill:none;stroke-width:1.5;margin-bottom:10px}
 
     /* overlays: drawer + modal */
-    .erp-ov{position:fixed;inset:0;z-index:100015;background:rgba(8,10,14,.62);display:none;opacity:0;transition:opacity .16s}
+    .erp-ov{position:fixed;inset:0;z-index:100015;background:rgba(8,10,14,.62);display:none;opacity:0;transition:opacity .2s cubic-bezier(.22,.61,.36,1)}
     .erp-ov.on{display:block;opacity:1}
-    .erp-drawer{position:absolute;top:0;right:0;height:100%;width:min(680px,96vw);background:var(--bg);border-left:1px solid var(--line);box-shadow:-16px 0 60px rgba(0,0,0,.4);transform:translateX(40px);opacity:0;transition:.2s;display:flex;flex-direction:column}
+    .erp-drawer{position:absolute;top:0;right:0;height:100%;width:min(680px,96vw);background:var(--bg);border-left:1px solid var(--line);box-shadow:-16px 0 60px rgba(0,0,0,.4);transform:translateX(40px);opacity:0;transition:transform .26s cubic-bezier(.22,.61,.36,1),opacity .22s ease;display:flex;flex-direction:column}
     .erp-ov.on .erp-drawer{transform:none;opacity:1}
-    .erp-modal{position:absolute;top:50%;left:50%;transform:translate(-50%,-46%);width:min(560px,94vw);max-height:88vh;background:var(--bg);border:1px solid var(--line);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.5);display:flex;flex-direction:column;opacity:0;transition:.18s}
-    .erp-ov.on .erp-modal{transform:translate(-50%,-50%);opacity:1}
+    .erp-modal{position:absolute;top:50%;left:50%;transform:translate(-50%,-47%) scale(.98);width:min(560px,94vw);max-height:88vh;background:var(--bg);border:1px solid var(--line);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.5);display:flex;flex-direction:column;opacity:0;transition:transform .22s cubic-bezier(.22,.61,.36,1),opacity .2s ease}
+    .erp-ov.on .erp-modal{transform:translate(-50%,-50%) scale(1);opacity:1}
     .erp-modal.wide{width:min(820px,96vw)}
     .erp-dh{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;border-bottom:1px solid var(--line);flex-shrink:0}
     .erp-dh h3{font-size:15px;font-weight:800;color:var(--ink);margin:0}
@@ -774,6 +780,7 @@
   }
   function togglePin(id) { const i = S.pinned.indexOf(id); if (i >= 0) S.pinned.splice(i, 1); else S.pinned.push(id); save('erp_pinned', S.pinned); renderNav(); }
 
+  let _lastRenderedView = null;
   function renderMain() {
     if (!document.getElementById('erpBody')) renderShell();
     // active nav
@@ -784,6 +791,12 @@
     if (!canAdmin()) { body.parentElement.innerHTML = denyHTML(); return; }
     const fn = VIEWS[S.view] || VIEWS.dashboard;
     body.innerHTML = fn();
+    // Fade the content in only when actually switching sections — not on every
+    // in-place re-render after a save/toggle, which would flicker on rapid clicks.
+    if (S.view !== _lastRenderedView) {
+      body.classList.remove('erp-fade-in'); void body.offsetWidth; body.classList.add('erp-fade-in');
+      _lastRenderedView = S.view;
+    }
     if (BIND[S.view]) BIND[S.view]();
     body.scrollTop = 0;
   }

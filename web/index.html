@@ -18,34 +18,40 @@
 <title>BOQ Builder</title>
 <style>
   :root{
-    --bg:#0e1014; --panel:#161922; --panel2:#1c2029; --panel3:#222732; --line:#2b313d;
-    --ink:#e9ebef; --dim:#9aa3b2; --faint:#646d7d; --fg:var(--ink); /* --fg was undefined; alias to --ink */
-    --line2:#232936; --accent-deep:#c9501a; --amber-soft:rgba(255,210,63,.12); --green-soft:rgba(52,211,153,.13);
-    --accent:#ff6a2c; --accent2:#ffd23f; --green:#34d399; --blue:#5e9bf0; --red:#f87171; --violet:#a78bfa;
-    --hi:#1f2530;
-    /* Type scale — a work tool's hierarchy, not a marketing page's. New
-       screens/components should reach for these instead of one-off px
-       values; existing hardcoded sizes are unaffected until touched. */
+    /* ===== RA PROCURE–INSPIRED LIGHT THEME (default) ===== */
+    --bg:#f6f6f7; --panel:#ffffff; --panel2:#f5f6f9; --panel3:#eceef2; --line:#e0e0e0;
+    --ink:#202020; --dim:#616364; --faint:#8b95a5; --fg:var(--ink);
+    --line2:#e3e8ef; --accent-deep:#01426e; --amber-soft:rgba(217,154,6,.12); --green-soft:rgba(31,138,91,.13);
+    --accent:#015294; --accent2:#1D9BF0; --green:#28a745; --blue:#0b6db5; --red:#e04848; --violet:#7c5cd6;
+    --hi:#edf2f9;
+    /* Type scale */
     --fs-page-title:24px; --fs-heading:16px; --fs-body:13px; --fs-secondary:12px; --fs-meta:11px;
+    /* RA Procure signature gradient */
+    --brand-gradient:linear-gradient(80deg, #003E68 0%, #015294 33.33%, #1D9BF0 100%);
+    /* Orange kept as a secondary CTA accent */
+    --cta-orange:#f86b06;
   }
-  /* ===== LIGHT THEME ===== remaps the core tokens; everything built on var(--*) flips automatically */
-  html[data-theme="light"]{
-    --bg:#eef0f3; --panel:#ffffff; --panel2:#f5f6f9; --panel3:#eceef2; --line:#dce0e7;
-    --ink:#1a1d24; --dim:#586072; --faint:#8b95a5; --fg:var(--ink);
-    --line2:#e3e8ef; --accent-deep:#c9501a; --amber-soft:rgba(217,154,6,.12); --green-soft:rgba(31,138,91,.13);
-    --accent:#ef5f22; --accent2:#d99a06; --green:#1f9d6b; --blue:#2f72d6; --red:#e04848; --violet:#7c5cd6;
-    --hi:#eaeef4;
+  /* ===== DARK THEME ===== preserved as alternate */
+  html[data-theme="dark"]{
+    --bg:#0e1014; --panel:#161922; --panel2:#1c2029; --panel3:#222732; --line:#2b313d;
+    --ink:#e9ebef; --dim:#9aa3b2; --faint:#646d7d; --fg:var(--ink);
+    --line2:#232936; --accent-deep:#01426e; --amber-soft:rgba(255,210,63,.12); --green-soft:rgba(52,211,153,.13);
+    --accent:#4da3e8; --accent2:#7cc3f5; --green:#34d399; --blue:#5e9bf0; --red:#f87171; --violet:#a78bfa;
+    --hi:#1f2530;
+    --brand-gradient:linear-gradient(180deg,#1a1e27,#13161d);
+    --cta-orange:#ff6a2c;
   }
-  html[data-theme="light"] .topbar{background:linear-gradient(180deg,#ffffff,#f1f3f6)}
-  html[data-theme="light"] .brand-logo .s0,html[data-theme="light"] .brand-logo path{fill:#1a1d24}
-  html[data-theme="light"] .brand h1{color:#1a1d24}
-  html[data-theme="light"] .modes button{color:var(--dim)}
-  html[data-theme="light"] ::-webkit-scrollbar-thumb:hover{background:#b8bfca}
-  html[data-theme="light"] mark{background:rgba(217,154,6,.22);color:#7a5500}
-  /* popups: keep readable text in light theme (hardcoded dark/light colors don't flip) */
-  html[data-theme="light"] .toast{background:#1c2029;color:#f2f4f8}
-  html[data-theme="light"] .qm-cloud-bar{color:#1d4e89}
-  html[data-theme="light"] .qm-cloud-bar.green{color:#0d6a46}
+  html[data-theme="dark"] .topbar{background:var(--brand-gradient);border-bottom-color:var(--accent2)}
+  html[data-theme="dark"] .brand-logo .s0,html[data-theme="dark"] .brand-logo path{fill:#fff}
+  html[data-theme="dark"] .brand h1{color:#e9ebef}
+  html[data-theme="dark"] .modes button{color:var(--dim)}
+  html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:#3a4150}
+  html[data-theme="dark"] mark{background:rgba(255,210,63,.30);color:#ffe592}
+  html[data-theme="dark"] .toast{background:#1c2029;color:#f2f4f8}
+  html[data-theme="dark"] .qm-cloud-bar{color:#bcd4f5}
+  html[data-theme="dark"] .qm-cloud-bar.green{color:#aef0d4}
+  html[data-theme="dark"] table.boqt th{background:var(--panel2)}
+  html[data-theme="dark"] .card:hover{box-shadow:0 14px 40px rgba(0,0,0,.4)}
   /* smooth cross-fade between themes */
   body,.topbar,.app,.view,.modal,.lib,.boq,input,select,textarea,.top-gear,.top-gear-imp,table,td,th{
     transition:background-color .25s ease,color .25s ease,border-color .25s ease}
@@ -59,19 +65,15 @@
   input,select,textarea{font-family:inherit}
   ::-webkit-scrollbar{width:11px;height:11px}
   ::-webkit-scrollbar-track{background:var(--bg)}
-  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;border:3px solid var(--bg)}
-  ::-webkit-scrollbar-thumb:hover{background:#3a4150}
-  mark{background:rgba(255,210,63,.30);color:#ffe592;border-radius:2px;padding:0 1px}
+  ::-webkit-scrollbar-thumb{background:#c5cad3;border-radius:6px;border:3px solid var(--bg)}
+  ::-webkit-scrollbar-thumb:hover{background:#015294}
+  mark{background:rgba(1,82,148,.15);color:#015294;border-radius:2px;padding:0 1px}
 
   .app{display:flex;flex-direction:column;height:100vh}
 
   /* ===== TOP BAR ===== */
-  .topbar{position:relative;z-index:100;background:linear-gradient(180deg,#1a1e27,#13161d);border-bottom:2px solid var(--accent);
+  .topbar{position:relative;z-index:100;background:linear-gradient(180deg,#015294,#01396a);border-bottom:3px solid #f5a623;
     padding:0 18px;height:56px;display:flex;align-items:center;gap:20px;flex-shrink:0;
-    /* Fallback for anything still too wide to fit after the responsive rules
-       below: a horizontal scrollbar beats silently clipping the user chip
-       past the edge of the window with no way to reach it (body has
-       overflow:hidden, so there was nowhere for the overflow to go). */
     overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
   .topbar::-webkit-scrollbar{height:4px}
   .brand{display:flex;align-items:center;gap:11px}
@@ -246,7 +248,7 @@
   .boq-meta input.proj{flex:1;min-width:160px;font-weight:600}
   .boq-scroll{flex:1;overflow:auto}
   table.boqt{width:100%;border-collapse:collapse}
-  table.boqt th{position:sticky;top:0;background:#11141a;color:var(--dim);text-align:left;padding:10px 14px;font-size:9.5px;text-transform:uppercase;letter-spacing:.7px;font-weight:600;border-bottom:2px solid var(--line);z-index:2}
+  table.boqt th{position:sticky;top:0;background:var(--panel2);color:var(--dim);text-align:left;padding:10px 14px;font-size:9.5px;text-transform:uppercase;letter-spacing:.7px;font-weight:600;border-bottom:2px solid var(--line);z-index:2}
   table.boqt td{padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top;font-size:12px}
   table.boqt tr:hover td{background:var(--hi)}
   .bq-sl{color:var(--faint);font-family:'Spline Sans Mono',monospace;font-size:11px;text-align:center;width:34px}
@@ -390,7 +392,7 @@
   .xbtn:disabled{opacity:.5;cursor:wait}
   .cmp-scroll{flex:1;overflow:auto}
   table.cmpt{width:100%;border-collapse:collapse}
-  table.cmpt th{position:sticky;top:0;background:#11141a;color:var(--dim);text-align:left;padding:9px 10px;font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;border-bottom:2px solid var(--line);z-index:2;white-space:nowrap}
+  table.cmpt th{position:sticky;top:0;background:var(--panel2);color:var(--dim);text-align:left;padding:9px 10px;font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;border-bottom:2px solid var(--line);z-index:2;white-space:nowrap}
   table.cmpt td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;font-size:12px}
   table.cmpt tr:hover td{background:var(--hi)}
   .cm-name{font-weight:700} .cm-desc{color:var(--dim);font-size:11px;line-height:1.4}
@@ -415,7 +417,7 @@
 
   .cb-scroll{flex:1;overflow:auto}
   table.cbt{width:100%;border-collapse:collapse;min-width:680px}
-  table.cbt th{position:sticky;top:0;background:#11141a;color:var(--dim);text-align:left;padding:9px 9px;font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;border-bottom:2px solid var(--line);z-index:2;white-space:nowrap}
+  table.cbt th{position:sticky;top:0;background:var(--panel2);color:var(--dim);text-align:left;padding:9px 9px;font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;border-bottom:2px solid var(--line);z-index:2;white-space:nowrap}
   table.cbt th.vhead{text-align:right}
   table.cbt th .vh-i{display:inline-block;width:14px;height:14px;border-radius:50%;color:#fff;font-size:9px;text-align:center;line-height:14px;margin-right:4px;font-family:'Spline Sans Mono',monospace;vertical-align:middle}
   table.cbt td{padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top;font-size:12px}
@@ -438,7 +440,7 @@
   .lrank.r4,.lrank.r5{background:rgba(154,163,178,.16);color:var(--dim)}
   .cb-del{background:none;border:none;color:var(--faint);font-size:16px;line-height:1;padding:3px 6px;border-radius:4px}
   .cb-del:hover{color:var(--red);background:rgba(248,113,113,.12)}
-  .cbt tfoot td{position:sticky;bottom:0;background:#11141a;border-top:2px solid var(--accent);padding:9px;font-weight:600;font-size:12px;z-index:2}
+  .cbt tfoot td{position:sticky;bottom:0;background:var(--panel2);border-top:2px solid var(--accent);padding:9px;font-weight:600;font-size:12px;z-index:2}
   .cbt tfoot .tot{font-family:'Spline Sans Mono',monospace;text-align:right}
   .cbt tfoot .tot.win{color:var(--green)}
   .cb-need{padding:40px 30px;text-align:center;color:var(--faint)}
@@ -690,7 +692,7 @@
   table.cmpt{min-width:1500px;table-layout:auto}
   /* Frozen header — raise z-index above sticky-left cells and add shadow for clear separation */
   table.cmpt thead{position:sticky;top:0;z-index:20}
-  table.cmpt thead th{position:sticky;top:0;background:#11141a;z-index:20;box-shadow:0 2px 0 var(--accent),0 4px 12px rgba(0,0,0,.4)}
+  table.cmpt thead th{position:sticky;top:0;background:var(--panel2);z-index:20;box-shadow:0 2px 0 var(--accent),0 4px 12px rgba(0,0,0,.4)}
   table.cmpt thead th.vh-col{text-align:center;font-size:9px}
   /* Vendor columns: prevent squeeze with min-width */
   table.cmpt td.vcell-col{min-width:148px;vertical-align:top}
