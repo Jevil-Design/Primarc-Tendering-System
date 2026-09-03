@@ -18,40 +18,34 @@
 <title>BOQ Builder</title>
 <style>
   :root{
-    /* ===== RA PROCURE–INSPIRED LIGHT THEME (default) ===== */
-    --bg:#f6f6f7; --panel:#ffffff; --panel2:#f5f6f9; --panel3:#eceef2; --line:#e0e0e0;
-    --ink:#202020; --dim:#616364; --faint:#8b95a5; --fg:var(--ink);
-    --line2:#e3e8ef; --accent-deep:#01426e; --amber-soft:rgba(217,154,6,.12); --green-soft:rgba(31,138,91,.13);
-    --accent:#015294; --accent2:#1D9BF0; --green:#28a745; --blue:#0b6db5; --red:#e04848; --violet:#7c5cd6;
-    --hi:#edf2f9;
-    /* Type scale */
-    --fs-page-title:24px; --fs-heading:16px; --fs-body:13px; --fs-secondary:12px; --fs-meta:11px;
-    /* RA Procure signature gradient */
-    --brand-gradient:linear-gradient(80deg, #003E68 0%, #015294 33.33%, #1D9BF0 100%);
-    /* Orange kept as a secondary CTA accent */
-    --cta-orange:#f86b06;
-  }
-  /* ===== DARK THEME ===== preserved as alternate */
-  html[data-theme="dark"]{
     --bg:#0e1014; --panel:#161922; --panel2:#1c2029; --panel3:#222732; --line:#2b313d;
-    --ink:#e9ebef; --dim:#9aa3b2; --faint:#646d7d; --fg:var(--ink);
-    --line2:#232936; --accent-deep:#01426e; --amber-soft:rgba(255,210,63,.12); --green-soft:rgba(52,211,153,.13);
-    --accent:#4da3e8; --accent2:#7cc3f5; --green:#34d399; --blue:#5e9bf0; --red:#f87171; --violet:#a78bfa;
+    --ink:#e9ebef; --dim:#9aa3b2; --faint:#646d7d; --fg:var(--ink); /* --fg was undefined; alias to --ink */
+    --line2:#232936; --accent-deep:#c9501a; --amber-soft:rgba(255,210,63,.12); --green-soft:rgba(52,211,153,.13);
+    --accent:#ff6a2c; --accent2:#ffd23f; --green:#34d399; --blue:#5e9bf0; --red:#f87171; --violet:#a78bfa;
     --hi:#1f2530;
-    --brand-gradient:linear-gradient(180deg,#1a1e27,#13161d);
-    --cta-orange:#ff6a2c;
+    /* Type scale — a work tool's hierarchy, not a marketing page's. New
+       screens/components should reach for these instead of one-off px
+       values; existing hardcoded sizes are unaffected until touched. */
+    --fs-page-title:24px; --fs-heading:16px; --fs-body:13px; --fs-secondary:12px; --fs-meta:11px;
   }
-  html[data-theme="dark"] .topbar{background:var(--brand-gradient);border-bottom-color:var(--accent2)}
-  html[data-theme="dark"] .brand-logo .s0,html[data-theme="dark"] .brand-logo path{fill:#fff}
-  html[data-theme="dark"] .brand h1{color:#e9ebef}
-  html[data-theme="dark"] .modes button{color:var(--dim)}
-  html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover{background:#3a4150}
-  html[data-theme="dark"] mark{background:rgba(255,210,63,.30);color:#ffe592}
-  html[data-theme="dark"] .toast{background:#1c2029;color:#f2f4f8}
-  html[data-theme="dark"] .qm-cloud-bar{color:#bcd4f5}
-  html[data-theme="dark"] .qm-cloud-bar.green{color:#aef0d4}
-  html[data-theme="dark"] table.boqt th{background:var(--panel2)}
-  html[data-theme="dark"] .card:hover{box-shadow:0 14px 40px rgba(0,0,0,.4)}
+  /* ===== LIGHT THEME ===== remaps the core tokens; everything built on var(--*) flips automatically */
+  html[data-theme="light"]{
+    --bg:#eef0f3; --panel:#ffffff; --panel2:#f5f6f9; --panel3:#eceef2; --line:#dce0e7;
+    --ink:#1a1d24; --dim:#586072; --faint:#8b95a5; --fg:var(--ink);
+    --line2:#e3e8ef; --accent-deep:#c9501a; --amber-soft:rgba(217,154,6,.12); --green-soft:rgba(31,138,91,.13);
+    --accent:#ef5f22; --accent2:#d99a06; --green:#1f9d6b; --blue:#2f72d6; --red:#e04848; --violet:#7c5cd6;
+    --hi:#eaeef4;
+  }
+  html[data-theme="light"] .topbar{background:linear-gradient(180deg,#ffffff,#f1f3f6)}
+  html[data-theme="light"] .brand-logo .s0,html[data-theme="light"] .brand-logo path{fill:#1a1d24}
+  html[data-theme="light"] .brand h1{color:#1a1d24}
+  html[data-theme="light"] .modes button{color:var(--dim)}
+  html[data-theme="light"] ::-webkit-scrollbar-thumb:hover{background:#b8bfca}
+  html[data-theme="light"] mark{background:rgba(217,154,6,.22);color:#7a5500}
+  /* popups: keep readable text in light theme (hardcoded dark/light colors don't flip) */
+  html[data-theme="light"] .toast{background:#1c2029;color:#f2f4f8}
+  html[data-theme="light"] .qm-cloud-bar{color:#1d4e89}
+  html[data-theme="light"] .qm-cloud-bar.green{color:#0d6a46}
   /* smooth cross-fade between themes */
   body,.topbar,.app,.view,.modal,.lib,.boq,input,select,textarea,.top-gear,.top-gear-imp,table,td,th{
     transition:background-color .25s ease,color .25s ease,border-color .25s ease}
@@ -65,15 +59,19 @@
   input,select,textarea{font-family:inherit}
   ::-webkit-scrollbar{width:11px;height:11px}
   ::-webkit-scrollbar-track{background:var(--bg)}
-  ::-webkit-scrollbar-thumb{background:#c5cad3;border-radius:6px;border:3px solid var(--bg)}
-  ::-webkit-scrollbar-thumb:hover{background:#015294}
-  mark{background:rgba(1,82,148,.15);color:#015294;border-radius:2px;padding:0 1px}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;border:3px solid var(--bg)}
+  ::-webkit-scrollbar-thumb:hover{background:#3a4150}
+  mark{background:rgba(255,210,63,.30);color:#ffe592;border-radius:2px;padding:0 1px}
 
   .app{display:flex;flex-direction:column;height:100vh}
 
   /* ===== TOP BAR ===== */
-  .topbar{position:relative;z-index:100;background:linear-gradient(180deg,#015294,#01396a);border-bottom:3px solid #f5a623;
+  .topbar{position:relative;z-index:100;background:linear-gradient(180deg,#1a1e27,#13161d);border-bottom:2px solid var(--accent);
     padding:0 18px;height:56px;display:flex;align-items:center;gap:20px;flex-shrink:0;
+    /* Fallback for anything still too wide to fit after the responsive rules
+       below: a horizontal scrollbar beats silently clipping the user chip
+       past the edge of the window with no way to reach it (body has
+       overflow:hidden, so there was nowhere for the overflow to go). */
     overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
   .topbar::-webkit-scrollbar{height:4px}
   .brand{display:flex;align-items:center;gap:11px}
@@ -243,12 +241,12 @@
   /* BOQ side */
   .boq{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
   .boq-meta{padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0}
-  .boq-meta.boq-actions{border-bottom:none;border-top:1px solid var(--line);align-items:center;padding:5px 14px}
+  .boq-meta.boq-actions{border-bottom:none;border-top:1px solid var(--line);align-items:center}
   .boq-meta input{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:7px 10px;color:var(--ink);font-size:12px}
   .boq-meta input.proj{flex:1;min-width:160px;font-weight:600}
   .boq-scroll{flex:1;overflow:auto}
   table.boqt{width:100%;border-collapse:collapse}
-  table.boqt th{position:sticky;top:0;background:var(--panel2);color:var(--dim);text-align:left;padding:10px 14px;font-size:9.5px;text-transform:uppercase;letter-spacing:.7px;font-weight:600;border-bottom:2px solid var(--line);z-index:2}
+  table.boqt th{position:sticky;top:0;background:#11141a;color:var(--dim);text-align:left;padding:10px 14px;font-size:9.5px;text-transform:uppercase;letter-spacing:.7px;font-weight:600;border-bottom:2px solid var(--line);z-index:2}
   table.boqt td{padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top;font-size:12px}
   table.boqt tr:hover td{background:var(--hi)}
   .bq-sl{color:var(--faint);font-family:'Spline Sans Mono',monospace;font-size:11px;text-align:center;width:34px}
@@ -274,30 +272,30 @@
   .boq-empty svg{width:46px;height:46px;stroke:var(--line);margin-bottom:14px;stroke-width:1.3}
   .boq-empty h4{font-size:15px;color:var(--dim);margin-bottom:6px;font-weight:700}
   .boq-empty>div{max-width:520px;margin:0 auto;line-height:1.55}
-  .boq-foot{flex-shrink:0;background:var(--panel);border-top:2px solid var(--accent);padding:6px 14px;display:flex;align-items:center;gap:12px}
+  .boq-foot{flex-shrink:0;background:var(--panel);border-top:2px solid var(--accent);padding:12px 16px;display:flex;align-items:center;gap:16px}
   .boq-foot .lines{font-family:'Spline Sans Mono',monospace;font-size:11px;color:var(--dim)}
-  .grand{margin-left:auto;display:flex;align-items:center;gap:10px}
-  .grand .lbl{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
-  .grand .amt{font-family:'Spline Sans Mono',monospace;font-size:18px;font-weight:700;color:var(--accent2)}
+  .grand{margin-left:auto;display:flex;align-items:baseline;gap:10px}
+  .grand .lbl{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+  .grand .amt{font-family:'Spline Sans Mono',monospace;font-size:24px;font-weight:700;color:var(--accent2)}
   /* notes panel */
   .notes-panel{flex-shrink:0;background:var(--panel);border-top:1px solid var(--line)}
-  .notes-head{display:flex;align-items:center;justify-content:space-between;padding:5px 14px;cursor:pointer;user-select:none;font-size:11px;font-weight:600;color:var(--dim)}
+  .notes-head{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;cursor:pointer;user-select:none;font-size:12px;font-weight:600;color:var(--dim)}
   .notes-head:hover{color:var(--ink)}
-  .notes-head svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;vertical-align:-2px;margin-right:5px}
-  .notes-head b{color:var(--accent);font-family:'Spline Sans Mono',monospace;font-size:10px;margin-left:5px}
+  .notes-head svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;vertical-align:-2px;margin-right:6px}
+  .notes-head b{color:var(--accent);font-family:'Spline Sans Mono',monospace;font-size:11px;margin-left:6px}
   .notes-chev{transition:transform .15s} .notes-chev.open{transform:rotate(90deg)}
-  .notes-body{padding:3px 14px 10px;max-height:220px;overflow:auto}
-  .notes-quick{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
-  .notes-chip{background:var(--panel3);border:1px solid var(--line);color:var(--dim);font-size:10px;padding:2px 8px;border-radius:20px}
+  .notes-body{padding:4px 16px 14px;max-height:260px;overflow:auto}
+  .notes-quick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .notes-chip{background:var(--panel3);border:1px solid var(--line);color:var(--dim);font-size:10.5px;padding:3px 9px;border-radius:20px}
   .notes-chip:hover{border-color:var(--accent);color:var(--accent)}
-  .notes-list{display:flex;flex-direction:column;gap:4px;margin-bottom:7px}
-  .note-row{display:flex;align-items:flex-start;gap:7px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+  .notes-list{display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
+  .note-row{display:flex;align-items:flex-start;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:6px 9px}
   .note-row .bullet{color:var(--accent);font-weight:700;line-height:1.5}
-  .note-row .note-txt{flex:1;font-size:12px;color:var(--ink);line-height:1.4;white-space:pre-wrap;word-break:break-word}
-  .note-row .note-del{background:none;border:none;color:var(--faint);font-size:15px;line-height:1;padding:0 2px}
+  .note-row .note-txt{flex:1;font-size:12.5px;color:var(--ink);line-height:1.45;white-space:pre-wrap;word-break:break-word}
+  .note-row .note-del{background:none;border:none;color:var(--faint);font-size:16px;line-height:1;padding:0 2px}
   .note-row .note-del:hover{color:var(--red)}
-  .notes-add{display:flex;gap:6px}
-  .notes-add input{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--ink);font-size:12px;font-family:'Archivo',sans-serif}
+  .notes-add{display:flex;gap:8px}
+  .notes-add input{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 11px;color:var(--ink);font-size:13px;font-family:'Archivo',sans-serif}
   .notes-add input:focus{outline:none;border-color:var(--accent)}
   /* Create-BOQ hierarchy */
   .boqt tr.bq-parent td{background:rgba(255,106,44,.07);border-top:2px solid var(--line)}
@@ -392,7 +390,7 @@
   .xbtn:disabled{opacity:.5;cursor:wait}
   .cmp-scroll{flex:1;overflow:auto}
   table.cmpt{width:100%;border-collapse:collapse}
-  table.cmpt th{position:sticky;top:0;background:var(--panel2);color:var(--dim);text-align:left;padding:9px 10px;font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;border-bottom:2px solid var(--line);z-index:2;white-space:nowrap}
+  table.cmpt th{position:sticky;top:0;background:#11141a;color:var(--dim);text-align:left;padding:9px 10px;font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;border-bottom:2px solid var(--line);z-index:2;white-space:nowrap}
   table.cmpt td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;font-size:12px}
   table.cmpt tr:hover td{background:var(--hi)}
   .cm-name{font-weight:700} .cm-desc{color:var(--dim);font-size:11px;line-height:1.4}
@@ -417,7 +415,7 @@
 
   .cb-scroll{flex:1;overflow:auto}
   table.cbt{width:100%;border-collapse:collapse;min-width:680px}
-  table.cbt th{position:sticky;top:0;background:var(--panel2);color:var(--dim);text-align:left;padding:9px 9px;font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;border-bottom:2px solid var(--line);z-index:2;white-space:nowrap}
+  table.cbt th{position:sticky;top:0;background:#11141a;color:var(--dim);text-align:left;padding:9px 9px;font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;border-bottom:2px solid var(--line);z-index:2;white-space:nowrap}
   table.cbt th.vhead{text-align:right}
   table.cbt th .vh-i{display:inline-block;width:14px;height:14px;border-radius:50%;color:#fff;font-size:9px;text-align:center;line-height:14px;margin-right:4px;font-family:'Spline Sans Mono',monospace;vertical-align:middle}
   table.cbt td{padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top;font-size:12px}
@@ -440,7 +438,7 @@
   .lrank.r4,.lrank.r5{background:rgba(154,163,178,.16);color:var(--dim)}
   .cb-del{background:none;border:none;color:var(--faint);font-size:16px;line-height:1;padding:3px 6px;border-radius:4px}
   .cb-del:hover{color:var(--red);background:rgba(248,113,113,.12)}
-  .cbt tfoot td{position:sticky;bottom:0;background:var(--panel2);border-top:2px solid var(--accent);padding:9px;font-weight:600;font-size:12px;z-index:2}
+  .cbt tfoot td{position:sticky;bottom:0;background:#11141a;border-top:2px solid var(--accent);padding:9px;font-weight:600;font-size:12px;z-index:2}
   .cbt tfoot .tot{font-family:'Spline Sans Mono',monospace;text-align:right}
   .cbt tfoot .tot.win{color:var(--green)}
   .cb-need{padding:40px 30px;text-align:center;color:var(--faint)}
@@ -692,7 +690,7 @@
   table.cmpt{min-width:1500px;table-layout:auto}
   /* Frozen header — raise z-index above sticky-left cells and add shadow for clear separation */
   table.cmpt thead{position:sticky;top:0;z-index:20}
-  table.cmpt thead th{position:sticky;top:0;background:var(--panel2);z-index:20;box-shadow:0 2px 0 var(--accent),0 4px 12px rgba(0,0,0,.4)}
+  table.cmpt thead th{position:sticky;top:0;background:#11141a;z-index:20;box-shadow:0 2px 0 var(--accent),0 4px 12px rgba(0,0,0,.4)}
   table.cmpt thead th.vh-col{text-align:center;font-size:9px}
   /* Vendor columns: prevent squeeze with min-width */
   table.cmpt td.vcell-col{min-width:148px;vertical-align:top}
@@ -1189,11 +1187,11 @@
               <div class="amt" id="bGrand">₹0</div>
             </div>
           </div>
-          <button class="btn xfer" id="bToQuote" style="flex-shrink:0;white-space:nowrap" title="Send these BOQ items into the Enquiry module to issue an RFQ"><svg viewBox="0 0 24 24" fill="none"><path d="M14 3v4a1 1 0 0 0 1 1h4M5 3h7l7 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM9 14h6m0 0-2.5-2.5M15 14l-2.5 2.5"/></svg>Transfer to Enquiry</button>
         </div>
-        <div class="boq-meta boq-actions" style="display:none">
+        <div class="boq-meta boq-actions">
           <input class="proj" id="bProj" placeholder="Project name…" style="display:none">
           <input id="bClient" placeholder="Contractor / Vendor" style="display:none">
+          <button class="btn xfer" id="bToQuote" style="margin-left:auto" title="Send these BOQ items into the Enquiry module to issue an RFQ"><svg viewBox="0 0 24 24" fill="none"><path d="M14 3v4a1 1 0 0 0 1 1h4M5 3h7l7 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM9 14h6m0 0-2.5-2.5M15 14l-2.5 2.5"/></svg>Transfer to Enquiry</button>
         </div>
       </div>
     </div>
@@ -3216,7 +3214,7 @@ $('#btExpandAll')?.addEventListener('click',()=>{ boq.forEach(n=>n.collapsed=fal
 $('#btCollapseAll')?.addEventListener('click',()=>{ boq.forEach(n=>{ if(BTYPES[n.type]&&BTYPES[n.type].group) n.collapsed=true; }); renderBOQ(); });
 $('#bTreeFind')?.addEventListener('input',function(){ bTreeFilter=this.value; renderBOQ(); });
 
-$('#bClear').addEventListener('click',()=>{if(boq.length&&confirm('Clear all '+boq.length+' rows?')){boq=[];bArmedParent=null;bArmBanner();renderBOQ();cRender();clearDraft()}});
+$('#bClear').addEventListener('click',()=>{if(boq.length&&confirm('Clear all '+boq.length+' rows?')){boq=[];bArmedParent=null;bArmBanner();renderBOQ();cRender()}});
 
 /* ---- BOQ export helpers ---- */
 function boqMeta(){return {proj:$('#bProj').value||'BOQ',client:$('#bClient').value||''};}
@@ -3307,7 +3305,6 @@ function openTransferDialog(){
     ov.classList.remove('on');
     setMode('quote');
     QM.importFromBOQ({mode,targetId,items,proj:m.proj,client:m.client,notes:bNotes.slice()});
-    clearDraft();   // items now live in the enquiry — don't offer to "resume" this draft next time
   };
 }
 $('#bToQuote').addEventListener('click',openTransferDialog);
@@ -5364,37 +5361,13 @@ function scheduleAutosave(){
   _asTimer=setTimeout(doAutosave,20000);
   _undoCapture();
 }
-/* Per-user working draft, synced to the server (survives a refresh, a crash,
-   or moving to another machine) via CloudflareAPI.draft — which itself writes
-   local-first (cf_pending_boq_draft) before the debounced network PUT, so a
-   network blip never loses the edit. See backend/routes/boq.js /boq-draft. */
 function doAutosave(){
-  try{
-    if(window.CloudflareAPI && window.CloudflareAPI.draft && (boq.length || bNotes.length)){
-      window.CloudflareAPI.draft.save(_revSnapshot()).then(r=>{
-        const ind=$('#autosaveInd'); if(!ind) return;
-        ind.textContent=(r&&r.ok)?'✓ Draft saved':'⏳ Saved locally — syncing…';
-        ind.classList.add('show');
-        clearTimeout(ind._hideTimer);
-        ind._hideTimer=setTimeout(()=>ind.classList.remove('show'),2200);
-      });
-    }
-  }catch(e){}
-}
-function clearDraft(){
-  try{ if(window.CloudflareAPI && window.CloudflareAPI.draft) window.CloudflareAPI.draft.clear(); }catch(e){}
+  /* Local-browser draft autosave disabled — nothing is written to localStorage. */
 }
 function checkRestoreDraft(){
-  if(!(window.CloudflareAPI && window.CloudflareAPI.draft) || boq.length) return;
-  window.CloudflareAPI.draft.get().then(r=>{
-    const d=r&&r.draft;
-    if(!d||!Array.isArray(d.boq)||!d.boq.length||boq.length) return;   // re-check: user may have started typing while this was in flight
-    const when=r.updatedAt?new Date(r.updatedAt).toLocaleString():'earlier';
-    if(confirm(`Resume your unsaved BOQ draft?\n\n${d.boq.length} item${d.boq.length===1?'':'s'} — saved ${when}\n\nCancel to start fresh (this draft is kept either way).`)){
-      _applyRevSnapshot(d);
-      showToast('↩ Draft restored');
-    }
-  }).catch(()=>{});
+  /* Disabled along with doAutosave(); also purge any pre-existing draft so the
+     restore prompt never resurfaces for browsers that saved one previously. */
+  try{ localStorage.removeItem(AS_KEY); }catch(e){}
 }
 
 /* ── Revision control ─────────────────────────────────── */
@@ -9145,8 +9118,8 @@ function csExport(q,fmt){
   for(let p=1;p<=pages;p++){doc.setPage(p);doc.setFontSize(6.8);doc.setTextColor(150,155,163);doc.setFont('helvetica','normal');doc.text('Page '+p+' of '+pages,pw-M,H-4.5,{align:'right'});}
   doc.save('CS_'+q.base.replace(/\//g,'-')+'.pdf');
 }
-function csPrintHtml(q){const vr=vendorRank(q);let h=`<h1>Comparative Statement</h1><p>${esc(q.base)} · ${esc(q.projectName)} — ${esc(q.subject||'')}</p><table border=1 cellspacing=0 cellpadding=5><tr><th>#</th><th>Description</th><th>Qty</th><th>UOM</th>${q.vendors.map(v=>'<th>'+esc(v.name)+'</th>').join('')}</tr>`;
-  q.items.forEach((it,i)=>{const rank=itemRank(q,i);const rm={};rank.forEach((x,k)=>rm[x.vi]=k);h+=`<tr><td>${i+1}</td><td>${esc(it.desc)}</td><td>${it.qty}</td><td>${esc(it.uom||'')}</td>${q.vendors.map((v,vi)=>{const a=lineAmt(q,v,i);return '<td>'+(a>0?'₹'+inr(a)+(rm[vi]!=null?' (L'+(rm[vi]+1)+')':''):'-')+'</td>';}).join('')}</tr>`;});
+function csPrintHtml(q){const vr=vendorRank(q);let h=`<h1>Comparative Statement</h1><p>${q.base} · ${q.projectName} — ${q.subject||''}</p><table border=1 cellspacing=0 cellpadding=5><tr><th>#</th><th>Description</th><th>Qty</th><th>UOM</th>${q.vendors.map(v=>'<th>'+v.name+'</th>').join('')}</tr>`;
+  q.items.forEach((it,i)=>{const rank=itemRank(q,i);const rm={};rank.forEach((x,k)=>rm[x.vi]=k);h+=`<tr><td>${i+1}</td><td>${it.desc}</td><td>${it.qty}</td><td>${it.uom||''}</td>${q.vendors.map((v,vi)=>{const a=lineAmt(q,v,i);return '<td>'+(a>0?'₹'+inr(a)+(rm[vi]!=null?' (L'+(rm[vi]+1)+')':''):'-')+'</td>';}).join('')}</tr>`;});
   h+=`<tr><td colspan=4><b>TOTAL (base)</b></td>${q.vendors.map((v,vi)=>{const rk=vr.findIndex(x=>x.vi===vi);return '<td><b>₹'+inr(vendorBase(q,v))+(rk>=0?' L'+(rk+1):'')+'</b></td>';}).join('')}</tr></table>`;return h;}
 function bidExport(q,fmt){
   const vr=vendorRank(q);const sel=q.vendors.find(v=>v.status==='approved')||(vr.length?q.vendors[vr[0].vi]:null);
@@ -9166,9 +9139,9 @@ function bidExport(q,fmt){
     doc.text('Base value '+pdfRs(vendorBase(q,sel))+'    ·    Incl. GST '+pdfRs(vendorTotal(q,sel)),M+6,y+20.5);}
   finish('Bid_'+q.base.replace(/\//g,'-')+'.pdf');
 }
-function bidPrintHtml(q,sel,vr){let h=`<h1>Bid Analysis Report</h1><p>${esc(q.base)} · ${esc(q.projectName)}</p><table border=1 cellspacing=0 cellpadding=5><tr><th>Vendor</th><th>Items</th><th>Base</th><th>Incl GST</th><th>Rank</th></tr>`;
-  q.vendors.forEach((v,vi)=>{const quoted=v.lines.filter(l=>num(l.rate)>0).length;const rk=vr.findIndex(x=>x.vi===vi);h+=`<tr><td>${esc(v.name)}</td><td>${quoted}/${qCountItems(q)}</td><td>₹${inr(vendorBase(q,v))}</td><td>₹${inr(vendorTotal(q,v))}</td><td>${rk>=0?'L'+(rk+1):'-'}</td></tr>`;});
-  h+=`</table><h2 style="color:#1b8a5a">Recommendation: ${sel?esc(sel.name)+' — '+esc(vendorId(q,sel)):'—'}</h2>`;return h;}
+function bidPrintHtml(q,sel,vr){let h=`<h1>Bid Analysis Report</h1><p>${q.base} · ${q.projectName}</p><table border=1 cellspacing=0 cellpadding=5><tr><th>Vendor</th><th>Items</th><th>Base</th><th>Incl GST</th><th>Rank</th></tr>`;
+  q.vendors.forEach((v,vi)=>{const quoted=v.lines.filter(l=>num(l.rate)>0).length;const rk=vr.findIndex(x=>x.vi===vi);h+=`<tr><td>${v.name}</td><td>${quoted}/${qCountItems(q)}</td><td>₹${inr(vendorBase(q,v))}</td><td>₹${inr(vendorTotal(q,v))}</td><td>${rk>=0?'L'+(rk+1):'-'}</td></tr>`;});
+  h+=`</table><h2 style="color:#1b8a5a">Recommendation: ${sel?sel.name+' — '+vendorId(q,sel):'—'}</h2>`;return h;}
 function rfqPdf(q){const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});
   const {startY,chrome,finish,pw,M,B}=pdfHeader(doc,{title:'REQUEST FOR ENQUIRY',subtitle:q.base,rightTop:PROJREF[q.ref]||q.ref||'',rightBot:'Due '+(q.dueDate||'—'),footer:'Primarc · RFQ',running:q.base});
   /* meta */
@@ -9189,7 +9162,7 @@ function rfqPdf(q){const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',for
 function printHTML(title,body){
   const css='<style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{font-family:Arial,Helvetica,sans-serif;padding:24px;color:#111;margin:0}table{border-collapse:collapse;width:100%;font-size:12px}th{background:#bc5b28;color:#fff;text-align:left}td,th{border:1px solid #ccc;padding:6px}h1{font-size:20px;margin:0 0 4px}h2{font-size:15px}p{color:#555;margin:0 0 14px}@page{margin:14mm}</style>';
   const doc='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+title+'</title>'+css+'</head><body>'+body+'</body></html>';
-  const w=window.open('','_blank','noopener');
+  const w=window.open('','_blank');
   if(w&&w.document){                       // popup allowed
     w.document.open();w.document.write(doc);w.document.close();
     const go=()=>{try{w.focus();w.print();}catch(e){}};
@@ -9296,51 +9269,18 @@ const Auth=(function(){
     if(document.getElementById('authCSS'))return;
     const s=document.createElement('style'); s.id='authCSS';
     s.textContent=`
-      #authGate{position:fixed;inset:0;z-index:100000;background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;overflow:hidden}
-      #authGate::before{content:'';position:absolute;inset:0;background:
-        radial-gradient(ellipse 60% 50% at 20% 80%,rgba(255,106,44,.08) 0%,transparent 70%),
-        radial-gradient(ellipse 50% 60% at 80% 20%,rgba(255,210,63,.06) 0%,transparent 70%),
-        radial-gradient(ellipse 40% 40% at 50% 50%,rgba(94,155,240,.04) 0%,transparent 60%);
-        animation:authBgPulse 8s ease-in-out infinite alternate;pointer-events:none}
-      @keyframes authBgPulse{0%{opacity:.6;transform:scale(1)}100%{opacity:1;transform:scale(1.05)}}
-      #authGate .ag-particles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-      #authGate .ag-particle{position:absolute;width:2px;height:2px;background:var(--accent);border-radius:50%;opacity:0;animation:agFloat linear infinite}
-      @keyframes agFloat{0%{opacity:0;transform:translateY(0) scale(1)}10%{opacity:.4}90%{opacity:.4}100%{opacity:0;transform:translateY(-100vh) scale(0)}}
-      #authGate .card{position:relative;width:min(400px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:38px 34px 34px;
-        box-shadow:0 32px 80px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.03) inset;
-        backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-        animation:authCardIn .5s cubic-bezier(.16,1,.3,1) both}
-      @keyframes authCardIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
-      #authGate .card::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:3px;background:linear-gradient(90deg,transparent,var(--accent),var(--accent2),var(--accent),transparent);border-radius:0 0 3px 3px;opacity:.8}
-      #authGate .ag-brand{display:flex;flex-direction:column;align-items:center;margin-bottom:28px;animation:authFadeIn .6s .15s both}
-      @keyframes authFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-      #authGate .ag-brand-icon{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent-deep,#c9501a));display:flex;align-items:center;justify-content:center;margin-bottom:14px;box-shadow:0 8px 24px rgba(255,106,44,.25)}
-      #authGate .ag-brand-icon svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-      #authGate h2{font-size:24px;font-weight:900;color:var(--ink);margin:0 0 4px;letter-spacing:-.3px;text-align:center}
-      #authGate .sub{font-size:12.5px;color:var(--faint);margin-bottom:0;text-align:center}
-      #authGate .ag-form{animation:authFadeIn .6s .25s both}
-      #authGate .ag-field{position:relative;margin-top:18px}
-      #authGate .ag-field:first-child{margin-top:0}
-      #authGate label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--faint);margin:0 0 6px;font-weight:600;transition:color .2s}
-      #authGate .ag-input-wrap{position:relative}
-      #authGate .ag-input-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--faint);stroke-width:1.8;fill:none;transition:stroke .2s;pointer-events:none}
-      #authGate input[type=text],#authGate input[type=password]{width:100%;box-sizing:border-box;background:var(--panel2);border:1.5px solid var(--line);border-radius:10px;color:var(--ink);font-size:14px;padding:12px 13px 12px 40px;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
-      #authGate input[type=text]:focus,#authGate input[type=password]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,106,44,.12);background:var(--panel)}
-      #authGate input:focus~svg,#authGate .ag-input-wrap:focus-within svg{stroke:var(--accent)}
-      #authGate .ag-row{display:flex;align-items:center;gap:8px;margin-top:18px;font-size:12px;color:var(--dim)}
-      #authGate .ag-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;border-radius:4px}
-      #authGate .ag-row label{margin:0;text-transform:none;letter-spacing:0;font-size:12px;color:var(--dim);font-weight:500;cursor:pointer}
-      #authGate button.go{position:relative;width:100%;margin-top:24px;background:linear-gradient(135deg,var(--accent),var(--accent-deep,#c9501a));color:#fff;border:none;border-radius:10px;padding:13px;font-size:14.5px;font-weight:700;cursor:pointer;letter-spacing:.2px;transition:transform .15s,box-shadow .15s,opacity .15s;box-shadow:0 4px 16px rgba(255,106,44,.3);overflow:hidden}
-      #authGate button.go:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 24px rgba(255,106,44,.4)}
-      #authGate button.go:active:not(:disabled){transform:translateY(0);box-shadow:0 2px 10px rgba(255,106,44,.25)}
-      #authGate button.go:disabled{opacity:.7;cursor:wait}
-      #authGate button.go.loading{color:transparent}
-      #authGate button.go.loading::after{content:'';position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:authSpin .6s linear infinite}
-      @keyframes authSpin{to{transform:rotate(360deg)}}
-      #authGate .err{color:var(--red);font-size:12px;margin-top:14px;min-height:16px;text-align:center;animation:authShake .4s ease}
-      @keyframes authShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
-      #authGate .hint{margin-top:20px;padding:12px 14px;background:var(--amber-soft,rgba(217,154,6,.12));border:1px solid rgba(217,154,6,.25);border-radius:10px;font-size:11.5px;color:var(--dim);line-height:1.6;animation:authFadeIn .6s .4s both}
-      #authGate .ag-footer{margin-top:24px;text-align:center;font-size:10px;color:var(--faint);letter-spacing:.5px;text-transform:uppercase;animation:authFadeIn .6s .5s both}
+      #authGate{position:fixed;inset:0;z-index:100000;background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif}
+      #authGate .card{width:min(380px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:32px 30px;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+      #authGate h2{font-size:22px;font-weight:800;color:var(--ink);margin:0 0 4px}
+      #authGate .sub{font-size:12.5px;color:var(--faint);margin-bottom:22px}
+      #authGate label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--faint);margin:14px 0 5px;font-weight:600}
+      #authGate input[type=text],#authGate input[type=password]{width:100%;box-sizing:border-box;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-size:14px;padding:11px 13px;outline:none}
+      #authGate input:focus{border-color:var(--accent)}
+      #authGate .row{display:flex;align-items:center;gap:7px;margin-top:14px;font-size:12px;color:var(--dim)}
+      #authGate button.go{width:100%;margin-top:20px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer}
+      #authGate button.go:disabled{opacity:.6}
+      #authGate .err{color:var(--red);font-size:12px;margin-top:12px;min-height:16px}
+      #authGate .hint{margin-top:18px;padding:10px 12px;background:var(--amber-soft,rgba(217,154,6,.12));border:1px solid rgba(217,154,6,.3);border-radius:8px;font-size:11.5px;color:var(--dim)}
       #authChip{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer;height:34px;flex-shrink:0;max-width:180px}
       #authChip .av{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
       /* min-width:0 lets this text column actually shrink inside the flex
@@ -9389,33 +9329,14 @@ const Auth=(function(){
     const showHint=only.length===1&&only[0].username==='admin'&&only[0].mustChange;
     let g=document.getElementById('authGate');
     if(!g){g=document.createElement('div');g.id='authGate';document.body.appendChild(g);}
-    g.innerHTML=`<div class="ag-particles">${Array.from({length:12},(_,i)=>`<div class="ag-particle" style="left:${Math.random()*100}%;bottom:-4px;animation-duration:${6+Math.random()*8}s;animation-delay:${Math.random()*6}s;width:${1+Math.random()*2}px;height:${1+Math.random()*2}px;opacity:0"></div>`).join('')}</div><div class="card">
-      <div class="ag-brand">
-        <div class="ag-brand-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
-        <h2>Tendering System</h2>
-        <div class="sub">Sign in to your workspace</div>
-      </div>
-      <div class="ag-form">
-        <div class="ag-field">
-          <label>Username</label>
-          <div class="ag-input-wrap">
-            <input type="text" id="auU" placeholder="Enter your username" autocomplete="off" autofocus>
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
-          </div>
-        </div>
-        <div class="ag-field">
-          <label>Password</label>
-          <div class="ag-input-wrap">
-            <input type="password" id="auP" placeholder="Enter your password" autocomplete="off">
-            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-        </div>
-        <div class="ag-row"><input type="checkbox" id="auR"><label for="auR">Remember me on this device</label></div>
-        <button class="go" id="auGo">Sign In</button>
-        <div class="err" id="auErr"></div>
-        ${showHint?`<div class="hint">First-time setup — default account:<br><b>Username:</b> admin &nbsp; <b>Password:</b> admin123<br>You'll be asked to change it after sign-in.</div>`:''}
-        <div class="ag-footer">Primarc Projects · Secure Access</div>
-      </div>
+    g.innerHTML=`<div class="card">
+      <h2>Tendering System</h2><div class="sub">Sign in to continue</div>
+      <label>Username</label><input type="text" id="auU" autocomplete="off" autofocus>
+      <label>Password</label><input type="password" id="auP" autocomplete="off">
+      <div class="row"><input type="checkbox" id="auR"><label for="auR" style="margin:0;text-transform:none;letter-spacing:0;font-size:12px;color:var(--dim)">Remember me on this device</label></div>
+      <button class="go" id="auGo">Sign In</button>
+      <div class="err" id="auErr"></div>
+      ${showHint?`<div class="hint">First-time setup — default account:<br><b>Username:</b> admin &nbsp; <b>Password:</b> admin123<br>You'll be asked to change it after sign-in.</div>`:''}
     </div>`;
     g.style.display='flex';
     const go=document.getElementById('auGo');
@@ -9423,9 +9344,11 @@ const Auth=(function(){
       const u=document.getElementById('auU').value.trim().toLowerCase();
       const p=document.getElementById('auP').value;
       const err=document.getElementById('auErr');
-      go.disabled=true; go.classList.add('loading'); err.textContent='';
+      go.disabled=true; err.textContent='';
 
       if(API()){
+        // The password is never hashed or compared in the browser: the server
+        // verifies it, records the attempt, and issues an httpOnly session cookie.
         try{
           const r=await window.TSApi.login(u,p);
           session={uid:r.user.id,username:r.user.username,name:r.user.name,role:r.user.role,ts:Date.now(),last:Date.now()};
@@ -9437,7 +9360,7 @@ const Auth=(function(){
           if(typeof AI!=='undefined'&&AI.refreshConfig)AI.refreshConfig().then(()=>{if(typeof updateNiBanner==='function')updateNiBanner();if(typeof updateGemStatus==='function')updateGemStatus();}).catch(()=>{});
           if(r.user.mustChange){ setTimeout(()=>changePassword(true),300); }
         }catch(ex){
-          err.textContent=ex.message||'Sign-in failed.'; go.disabled=false; go.classList.remove('loading');
+          err.textContent=ex.message||'Sign-in failed.'; go.disabled=false;
         }
         return;
       }
@@ -9445,7 +9368,7 @@ const Auth=(function(){
       const rec=users().find(x=>x.username.toLowerCase()===u&&x.active!==false);
       const ok=rec&&await verifyPw(rec,p);
       logHistory(u,rec?rec.role:'?',!!ok);
-      if(!ok){ err.textContent='Invalid username or password.'; go.disabled=false; go.classList.remove('loading'); return; }
+      if(!ok){ err.textContent='Invalid username or password.'; go.disabled=false; return; }
       session={uid:rec.id,username:rec.username,name:rec.name,role:rec.role,ts:Date.now(),last:Date.now()};
       if(document.getElementById('auR').checked) save(SKEY,session); else { try{sessionStorage.setItem(SKEY,JSON.stringify(session));}catch(e){} }
       g.style.display='none';
