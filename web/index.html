@@ -135,17 +135,17 @@
   .home-foot b{color:var(--accent2)}
 
   /* ===== SHARED CONTROL BAR ===== */
-  .ctrl{background:var(--panel);border-bottom:1px solid var(--line);padding:11px 16px;display:flex;gap:9px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+  .ctrl{background:var(--panel);border-bottom:1px solid var(--line);padding:7px 12px;display:flex;gap:7px;align-items:center;flex-wrap:wrap;flex-shrink:0}
   .srch{flex:1;min-width:240px;position:relative}
   .srch.srch-sm{flex:0 1 180px;min-width:150px;max-width:200px}
-  .srch svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--faint)}
-  .srch input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:9px 11px 9px 35px;color:var(--ink);font-size:14px;transition:.14s}
+  .srch svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--faint)}
+  .srch input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:7px 10px 7px 32px;color:var(--ink);font-size:13px;transition:.14s}
   .srch input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,106,44,.12)}
   .srch input::placeholder{color:var(--faint)}
-  select.flt{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:9px 11px;color:var(--ink);font-size:12.5px;max-width:190px}
+  select.flt{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:7px 9px;color:var(--ink);font-size:12px;max-width:180px}
   select.flt:focus{outline:none;border-color:var(--accent)}
-  .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:7px;overflow:hidden}
-  .seg button{background:none;border:none;color:var(--dim);padding:8px 12px;font-family:'Spline Sans Mono',monospace;font-size:11px;font-weight:500;transition:.12s}
+  .seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .seg button{background:none;border:none;color:var(--dim);padding:6px 10px;font-family:'Spline Sans Mono',monospace;font-size:10.5px;font-weight:500;transition:.12s}
   .seg button.on{background:var(--accent);color:#fff}
   .seg button:not(.on):hover{background:var(--hi);color:var(--ink)}
   .btn{border:1px solid var(--line);background:var(--panel2);color:var(--dim);padding:8px 13px;border-radius:7px;font-size:12px;font-weight:600;transition:.12s;display:inline-flex;align-items:center;gap:6px}
@@ -171,7 +171,7 @@
   #create{flex-direction:column}
   .create-body{flex:1;display:flex;overflow:hidden}
   .lib{width:46%;min-width:380px;display:flex;flex-direction:column;border-right:1px solid var(--line);overflow:hidden}
-  .lib-head{padding:9px 14px;background:var(--panel2);border-bottom:1px solid var(--line);font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:var(--dim);letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+  .lib-head{padding:7px 12px;background:var(--panel2);border-bottom:1px solid var(--line);font-family:'Spline Sans Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
   .lib-head b{color:var(--accent)}
   .lib-new{background:var(--accent);border:none;color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;display:inline-flex;align-items:center;gap:5px;font-family:'Archivo',sans-serif}
   .lib-new svg{width:13px;height:13px;stroke-width:2.4}
@@ -1001,6 +1001,91 @@
       animation:none!important}
     .card:hover .ic,.qm-w:hover,.btn:active{transform:none!important}
   }
+
+  /* ══════════════════════════════════════════════════════════════════
+     BOQ CREATION — workspace refinement (layout/density only).
+     Scoped to #create so no other view is affected.
+     ══════════════════════════════════════════════════════════════════ */
+  /* L1 · context strip -------------------------------------------------- */
+  /* keep search + Filters grouped over the library they act on, not stretched
+     across the whole page where they read as a global search */
+  #create .ctrl{padding:6px 12px;gap:6px}
+  #create .ctrl .srch{flex:0 1 470px;min-width:240px}
+  /* wraps instead of clipping — nothing in the header can become unreachable */
+  #create .rev-row{padding:5px 12px;gap:7px;flex-wrap:wrap;row-gap:5px}
+  #create .rev-row>.btn,#create .rev-row .rev-btn,#create .rev-row #revBadge,#create .rev-row .exp-dd{flex-shrink:0}
+  #create .rev-row .btn{padding:5px 10px;font-size:11.5px;border-radius:6px}
+  #create .rev-row .btn svg{width:13px;height:13px}
+  .rev-proj{flex:1 1 200px;min-width:120px;background:transparent;border:none;border-bottom:1px solid transparent;color:var(--ink);font-size:13px;font-weight:700;font-family:'Archivo',sans-serif;padding:2px 2px;outline:none}
+  .rev-proj:hover{border-bottom-color:var(--line)}
+  .rev-proj:focus{border-bottom-color:var(--accent)}
+  .rev-proj::placeholder{color:var(--faint);font-weight:600}
+  .rev-sum{font-family:'Spline Sans Mono',monospace;font-size:10px;color:var(--faint);white-space:nowrap;letter-spacing:.3px}
+  .rev-sum b{color:var(--dim);font-weight:600}
+  .kbd-tip{font-family:'Spline Sans Mono',monospace;font-size:9px;color:var(--faint)}
+  /* collapsible library filters */
+  .flt-tog{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);color:var(--dim);font-size:11.5px;font-weight:600;padding:6px 10px;border-radius:6px;cursor:pointer;transition:.12s;white-space:nowrap}
+  .flt-tog:hover{border-color:var(--accent);color:var(--accent)}
+  .flt-tog svg{width:12px;height:12px;stroke:currentColor;stroke-width:2.4;fill:none;transition:transform .15s}
+  .flt-tog b{font-family:'Spline Sans Mono',monospace;font-size:9.5px;background:var(--accent);color:#fff;border-radius:9px;padding:0 6px;line-height:15px;display:none}
+  .flt-tog.has b{display:inline-block}
+  .flt-tog.has{border-color:var(--accent);color:var(--accent)}
+  .ctrl-adv{display:none;gap:6px;align-items:center;flex-wrap:wrap;width:100%}
+  .ctrl.open .ctrl-adv{display:flex}
+  .ctrl.open .flt-tog svg{transform:rotate(180deg)}
+  /* L2 · workspace toolbar ---------------------------------------------- */
+  #create .boq-toolbar{padding:6px 12px;gap:6px}
+  .add-dd{position:relative}
+  #btAddMenuBtn .dd-chev{width:11px;height:11px;margin-left:1px;opacity:.85;transition:transform .15s}
+  .add-dd.open #btAddMenuBtn .dd-chev{transform:rotate(180deg)}
+  .add-menu{position:absolute;top:calc(100% + 5px);left:0;z-index:60;display:none;flex-direction:column;gap:3px;padding:5px;background:var(--panel);border:1px solid var(--line);border-radius:9px;box-shadow:0 10px 28px rgba(0,0,0,.32);min-width:172px}
+  .add-dd.open .add-menu{display:flex}
+  .add-menu .bt-add{width:100%;justify-content:flex-start}
+  .bt-srch{position:relative;flex:1;min-width:150px;display:flex;align-items:center}
+  .bt-srch svg{position:absolute;left:9px;width:13px;height:13px;stroke:var(--faint);fill:none;stroke-width:2;pointer-events:none}
+  #create .bt-find{width:100%;padding:6px 10px 6px 29px}
+  #create .bt-find:focus{box-shadow:0 0 0 3px rgba(255,106,44,.12)}
+  /* secondary: find-from-history collapses to a compact chip */
+  #create .boq-filterbar{padding:5px 12px;gap:7px}
+  #create .boq-filterbar.collapsed{padding:4px 12px;background:var(--panel)}
+  #create .boq-filterbar.collapsed .fbtag{color:var(--dim)}
+  #create .boq-filterbar .fbtag{cursor:pointer}
+  /* L3 · the table is the workspace ------------------------------------- */
+  #create table.boqt th{padding:7px 12px;background:var(--panel2);border-bottom:1px solid var(--line)}
+  #create table.boqt td{padding:6px 12px;line-height:1.45}
+  #create table.boqt tbody tr:hover td{background:var(--hi)}
+  /* hierarchy: quiet indent + one accent rail, not a wall of colour */
+  #create .boqt tr.bq-parent td{background:var(--panel2);border-top:1px solid var(--line)}
+  #create .boqt tr.bq-parent td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+  #create .boqt tr.bq-sub td{background:rgba(94,155,240,.045)}
+  #create .boqt tr.bq-sub td:first-child{box-shadow:inset 3px 0 0 rgba(94,155,240,.5)}
+  #create .boqt tr.bq-sub td:nth-child(2){border-left:none;padding-left:14px}
+  #create .bq-pname{font-size:12.5px}
+  /* row actions: hidden until hover, but always reachable by keyboard */
+  #create .bq-acts:focus-within{opacity:1}
+  /* L4 · library panel --------------------------------------------------- */
+  #create .lib{width:38%;min-width:320px}
+  #create .lib-head{padding:5px 12px}
+  #create .libitem{padding:8px 12px;gap:9px}
+  #create .li-name{font-size:12.5px;margin-bottom:2px}
+  #create .li-meta{margin-top:4px;gap:6px}
+  /* L5 · notes + footer -------------------------------------------------- */
+  #create .notes-head{padding:6px 12px;font-size:11.5px}
+  #create .notes-body{padding:4px 12px 10px;max-height:220px}
+  #create .boq-foot{padding:7px 12px;gap:14px}
+  #create .boq-foot .lines .dot{color:var(--faint);margin:0 3px}
+  #create .grand{gap:16px;align-items:center}
+  #create .grand .gcell{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+  #create .grand .glbl{font-size:9px;color:var(--faint);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+  #create .grand .amt{font-size:14px}
+  #create .grand .gcell.tot{padding-left:16px;border-left:1px solid var(--line)}
+  #create .grand .gcell.tot .glbl{color:var(--dim)}
+  #create .grand .gcell.tot .amt{font-size:19px}
+  #create .grand .amt.sub{color:var(--dim)}
+  /* progressive trim so the header stays on one line as long as possible */
+  @media(max-width:1750px){#create .kbd-tip{display:none}}
+  @media(max-width:1550px){#create .rev-sum{display:none}#create .lib{width:34%;min-width:290px}}
+  @media(max-width:1350px){#create .lib{width:32%;min-width:270px}#create .rev-proj{flex-basis:150px}}
 </style>
 </head>
 <body>
@@ -1108,15 +1193,19 @@
 
   <!-- CREATE BOQ -->
   <div class="view" id="create">
-    <div class="ctrl">
+    <div class="ctrl" id="cCtrl">
       <div class="srch">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="cSearch" placeholder="Search items — ranked · typo & synonym tolerant · ↑↓ choose · Enter adds" autocomplete="off">
+        <input id="cSearch" placeholder="Search the item library — typo &amp; synonym tolerant · ↑↓ choose · Enter adds" autocomplete="off">
       </div>
-      <select class="flt" id="cWGroup" style="min-width:130px"><option value="">All Work Groups</option></select>
-      <select class="flt" id="cCat"><option value="">All Categories</option></select>
-      <select class="flt" id="cUom"><option value="">All Units</option></select>
-      <div class="seg" id="cScope"><button data-s="name" class="on">Name</button><button data-s="all">All</button><button data-s="work">By Work</button></div>
+      <button class="flt-tog" id="cFltTog" title="Show / hide library filters">Filters<b id="cFltCount">0</b><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="ctrl-adv" id="cAdv">
+        <select class="flt" id="cWGroup" style="min-width:130px"><option value="">All Work Groups</option></select>
+        <select class="flt" id="cCat"><option value="">All Categories</option></select>
+        <select class="flt" id="cUom"><option value="">All Units</option></select>
+        <div class="seg" id="cScope"><button data-s="name" class="on">Name</button><button data-s="all">All</button><button data-s="work">By Work</button></div>
+        <button class="fclear" id="cFltClear" title="Reset library filters">Clear</button>
+      </div>
     </div>
     <div class="create-body">
       <!-- library -->
@@ -1127,12 +1216,14 @@
       <!-- boq -->
       <div class="boq">
         <div class="rev-row">
+          <input class="rev-proj" id="bProj" placeholder="Untitled BOQ — project name…" autocomplete="off">
           <span id="revBadge">Rev-0</span>
           <button class="rev-btn" id="revSaveBtn" title="Save current state as a new revision">↑ Save Revision</button>
           <button class="rev-btn" id="revHistBtn" title="View revision history">History</button>
           <span id="autosaveInd">✓ Draft saved</span>
+          <span class="rev-sum" id="bHdrSum"></span>
           <div style="flex:1"></div>
-          <span style="font-family:'Spline Sans Mono',monospace;font-size:9px;color:var(--faint)">Ctrl+S save · Ctrl+N add row</span>
+          <span class="kbd-tip">Ctrl+S save · Ctrl+N add row</span>
           <button class="btn" id="bSave" title="Save BOQ as JSON"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save</button>
           <label class="btn" id="bLoadBtn" title="Load BOQ from JSON, Excel, CSV or PDF" style="cursor:pointer"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Load<input type="file" id="bLoadFile" accept=".json,.xlsx,.xls,.csv,.pdf" style="display:none"></label>
           <button class="btn" id="bClear"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>Clear</button>
@@ -1145,9 +1236,27 @@
             </div>
           </div>
         </div>
-        <div class="boq-filterbar" id="boqFindBar">
+        <div class="boq-toolbar">
+          <div class="add-dd" id="btAddDd">
+            <button class="bt-add itm" id="btAddMenuBtn" title="Add to the BOQ"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add<svg class="dd-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+            <div class="add-menu" id="btAddMenu">
+              <button class="bt-add itm" id="btAddItem" title="Add a BOQ line item"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Item</button>
+              <button class="bt-add hdr" id="btAddHeader" title="Add a top-level section header"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg>Add Header</button>
+              <button class="bt-add" id="btAddNote" title="Add a note row"><svg viewBox="0 0 24 24"><path d="M9 7h6m-6 4h6m-6 4h4M5 3h14a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg>Add Note</button>
+            </div>
+          </div>
+          <div class="bt-sep"></div>
+          <button class="bt-ico" id="btExpandAll" title="Expand all groups">⊞</button>
+          <button class="bt-ico" id="btCollapseAll" title="Collapse all groups">⊟</button>
+          <div class="bt-sep"></div>
+          <div class="bt-srch">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input class="bt-find" id="bTreeFind" placeholder="Search BOQ items, code, WBS or category…" autocomplete="off">
+          </div>
+        </div>
+        <div class="boq-filterbar collapsed" id="boqFindBar">
           <button class="fb-fold" id="bFindToggle" title="Show / hide find-from-history"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
-          <span class="fbtag" id="bFindLabel">🔎 Find from history:</span>
+          <span class="fbtag" id="bFindLabel">🔎 Find from History</span>
           <span class="fb-controls">
             <input id="bFindVendor" placeholder="Vendor name…" autocomplete="off" list="vendList" style="min-width:160px">
             <input id="bFindWO" placeholder="WO number (e.g. WO/MBA/…)" autocomplete="off" list="woList" style="min-width:170px">
@@ -1157,16 +1266,6 @@
             <button class="fclear" id="bFindClear">Clear</button>
             <span class="fcount" id="bFindCount"></span>
           </span>
-        </div>
-        <div class="boq-toolbar">
-          <button class="bt-add hdr" id="btAddHeader" title="Add a top-level section header"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg>Header</button>
-          <button class="bt-add itm" id="btAddItem" title="Add a BOQ line item"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Item</button>
-          <button class="bt-add" id="btAddNote" title="Add a note row"><svg viewBox="0 0 24 24"><path d="M9 7h6m-6 4h6m-6 4h4M5 3h14a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg>Note</button>
-          <div class="bt-sep"></div>
-          <button class="bt-ico" id="btExpandAll" title="Expand all groups">⊞</button>
-          <button class="bt-ico" id="btCollapseAll" title="Collapse all groups">⊟</button>
-          <div class="bt-sep"></div>
-          <input class="bt-find" id="bTreeFind" placeholder="🔎 Filter tree by name, code, WBS or category…" autocomplete="off">
         </div>
         <datalist id="uomMasterList"></datalist>
         <div class="boq-scroll" id="boqScroll">
@@ -1189,26 +1288,17 @@
           <div id="bCatBody" style="display:grid;grid-template-columns:1fr auto auto;gap:3px 16px;font-size:12px"></div>
         </div>
         <div class="boq-foot">
-          <span class="lines"><b id="bCount">0</b> line items <button class="btn" id="bCatToggle" style="font-size:10px;padding:3px 8px;margin-left:8px">📊 Summary</button></span>
-          <div class="grand" style="gap:20px;align-items:flex-end">
-            <div style="text-align:right">
-              <div style="font-size:10px;color:var(--dim);letter-spacing:.5px">BASE (excl. GST)</div>
-              <div class="amt" id="bBase" style="font-size:16px">₹0</div>
-            </div>
-            <div style="text-align:right">
-              <div style="font-size:10px;color:var(--dim);letter-spacing:.5px">+ GST</div>
-              <div class="amt" id="bGst" style="font-size:16px;color:var(--dim)">₹0</div>
-            </div>
-            <div style="border-left:1px solid var(--line);padding-left:20px;text-align:right">
-              <span class="lbl">GRAND TOTAL</span>
-              <div class="amt" id="bGrand">₹0</div>
-            </div>
+          <span class="lines"><b id="bCount">0</b> items<span class="dot">·</span><b id="bSecCount">0</b> sections
+            <button class="btn" id="bCatToggle" style="font-size:10px;padding:3px 8px;margin-left:8px">📊 Summary</button></span>
+          <div class="grand">
+            <div class="gcell"><span class="glbl">Base excl. GST</span><span class="amt" id="bBase">₹0</span></div>
+            <div class="gcell"><span class="glbl">+ GST</span><span class="amt sub" id="bGst">₹0</span></div>
+            <div class="gcell tot"><span class="glbl">Grand Total</span><span class="amt" id="bGrand">₹0</span></div>
           </div>
+          <button class="btn xfer" id="bToQuote" style="flex-shrink:0;white-space:nowrap" title="Send these BOQ items into the Enquiry module to issue an RFQ"><svg viewBox="0 0 24 24" fill="none"><path d="M14 3v4a1 1 0 0 0 1 1h4M5 3h7l7 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM9 14h6m0 0-2.5-2.5M15 14l-2.5 2.5"/></svg>Transfer to Enquiry</button>
         </div>
-        <div class="boq-meta boq-actions">
-          <input class="proj" id="bProj" placeholder="Project name…" style="display:none">
-          <input id="bClient" placeholder="Contractor / Vendor" style="display:none">
-          <button class="btn xfer" id="bToQuote" style="margin-left:auto" title="Send these BOQ items into the Enquiry module to issue an RFQ"><svg viewBox="0 0 24 24" fill="none"><path d="M14 3v4a1 1 0 0 0 1 1h4M5 3h7l7 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM9 14h6m0 0-2.5-2.5M15 14l-2.5 2.5"/></svg>Transfer to Enquiry</button>
+        <div class="boq-meta boq-actions" style="display:none">
+          <input id="bClient" placeholder="Contractor / Vendor">
         </div>
       </div>
     </div>
@@ -2833,9 +2923,16 @@ function recalcFooter(){
     if(a){base+=a; gstAmt+=a*(parseFloat(x.gst)||0)/100;}
   });
   const bEl=$('#bBase'), gEl=$('#bGst'), tEl=$('#bGrand');
+  const grand='₹'+inr(Math.round((base+gstAmt)*100)/100);
   if(bEl)bEl.textContent='₹'+inr(Math.round(base*100)/100);
   if(gEl)gEl.textContent='₹'+inr(Math.round(gstAmt*100)/100);
-  if(tEl)tEl.textContent='₹'+inr(Math.round((base+gstAmt)*100)/100);
+  if(tEl)tEl.textContent=grand;
+  /* header/footer context counters (display only) */
+  const items=boq.filter(n=>QUOTABLE.has(n.type)).length;
+  const secs=boq.filter(n=>n.type==='header'||n.type==='subheader').length;
+  const sEl=$('#bSecCount'); if(sEl)sEl.textContent=secs;
+  const hEl=$('#bHdrSum');
+  if(hEl)hEl.innerHTML=boq.length?`<b>${items}</b> items · <b>${secs}</b> sections · <b>${grand}</b>`:'';
 }
 function renderCatSummary(){
   const totals={}; let all=0;
@@ -2896,7 +2993,7 @@ function renderBOQ(){
   $('#bCount').textContent=boq.filter(n=>QUOTABLE.has(n.type)).length;
   if(!boq.length){
     boqScroll.innerHTML=`<div class="boq-empty"><svg viewBox="0 0 24 24" fill="none"><path d="M9 11H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-4M12 3v8m0 0 3-3m-3 3L9 8"/></svg><h4>Your BOQ is empty</h4><div>Add a <b>Header</b>, then nest <b>Items</b> under it — or search the library on the left and click ＋. Use ⇥/⇤ to indent, drag ⋮⋮ to reorder. Build unlimited levels.</div></div>`;
-    $('#bGrand').textContent='₹0'; $('#bBase').textContent='₹0'; $('#bGst').textContent='₹0'; return;
+    recalcFooter(); return;
   }
   const nums=bNumbering(), wbs=bWBS(), codes=bItemCodes();
   const {idx,filtered}=bVisibleIndices();
@@ -3334,6 +3431,44 @@ $('#bToQuote').addEventListener('click',openTransferDialog);
   menu&&menu.addEventListener('click',()=>dd.classList.remove('open')); // close after choosing a format
   document.addEventListener('click',e=>{ if(!dd.contains(e.target)) dd.classList.remove('open'); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape') dd.classList.remove('open'); });
+})();
+
+/* ── BOQ toolbar "＋ Add" menu — same open/close pattern as Export.
+      The real Header/Item/Note buttons simply live inside it, so every
+      existing handler and keyboard shortcut keeps working untouched. ── */
+(function(){
+  const dd=$('#btAddDd'), btn=$('#btAddMenuBtn'), menu=$('#btAddMenu');
+  if(!dd||!btn)return;
+  btn.addEventListener('click',e=>{ e.stopPropagation(); dd.classList.toggle('open'); });
+  menu&&menu.addEventListener('click',()=>dd.classList.remove('open'));
+  document.addEventListener('click',e=>{ if(!dd.contains(e.target)) dd.classList.remove('open'); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') dd.classList.remove('open'); });
+})();
+
+/* ── Library filter bar: collapsed until used, with an active-filter count.
+      Only shows/hides the existing controls — filtering itself is unchanged. ── */
+(function(){
+  const bar=$('#cCtrl'), tog=$('#cFltTog'), cnt=$('#cFltCount'), clr=$('#cFltClear');
+  if(!bar||!tog)return;
+  const scopeBtn=()=>document.querySelector('#cScope button.on');
+  function refresh(){
+    let n=0;
+    ['#cWGroup','#cCat','#cUom'].forEach(s=>{ const el=$(s); if(el&&el.value!=='') n++; });
+    const sb=scopeBtn(); if(sb&&sb.dataset.s!=='name') n++;
+    if(cnt)cnt.textContent=n;
+    tog.classList.toggle('has',n>0);
+    if(n>0) bar.classList.add('open');          // never hide filters that are active
+  }
+  tog.addEventListener('click',()=>bar.classList.toggle('open'));
+  bar.addEventListener('change',refresh);
+  bar.addEventListener('click',e=>{ if(e.target.closest('#cScope')) setTimeout(refresh,0); });
+  clr&&clr.addEventListener('click',()=>{
+    ['#cWGroup','#cCat','#cUom'].forEach(s=>{ const el=$(s); if(el&&el.value!==''){ el.value=''; el.dispatchEvent(new Event('change')); } });
+    const first=document.querySelector('#cScope button[data-s="name"]');
+    if(first&&!first.classList.contains('on')) first.click();
+    refresh();
+  });
+  refresh();
 })();
 
 $('#bExpCsv').addEventListener('click',()=>{
@@ -6076,7 +6211,8 @@ setInterval(()=>{ if(typeof cInit!=='undefined'&&cInit&&typeof boq!=='undefined'
     const bar=document.getElementById('boqFindBar');
     const tog=document.getElementById('bFindToggle');
     if(!bar||!tog) return;
-    try{ if(localStorage.getItem('boq_find_collapsed')==='1') bar.classList.add('collapsed'); }catch(e){}
+    /* collapsed by default (markup); an explicit stored choice still wins */
+    try{ const v=localStorage.getItem('boq_find_collapsed'); if(v==='0') bar.classList.remove('collapsed'); else bar.classList.add('collapsed'); }catch(e){}
     const apply=()=>{ const c=bar.classList.contains('collapsed'); tog.title=c?'Show find-from-history':'Hide find-from-history'; };
     apply();
     tog.addEventListener('click',()=>{
