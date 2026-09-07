@@ -319,6 +319,14 @@
       markRead: (id) => post('/notifications/' + id + '/read'),
       markAllRead: () => post('/notifications/read-all'),
     },
+    /* GSTIN verification. The provider key lives only on the server; this
+       just posts the GSTIN and gets back a normalised answer. */
+    gst: {
+      config: () => get('/gst/config'),
+      verify: (gstin, opts) => post('/gst/verify', Object.assign({ gstin }, opts || {})),
+      history: (gstin) => get('/gst/history', { gstin }),
+    },
+
 
     audit: { list: (opts) => get('/audit', opts) },
 

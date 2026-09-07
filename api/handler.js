@@ -32,6 +32,19 @@ function buildEnv() {
     COOKIE_SECURE: process.env.COOKIE_SECURE || 'true',
     SESSION_PEPPER: process.env.SESSION_PEPPER,
     BOOTSTRAP_TOKEN: process.env.BOOTSTRAP_TOKEN,
+    /* GSTIN verification provider (backend/routes/gst.js). Absent = the
+       endpoint reports PROVIDER_UNCONFIGURED; it never fakes a result. */
+    GST_API_PROVIDER: process.env.GST_API_PROVIDER,
+    GST_API_KEY: process.env.GST_API_KEY,
+    GST_API_SECRET: process.env.GST_API_SECRET,
+    GST_API_URL: process.env.GST_API_URL,
+    GST_API_METHOD: process.env.GST_API_METHOD,
+    GST_API_HEADERS: process.env.GST_API_HEADERS,
+    GST_API_BODY: process.env.GST_API_BODY,
+    GST_API_FIELD_MAP: process.env.GST_API_FIELD_MAP,
+    GST_API_TIMEOUT_MS: process.env.GST_API_TIMEOUT_MS,
+    GST_CACHE_DAYS: process.env.GST_CACHE_DAYS,
+    GST_RATE_LIMIT_PER_HOUR: process.env.GST_RATE_LIMIT_PER_HOUR,
   };
 }
 

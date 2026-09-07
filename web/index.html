@@ -205,6 +205,17 @@
   .vm-status.err{color:var(--red)}
   .vm-status.busy{color:var(--faint)}
   .vm-field-err{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(248,113,113,.12)!important}
+  /* GST verification — compact result panel + badges */
+  .vm-gstbox{margin-top:8px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 11px;display:grid;gap:3px}
+  .vm-gstrow{display:flex;gap:10px;font-size:11.5px;line-height:1.5}
+  .vm-gstrow span{color:var(--faint);min-width:96px;flex-shrink:0}
+  .vm-gstrow b{color:var(--ink);font-weight:600;word-break:break-word}
+  .vm-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:10px;font-family:'Spline Sans Mono',monospace;background:var(--panel3);color:var(--dim);border:1px solid var(--line)}
+  .vm-badge.ok{background:rgba(52,211,153,.14);color:var(--green);border-color:rgba(52,211,153,.4)}
+  .vm-badge.warn{background:rgba(255,210,63,.14);color:var(--accent2);border-color:rgba(255,210,63,.35)}
+  .vm-gflag{font-size:8.5px;font-family:'Spline Sans Mono',monospace;padding:1px 5px;border-radius:3px;margin-left:5px;white-space:nowrap}
+  .vm-gflag.ok{background:rgba(52,211,153,.14);color:var(--green)}
+  .vm-gflag.no{background:rgba(255,210,63,.12);color:var(--accent2)}
   @keyframes vmSpin{to{transform:rotate(360deg)}}
   .vm-spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:vmSpin .6s linear infinite;vertical-align:middle;margin-right:5px}
   .modal-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -8428,16 +8439,33 @@ function vmtplParse(aoa){
 
 function vmtplApply(res){
   let added=0,updated=0;
+  /* Spreadsheet GST/PAN is operator-entered data, never a government check.
+     Rows are normalised and the PAN is derived from the GSTIN so the two
+     always agree, but nothing here is ever marked verified. */
+  const prep=(rec)=>{
+    const gst=_vmNormGSTIN(rec.gst);
+    const derived=gst?_vmPanFromGSTIN(gst):'';
+    const pan=derived||String(rec.pan||'').replace(/\s+/g,'').toUpperCase();
+    return {gst,pan};
+  };
   res.update.forEach(rec=>{
     const v=(DB.vendorMaster||[]).find(x=>x.id===rec.id); if(!v)return;
+    const {gst,pan}=prep(rec);
     v.name=rec.name; v.code=rec.code||v.code; v.category=rec.cat||v.category; v.mobile=rec.mobile||v.mobile;
-    v.email=rec.email||v.email; v.gst=rec.gst||v.gst; v.pan=rec.pan||v.pan; v.address=rec.addr||v.address;
+    v.email=rec.email||v.email; v.address=rec.addr||v.address;
+    if(gst&&gst!==_vmNormGSTIN(v.gst)){ v.gst=gst; _vmClearGstMeta(v); v.pan=pan||v.pan; }
+    else if(!v.gst&&gst){ v.gst=gst; _vmClearGstMeta(v); v.pan=pan||v.pan; }
+    else if(pan&&!v.gst){ v.pan=pan; }
     if(rec.rating!=null)v.rating=rec.rating;
     updated++;
   });
   res.add.forEach(rec=>{
     DB.vendorMaster=DB.vendorMaster||[];
-    DB.vendorMaster.push({id:uid(),name:rec.name,code:rec.code||'',category:rec.cat||'',contact:'',mobile:rec.mobile||'',email:rec.email||'',gst:rec.gst||'',pan:rec.pan||'',address:rec.addr||'',rating:rec.rating||0});
+    const {gst,pan}=prep(rec);
+    DB.vendorMaster.push({id:uid(),name:rec.name,code:rec.code||'',category:rec.cat||'',contact:'',
+      mobile:rec.mobile||'',email:rec.email||'',gst:gst,pan:pan,address:rec.addr||'',rating:rec.rating||0,
+      gstStatus:'',gstLegalName:'',gstTradeName:'',gstState:gst?_vmStateFromGSTIN(gst):'',
+      gstRegistrationDate:'',gstVerified:false,gstVerifiedAt:'',gstVerificationSource:''});
     added++;
   });
   saveDB();
@@ -8473,7 +8501,17 @@ function vmtplPreview(res,fname){
   ov.querySelector('#vmtplCancel').onclick=close;
   ov.addEventListener('click',e=>{if(e.target===ov)close();});
   const go=ov.querySelector('#vmtplGo');
-  if(go)go.onclick=()=>{const r=vmtplApply(res);close();showToast('✓ Vendor Master updated — '+r.added+' added, '+r.updated+' updated');renderVendorMaster($('#qmMain'));};
+  if(go)go.onclick=()=>{
+    const r=vmtplApply(res);close();
+    showToast('✓ Vendor Master updated — '+r.added+' added, '+r.updated+' updated');
+    renderVendorMaster($('#qmMain'));
+    /* Imported GST/PAN is operator-entered data, not a government check. Say
+       so plainly and offer the real verification instead of implying one. */
+    const pend=(DB.vendorMaster||[]).filter(v=>v.gst&&!v.gstVerified).length;
+    if(pend)setTimeout(()=>{
+      if(confirm('GSTIN/PAN imported from Excel is not government verified.\n\n'+pend+' vendor'+(pend===1?'':'s')+' now hold an unverified GSTIN.\n\nVerify them with the GST provider now? (You can also do this later from Vendor Master → Verify GSTINs.)'))_vmVerifyAllGst();
+    },250);
+  };
 }
 
 function vmtplUpload(){
@@ -8518,7 +8556,7 @@ function renderVendorMaster(m){
       <td><select class="vmF" data-id="${v.id}" data-k="category" style="min-width:120px">${(cats.includes(v.category||'')?cats:[v.category].concat(cats)).map(c=>`<option ${c===v.category?'selected':''}>${esc(c)}</option>`).join('')}</select></td>
       <td><input class="vmF" data-id="${v.id}" data-k="mobile" value="${esc(v.mobile||'')}" placeholder="—" style="width:110px"></td>
       <td><input class="vmF" data-id="${v.id}" data-k="email" value="${esc(v.email||'')}" placeholder="—" style="min-width:150px"></td>
-      <td><input class="vmF" data-id="${v.id}" data-k="gst" value="${esc(v.gst||'')}" placeholder="—" style="width:130px"></td>
+      <td><input class="vmF" data-id="${v.id}" data-k="gst" value="${esc(v.gst||'')}" placeholder="—" style="width:130px">${v.gst?(v.gstVerified?`<span class="vm-gflag ok" title="Government verified${v.gstVerifiedAt?' on '+esc(_vmFmtVerifiedAt(v.gstVerifiedAt)):''}${v.gstLegalName?' — '+esc(v.gstLegalName):''}">✓ VERIFIED</span>`:`<span class="vm-gflag no" title="This GSTIN has not been government verified. Open the vendor and click Verify GST.">NOT VERIFIED</span>`):''}</td>
       <td><input class="vmF" data-id="${v.id}" data-k="pan" value="${esc(v.pan||'')}" placeholder="—" style="width:100px"></td>
       <td style="white-space:nowrap">${star(v.rating||0,v.id)}</td>
       <td class="mono" style="text-align:center">${st.quotes}</td>
@@ -8537,6 +8575,7 @@ function renderVendorMaster(m){
       <button class="btn primary vm-add" onclick="QM._vmAdd()"><svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2"/></svg>Add Vendor</button>
       <button class="btn xbtn vm-add" onclick="QM._vmTemplate()" title="Download an Excel template pre-filled with your vendors"><svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Template</button>
       <button class="btn xbtn green vm-add" onclick="QM._vmImport()" title="Upload a filled template to add or update vendors in bulk"><svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M12 21V9m0 0 4 4m-4-4-4 4M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/></svg>Import / Update</button>
+      <button class="btn xbtn" onclick="QM._vmVerifyAllGst()" title="Verify every unverified GSTIN with the GST provider (runs one at a time)"><svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Verify GSTINs</button>
       <div style="flex:1"></div><span style="font-size:11px;color:var(--faint)">${shown.length} vendor${shown.length!==1?'s':''}</span>
     </div>
     <div class="qm-scrollx"><table class="qm-tbl"><thead><tr>
@@ -8545,7 +8584,33 @@ function renderVendorMaster(m){
     </tr></thead><tbody>${rows||`<tr><td colspan="15" style="text-align:center;padding:30px;color:var(--faint)">No vendors yet — add one, or create a enquiry with vendors.</td></tr>`}</tbody></table></div>
   </div>`;
   const s=$('#vmSearch');if(s)s.addEventListener('input',e=>{vmFilter=e.target.value;const p=e.target.selectionStart;renderVendorMaster(m);const s2=$('#vmSearch');if(s2){s2.focus();s2.setSelectionRange(p,p);}});
-  m.querySelectorAll('.vmF').forEach(el=>el.addEventListener('change',e=>{const v=DB.vendorMaster.find(x=>x.id===e.target.dataset.id);if(v){v[e.target.dataset.k]=e.target.value;saveDB();showToast('✓ Saved');}}));
+  m.querySelectorAll('.vmF').forEach(el=>el.addEventListener('change',e=>{
+    const v=DB.vendorMaster.find(x=>x.id===e.target.dataset.id);if(!v)return;
+    const k=e.target.dataset.k;
+    if(k==='gst'){
+      /* Editing a GSTIN here must drop the old verification with it — a
+         verified flag left attached to a different number would be a lie. */
+      const g=_vmNormGSTIN(e.target.value);
+      e.target.value=g;
+      if(g!==_vmNormGSTIN(v.gst)){
+        v.gst=g;
+        const dup=g?(DB.vendorMaster||[]).find(x=>x.id!==v.id&&_vmNormGSTIN(x.gst)===g):null;
+        if(dup){
+          e.target.value=v.gst='';
+          showToast('✕ GSTIN already exists — '+(dup.name||'another vendor'));
+          renderVendorMaster(m);return;
+        }
+        _vmClearGstMeta(v);
+        const derived=_vmPanFromGSTIN(g);
+        if(derived)v.pan=derived; else if(g)v.pan='';
+        saveDB();renderVendorMaster(m);
+        showToast(g?'✓ Saved — GSTIN needs re-verification':'✓ Saved');
+        return;
+      }
+      return;
+    }
+    v[k]=e.target.value;saveDB();showToast('✓ Saved');
+  }));
 }
 
 /* ── Vendor Form — validation helpers ── */
@@ -8600,12 +8665,14 @@ function openVendorForm(editId){
     <div class="vm-sec"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>GST Details</div>
     <div class="vm-row">
       <div class="vm-field"><label>GSTIN</label>
-      <input id="vmFGST" value="${esc(v.gst||'')}" placeholder="22AAAAA0000A1Z5" maxlength="15" style="text-transform:uppercase"></div>
+      <input id="vmFGST" value="${esc(v.gst||'')}" placeholder="22AAAAA0000A1Z5" maxlength="15" style="text-transform:uppercase" autocomplete="off"></div>
       <button class="vm-verify" id="vmFGSTBtn" onclick="QM._vmVerifyGST()" style="margin-bottom:0;align-self:flex-end">Verify GST</button>
+      <button class="vm-verify" id="vmFGSTReBtn" onclick="QM._vmVerifyGST(true)" title="Ignore the cached result and ask the GST provider again" style="margin-bottom:0;align-self:flex-end;display:none;border-color:var(--line);color:var(--dim)">↻ Re-verify</button>
     </div>
     <div id="vmFGSTStatus" class="vm-status"></div>
-    <label>PAN</label>
-    <input id="vmFPAN" value="${esc(v.pan||'')}" placeholder="Auto-filled from GST or enter manually" maxlength="10" style="text-transform:uppercase">
+    <div id="vmFGSTDetail" class="vm-gstbox" style="display:none"></div>
+    <div class="ni-descrow"><label>PAN</label><span id="vmFPANBadge" class="vm-badge" style="display:none"></span></div>
+    <input id="vmFPAN" value="${esc(v.pan||'')}" placeholder="Auto-filled from GSTIN or enter manually" maxlength="10" style="text-transform:uppercase" autocomplete="off">
 
     <div class="vm-sec"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Bank Details</div>
     <div class="modal-2col">
@@ -8650,21 +8717,218 @@ function openVendorForm(editId){
   /* IFSC auto-fetch on blur */
   const ifscEl=$('#vmFBIFSC');
   if(ifscEl)ifscEl.addEventListener('blur',_vmFetchIFSC);
+
+  /* ── GST verification state for this form ──
+     Restored from the saved vendor, so re-opening a verified vendor shows
+     its badge without re-calling the provider. It is bound to the GSTIN it
+     was obtained for: edit the GSTIN and it is discarded (see below). */
+  _vmGstV = (v.gst && v.gstVerified)
+    ? { gstin:_vmNormGSTIN(v.gst), verified:true, status:v.gstStatus||null, legalName:v.gstLegalName||null,
+        tradeName:v.gstTradeName||null, pan:v.pan||null, state:v.gstState||null,
+        registrationDate:v.gstRegistrationDate||null, verifiedAt:v.gstVerifiedAt||null,
+        source:v.gstVerificationSource||null }
+    : null;
+  _vmGstInFlight=false;
+  _vmRenderGstState();
+
+  const gstEl=$('#vmFGST');
+  if(gstEl)gstEl.addEventListener('input',_vmGstInputChanged);
 }
 
-/* GST verify */
-function _vmVerifyGST(){
-  const inp=$('#vmFGST');const st=$('#vmFGSTStatus');const btn=$('#vmFGSTBtn');
-  if(!inp||!st)return;
-  const gstin=inp.value.trim().toUpperCase();inp.value=gstin;
-  if(!gstin){st.className='vm-status err';st.textContent='Enter a GSTIN to verify.';return;}
-  if(!_vmValidGSTIN(gstin)){st.className='vm-status err';st.textContent='✕ Invalid GSTIN format or checksum.';inp.classList.add('vm-field-err');return;}
+/* ── GSTIN helpers ────────────────────────────────────────────────
+   PAN sits at characters 3–12 of a GSTIN (index 2..11). Extracting it is a
+   local convenience only — it says nothing about whether the registration
+   exists, which is what verification is for. */
+let _vmGstV=null, _vmGstInFlight=false;
+function _vmNormGSTIN(g){return String(g||'').replace(/\s+/g,'').toUpperCase();}
+function _vmPanFromGSTIN(g){const p=_vmNormGSTIN(g).slice(2,12);return _vmValidPAN(p)?p:'';}
+/* Published GST state codes — a government code list, not provider data. */
+const GST_STATES={'01':'Jammu and Kashmir','02':'Himachal Pradesh','03':'Punjab','04':'Chandigarh','05':'Uttarakhand','06':'Haryana','07':'Delhi','08':'Rajasthan','09':'Uttar Pradesh','10':'Bihar','11':'Sikkim','12':'Arunachal Pradesh','13':'Nagaland','14':'Manipur','15':'Mizoram','16':'Tripura','17':'Meghalaya','18':'Assam','19':'West Bengal','20':'Jharkhand','21':'Odisha','22':'Chhattisgarh','23':'Madhya Pradesh','24':'Gujarat','25':'Daman and Diu','26':'Dadra and Nagar Haveli and Daman and Diu','27':'Maharashtra','28':'Andhra Pradesh','29':'Karnataka','30':'Goa','31':'Lakshadweep','32':'Kerala','33':'Tamil Nadu','34':'Puducherry','35':'Andaman and Nicobar Islands','36':'Telangana','37':'Andhra Pradesh','38':'Ladakh','96':'Foreign Country','97':'Other Territory','99':'Centre Jurisdiction'};
+function _vmStateFromGSTIN(g){return GST_STATES[_vmNormGSTIN(g).slice(0,2)]||'';}
+/* Drops every verification field. Used wherever a GSTIN changes, so verified
+   metadata can never outlive the number it was obtained for. */
+function _vmClearGstMeta(v){
+  v.gstStatus='';v.gstLegalName='';v.gstTradeName='';v.gstRegistrationDate='';
+  v.gstVerified=false;v.gstVerifiedAt='';v.gstVerificationSource='';
+  v.gstState=v.gst?_vmStateFromGSTIN(v.gst):'';
+}
+
+/* ── Bulk verification (imported / legacy rows) ───────────────────
+   Sequential with a small gap, not Promise.all: a vendor master can hold
+   hundreds of GSTINs and firing them at once would trip the provider's own
+   rate limit and get the whole batch rejected. The server counts live calls
+   per hour too, so this stops cleanly when that cap is reached. */
+async function _vmVerifyAllGst(ids){
+  if(!(window.CloudflareAPI&&window.CloudflareAPI.gst)){alert('GST verification needs a server connection.');return;}
+  const list=(DB.vendorMaster||[]).filter(v=>(!ids||ids.includes(v.id))&&v.gst&&_vmValidGSTIN(_vmNormGSTIN(v.gst))&&!v.gstVerified);
+  if(!list.length){showToast('Nothing to verify — all GSTINs are either verified or invalid');return;}
+  if(!confirm('Verify '+list.length+' GSTIN'+(list.length===1?'':'s')+' with the GST provider?\n\nThis runs one at a time and may take about '+Math.ceil(list.length*0.7)+'s.'))return;
+
+  let ok=0,bad=0,stopped='';
+  const prog=document.createElement('div');
+  prog.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:10px 18px;font-size:12.5px;color:var(--ink);z-index:100060;box-shadow:0 10px 30px rgba(0,0,0,.4)';
+  document.body.appendChild(prog);
+  try{
+    for(let i=0;i<list.length;i++){
+      const v=list[i];
+      prog.textContent='Verifying '+(i+1)+' of '+list.length+' — '+(v.name||v.gst)+'  ·  ✓'+ok+' ✕'+bad;
+      try{
+        const r=await window.CloudflareAPI.gst.verify(_vmNormGSTIN(v.gst),{vendorId:v.id});
+        if(r&&r.verified){
+          v.gstStatus=r.status||'';v.gstLegalName=r.legalName||'';v.gstTradeName=r.tradeName||'';
+          v.gstState=r.state||_vmStateFromGSTIN(v.gst);v.gstRegistrationDate=r.registrationDate||'';
+          v.gstVerified=true;v.gstVerifiedAt=r.verifiedAt||new Date().toISOString();
+          v.gstVerificationSource=r.source||'';
+          if(r.pan)v.pan=r.pan;
+          ok++;
+        }else{ _vmClearGstMeta(v); bad++; if(r&&r.code==='PROVIDER_UNCONFIGURED'){stopped='Verification is not configured on the server.';break;} }
+      }catch(e){
+        bad++;
+        if(e&&e.code==='RATE_LIMIT'){stopped=e.message||'Hourly verification limit reached.';break;}
+        if(e&&(e.code==='OFFLINE'||e.offline)){stopped='Lost connection to the server.';break;}
+        if(e&&e.code==='FORBIDDEN'){stopped='You do not have permission to verify GSTINs.';break;}
+      }
+      if(i<list.length-1)await new Promise(r=>setTimeout(r,400));   // be a good citizen
+    }
+  }finally{
+    prog.remove();saveDB();
+    const m=document.getElementById('vendors');if(m&&typeof renderVendorMaster==='function')renderVendorMaster(m);
+  }
+  alert('GST verification finished.\n\nVerified: '+ok+'\nNot verified: '+bad+(stopped?'\n\nStopped early: '+stopped:''));
+}
+function _vmFmtVerifiedAt(iso){
+  if(!iso)return '';
+  const d=new Date(iso); if(isNaN(d))return '';
+  return d.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+/* Editing the GSTIN invalidates any previous verification and re-derives the
+   PAN, so a PAN from the old GSTIN can never survive into the saved record. */
+function _vmGstInputChanged(){
+  const inp=$('#vmFGST'), panEl=$('#vmFPAN');
+  if(!inp)return;
+  const cur=_vmNormGSTIN(inp.value);
+  if(inp.value!==cur){const at=inp.selectionStart;inp.value=cur;try{inp.setSelectionRange(at,at);}catch(e){}}
   inp.classList.remove('vm-field-err');
-  st.className='vm-status ok';st.innerHTML='✓ GSTIN format verified';
-  /* auto-extract PAN from GSTIN (chars 2..12) */
-  const pan=gstin.substring(2,12);
-  const panEl=$('#vmFPAN');
-  if(panEl&&!panEl.value.trim())panEl.value=pan;
+  if(_vmGstV && _vmGstV.gstin!==cur) _vmGstV=null;      // different GSTIN ⇒ stale
+  if(panEl){
+    const derived=_vmPanFromGSTIN(cur);
+    /* Overwrite whenever we can derive one: the PAN must always belong to the
+       GSTIN on screen. Only leave a hand-typed PAN alone while the GSTIN is
+       too short/malformed to derive from. */
+    if(derived) panEl.value=derived;
+    else if(cur.length>=12) panEl.value='';
+  }
+  _vmRenderGstState();
+}
+
+/* Single place that paints GST status / details / PAN lock-state. */
+function _vmRenderGstState(msg){
+  const inp=$('#vmFGST'), st=$('#vmFGSTStatus'), box=$('#vmFGSTDetail'),
+        panEl=$('#vmFPAN'), badge=$('#vmFPANBadge'),
+        btn=$('#vmFGSTBtn'), reBtn=$('#vmFGSTReBtn');
+  if(!inp||!st)return;
+  const gstin=_vmNormGSTIN(inp.value);
+  const vr=(_vmGstV&&_vmGstV.gstin===gstin)?_vmGstV:null;
+  const fmtOk=gstin?_vmValidGSTIN(gstin):false;
+
+  if(btn){btn.disabled=_vmGstInFlight;btn.textContent=_vmGstInFlight?'Verifying…':'Verify GST';}
+  if(reBtn)reBtn.style.display=(vr&&vr.verified&&!_vmGstInFlight)?'':'none';
+
+  /* PAN is read-only only while a real verification is in force. */
+  if(panEl){
+    const lock=!!(vr&&vr.verified&&vr.pan);
+    panEl.readOnly=lock;
+    panEl.style.opacity=lock?'.75':'';
+    panEl.title=lock?'Locked to the PAN embedded in the verified GSTIN. Change the GSTIN to edit.':'';
+    if(lock&&vr.pan)panEl.value=vr.pan;
+  }
+  if(badge){
+    if(vr&&vr.verified){badge.style.display='';badge.className='vm-badge ok';badge.textContent='GST Verified';}
+    else{badge.style.display='none';}
+  }
+
+  if(msg){st.className='vm-status '+(msg.kind||'');st.innerHTML=msg.html;}
+  else if(_vmGstInFlight){st.className='vm-status busy';st.innerHTML='<span class="vm-spinner"></span>Verifying GSTIN…';}
+  else if(!gstin){st.className='vm-status';st.textContent='Not verified';}
+  else if(!fmtOk){st.className='vm-status';st.textContent='Not verified — enter a valid 15-character GSTIN.';}
+  else if(vr&&vr.verified){st.className='vm-status ok';st.textContent='✓ GSTIN Verified';}
+  else{st.className='vm-status';st.innerHTML='Format valid · <b>not government verified</b> — click Verify GST.';}
+
+  if(box){
+    if(vr&&vr.verified){
+      const row=(k,val)=>val?`<div class="vm-gstrow"><span>${k}</span><b>${esc(String(val))}</b></div>`:'';
+      box.style.display='';
+      box.innerHTML=row('GSTIN',vr.gstin)+row('Status',vr.status)+row('Legal Name',vr.legalName)
+        +row('Trade Name',vr.tradeName)+row('PAN',vr.pan)+row('State',vr.state||_vmStateFromGSTIN(vr.gstin))
+        +row('Registered',vr.registrationDate)+row('Last Verified',_vmFmtVerifiedAt(vr.verifiedAt))
+        +(vr.source?`<div class="vm-gstrow"><span>Source</span><b>${esc(vr.source)}</b></div>`:'');
+    }else{box.style.display='none';box.innerHTML='';}
+  }
+}
+
+/* GST verify — always through the backend; the provider key never reaches
+   the browser. `force` is the Re-verify path (bypasses the server cache). */
+async function _vmVerifyGST(force){
+  const inp=$('#vmFGST');
+  if(!inp)return;
+  if(_vmGstInFlight)return;                       // no duplicate requests
+  const gstin=_vmNormGSTIN(inp.value);inp.value=gstin;
+
+  if(!gstin){_vmRenderGstState({kind:'err',html:'Enter a GSTIN to verify.'});return;}
+  if(!_vmValidGSTIN(gstin)){
+    inp.classList.add('vm-field-err');
+    _vmRenderGstState({kind:'err',html:'✕ Enter a valid 15-character GSTIN.'});
+    return;
+  }
+  inp.classList.remove('vm-field-err');
+
+  if(!(window.CloudflareAPI&&window.CloudflareAPI.gst)){
+    _vmRenderGstState({kind:'err',html:'✕ GST verification needs the server. You are working offline.'});
+    return;
+  }
+
+  _vmGstInFlight=true;_vmRenderGstState();
+  try{
+    const r=await window.CloudflareAPI.gst.verify(gstin,{force:!!force});
+    _vmGstInFlight=false;
+    if(r&&r.verified){
+      _vmGstV={gstin:r.gstin||gstin,verified:true,status:r.status||null,legalName:r.legalName||null,
+        tradeName:r.tradeName||null,pan:r.pan||_vmPanFromGSTIN(gstin),state:r.state||null,
+        registrationDate:r.registrationDate||null,verifiedAt:r.verifiedAt||new Date().toISOString(),
+        source:r.source||null};
+      _vmRenderGstState();
+      showToast(r.cached?'✓ GSTIN verified (cached)':'✓ GSTIN verified');
+      /* Offer the registered legal name when the vendor name is still blank —
+         never silently overwrite a name the user already typed. */
+      const nameEl=$('#vmFName');
+      if(nameEl&&!nameEl.value.trim()&&(r.legalName||r.tradeName))nameEl.value=r.tradeName||r.legalName;
+      return;
+    }
+    /* A definite answer that is not a verification. Keep the GSTIN on screen. */
+    _vmGstV=null;
+    const code=(r&&r.code)||'';
+    let html='✕ GSTIN could not be verified.';
+    if(code==='PROVIDER_UNCONFIGURED')
+      html='GSTIN format is valid, but government verification is not set up yet. It will be saved as <b>Unverified</b>.';
+    else if(code==='NOT_FOUND') html='✕ This GSTIN was not found on the GST portal.';
+    else if(code==='CANCELLED') html='✕ This GSTIN is registered but has been <b>cancelled</b>.';
+    else if(code==='SUSPENDED') html='✕ This GSTIN is registered but is currently <b>suspended</b>.';
+    else if(code==='INACTIVE')  html='✕ This GSTIN is registered but currently <b>inactive</b>.';
+    else if(r&&r.message) html='✕ '+esc(r.message);
+    _vmRenderGstState({kind:code==='PROVIDER_UNCONFIGURED'?'':'err',html});
+  }catch(e){
+    /* Never wipe what the user typed because a network call failed. */
+    _vmGstInFlight=false;_vmGstV=null;
+    const code=e&&e.code, msg=(e&&e.message)||'';
+    let html;
+    if(code==='RATE_LIMIT') html='✕ '+esc(msg||'Too many verification attempts. Please wait and try again.');
+    else if(code==='OFFLINE'||e&&e.offline) html='✕ Unable to verify GSTIN right now. Please try again.';
+    else if(code==='FORBIDDEN') html='✕ You do not have permission to verify GSTINs.';
+    else if(code==='VALIDATION'||code==='INTERNAL') html='✕ '+esc(msg||'GSTIN could not be verified.');
+    else html='✕ GST verification service is temporarily unavailable. Please try again.';
+    _vmRenderGstState({kind:'err',html});
+  }
 }
 
 /* IFSC auto-fetch */
@@ -8710,8 +8974,27 @@ function _vmSaveForm(editId){
   /* format validations */
   if(mobile&&!_vmValidMobile(mobile)){msg.textContent='Mobile must be 10 digits starting with 6-9.';$('#vmFMobile').classList.add('vm-field-err');$('#vmFMobile').focus();return;}
   if(email&&!_vmValidEmail(email)){msg.textContent='Invalid email address.';$('#vmFEmail').classList.add('vm-field-err');$('#vmFEmail').focus();return;}
-  if(gst&&!_vmValidGSTIN(gst)){msg.textContent='Invalid GSTIN format or checksum.';$('#vmFGST').classList.add('vm-field-err');$('#vmFGST').focus();return;}
+  if(gst&&!_vmValidGSTIN(gst)){msg.textContent='Enter a valid 15-character GSTIN.';$('#vmFGST').classList.add('vm-field-err');$('#vmFGST').focus();return;}
   if(pan&&!_vmValidPAN(pan)){msg.textContent='PAN must be 10 characters (e.g. ABCDE1234F).';$('#vmFPAN').classList.add('vm-field-err');$('#vmFPAN').focus();return;}
+
+  /* GSTIN must not already belong to a different vendor. Compared on the
+     normalised value so spacing/case can't sneak a duplicate through. */
+  if(gst){
+    const clash=(DB.vendorMaster||[]).find(x=>x.id!==editId&&_vmNormGSTIN(x.gst)===gst);
+    if(clash){
+      msg.textContent='GSTIN already exists in Vendor Master — '+(clash.name||'unnamed vendor')+(clash.code?' ('+clash.code+')':'')+'.';
+      $('#vmFGST').classList.add('vm-field-err');$('#vmFGST').focus();return;
+    }
+  }
+  /* The PAN is embedded in the GSTIN, so a mismatch means one of the two is
+     wrong — saving both would leave the record self-contradictory. */
+  if(gst&&pan){
+    const derived=_vmPanFromGSTIN(gst);
+    if(derived&&pan!==derived){
+      msg.textContent='PAN does not match this GSTIN. The GSTIN contains PAN '+derived+'.';
+      $('#vmFPAN').classList.add('vm-field-err');$('#vmFPAN').focus();return;
+    }
+  }
   if(accNum&&!_vmValidAccNum(accNum)){msg.textContent='Account number must be 9–18 digits.';$('#vmFBAccNum').classList.add('vm-field-err');$('#vmFBAccNum').focus();return;}
   if(ifsc&&!_vmValidIFSC(ifsc)){msg.textContent='Invalid IFSC format.';$('#vmFBIFSC').classList.add('vm-field-err');$('#vmFBIFSC').focus();return;}
 
@@ -8741,6 +9024,25 @@ function _vmSaveForm(editId){
     category:$('#vmFCat').value||'',
     remarks:$('#vmFRemarks').value.trim()
   };
+
+  /* ── GST verification metadata ──
+     Only carried over when the in-form result is for the GSTIN actually being
+     saved; otherwise the record is written as unverified. An unverified GSTIN
+     is allowed (business rule), it is just never labelled as verified. */
+  const vr=(gst&&_vmGstV&&_vmGstV.gstin===gst&&_vmGstV.verified)?_vmGstV:null;
+  Object.assign(vendorData,vr?{
+    gstStatus:vr.status||'',
+    gstLegalName:vr.legalName||'',
+    gstTradeName:vr.tradeName||'',
+    gstState:vr.state||_vmStateFromGSTIN(gst),
+    gstRegistrationDate:vr.registrationDate||'',
+    gstVerified:true,
+    gstVerifiedAt:vr.verifiedAt||new Date().toISOString(),
+    gstVerificationSource:vr.source||''
+  }:{
+    gstStatus:'',gstLegalName:'',gstTradeName:'',gstState:gst?_vmStateFromGSTIN(gst):'',
+    gstRegistrationDate:'',gstVerified:false,gstVerifiedAt:'',gstVerificationSource:''
+  });
 
   if(editId){
     /* update existing */
@@ -9301,7 +9603,8 @@ const api={
   _vmRate(id,n){const v=DB.vendorMaster.find(x=>x.id===id);if(v){v.rating=(v.rating===n?n-1:n);saveDB();render();}},
   _vmTemplate(){vmtplDownload();},
   _vmImport(){vmtplUpload();},
-  _vmVerifyGST(){_vmVerifyGST();},
+  _vmVerifyGST(force){_vmVerifyGST(force);},
+  _vmVerifyAllGst(){_vmVerifyAllGst();},
   _vmSaveForm(editId){_vmSaveForm(editId);},
   _apprAct(qid,action){const q=DB.quotations.find(x=>x.id===qid);if(!q)return;const a=apprState(q);const comment=prompt((action==='approved'?'Approve':'Reject')+' at "'+APPR_STAGES[a.stage]+'" — comment (optional):')||'';a.history=a.history||[];a.history.push({stage:APPR_STAGES[a.stage],action,by:'Admin',comment,ts:now()});if(action==='rejected'){a.status='rejected';audit(q,'Approval rejected',{txt:APPR_STAGES[a.stage]+(comment?' — '+comment:'')});}else{audit(q,'Approved',{txt:APPR_STAGES[a.stage]});if(a.stage>=APPR_STAGES.length-1){a.status='approved';notify('approved','Enquiry '+q.base+' fully approved — ready for Work Order.',q.id);}else{a.stage++;}}saveDB();render();showToast(action==='approved'?'✓ Approved — '+(a.status==='approved'?'fully signed off':'advanced to '+APPR_STAGES[a.stage]):'✕ Rejected');},
   _apprReset(qid){const q=DB.quotations.find(x=>x.id===qid);if(!q)return;if(!confirm('Restart the approval workflow from stage 1?'))return;q.approval={stage:0,status:'pending',history:(q.approval&&q.approval.history)||[]};saveDB();render();showToast('↻ Approval restarted');},

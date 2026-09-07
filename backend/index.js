@@ -22,6 +22,7 @@ import registerDocuments from './routes/documents.js';
 import registerMigration from './routes/migration.js';
 import registerAppState from './routes/app-state.js';
 import registerAi from './routes/ai.js';
+import registerGst from './routes/gst.js';
 
 /* Routes that must work without a session. Everything else requires one —
    the default is "authenticated", so forgetting to guard a new route fails
@@ -68,6 +69,7 @@ registerDocuments(router);
 registerMigration(router);
 registerAppState(router);
 registerAi(router);
+registerGst(router);
 
 export default {
   async fetch(request, env) {
