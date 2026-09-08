@@ -85,7 +85,10 @@
   .home-logo .s0,.home-logo path{fill:var(--accent)}
   .modes{display:flex;gap:4px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:4px}
   .modes button{background:none;border:none;color:var(--dim);padding:8px 16px;border-radius:5px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px;transition:.13s}
-  .modes button svg{width:15px;height:15px;stroke-width:2}
+  /* stroke was never set here and the markup carries fill="none" with no
+     stroke attribute, so these icons rendered invisible — text-only nav.
+     Needed for real now that the labels hide on narrow screens. */
+  .modes button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
   .modes button.on{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(255,106,44,.3)}
   .modes button:not(.on):hover{background:var(--hi);color:var(--ink)}
   .topspace{margin-left:auto;display:flex;gap:18px;align-items:center;flex-shrink:0}
@@ -1097,6 +1100,187 @@
   @media(max-width:1750px){#create .kbd-tip{display:none}}
   @media(max-width:1550px){#create .rev-sum{display:none}#create .lib{width:34%;min-width:290px}}
   @media(max-width:1350px){#create .lib{width:32%;min-width:270px}#create .rev-proj{flex-basis:150px}}
+
+  /* ══════════════════════════════════════════════════════════════════
+     DENSITY & RESPONSIVE LAYER
+     Goal: more usable rows on a 1366×768 laptop without shrinking text.
+     Structure first (fewer stacked lines per row, narrower Actions),
+     then spacing. Nothing here changes behaviour or data.
+     ══════════════════════════════════════════════════════════════════ */
+  :root{
+    /* spacing scale — reach for these instead of one-off px values */
+    --sp-1:4px; --sp-2:6px; --sp-3:8px; --sp-4:12px; --sp-5:16px;
+    --ctl-h:32px;              /* min comfortable hit target */
+    --row-pad-y:6px;           /* BOQ table cell padding, tightened per tier */
+  }
+
+  /* ── reusable utilities (replaces one-off rules) ───────────────── */
+  .toolbar{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;flex-shrink:0}
+  .icon-btn{display:inline-flex;align-items:center;justify-content:center;min-width:var(--ctl-h);height:28px;
+    background:var(--panel2);border:1px solid var(--line);color:var(--dim);border-radius:6px;cursor:pointer;transition:.12s}
+  .icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  .panel-header{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-2) var(--sp-4);
+    background:var(--panel2);border-bottom:1px solid var(--line);flex-shrink:0}
+  .responsive-table{overflow:auto;flex:1;min-height:0}
+  .compact{padding:var(--sp-2) var(--sp-3)!important;gap:var(--sp-2)!important}
+  /* Only components scroll sideways — never the page shell. */
+  .view,.create-body,.boq,.lib{min-width:0}
+
+  /* ── BOQ row: one line for name, one for description ───────────── */
+  /* The type tag used to sit on its own line above the name, costing every
+     row ~18px. Now it shares the name's line. */
+  #create .bq-nameline{display:flex;align-items:center;gap:5px;min-width:0}
+  #create .bq-nameline .bq-tag{flex-shrink:0;margin-right:0}
+  #create .bq-noteline{display:flex;align-items:center;gap:5px}
+  #create .bq-noteline .bq-tag{flex-shrink:0}
+  #create .bq-noteline textarea.descin{margin-top:0}
+  /* Collapsed description = exactly one line, no clipped half-line and no
+     always-on resize grip. Focus (or Read more) opens it — that is the
+     "editing state", so editing looks deliberate rather than permanent. */
+  #create textarea.descin{height:19px;min-height:19px;max-height:19px;overflow:hidden;resize:none;
+    margin-top:1px;border-radius:4px;transition:none}
+  #create textarea.descin:focus,#create textarea.descin.rm-open{
+    height:auto;min-height:44px;max-height:150px;overflow:auto;resize:vertical;
+    background:rgba(255,106,44,.06);border-bottom-color:var(--accent);padding:3px 5px;color:var(--fg)}
+  /* The AI-describe button is a secondary action — it appeared on every row
+     and took width from the item name. Revealed on hover/focus instead, so
+     the name keeps its space and stays readable. Still keyboard-reachable. */
+  #create .bq-nameline .bq-airow{opacity:0;width:0;padding:0;margin:0;overflow:hidden;transition:none}
+  #create tr:hover .bq-nameline .bq-airow,
+  #create .bq-nameline .bq-airow:focus-visible,
+  #create .bq-nameline:focus-within .bq-airow{opacity:.55;width:auto;padding:2px 4px}
+  #create tr:hover .bq-nameline .bq-airow:hover{opacity:1}
+  /* description + Read more share one line */
+  #create .bq-descline{display:flex;align-items:center;gap:6px;min-width:0}
+  #create .bq-descline textarea.descin{flex:1;min-width:0}
+  #create .bq-descline:focus-within{align-items:flex-end}
+  #create .rm-toggle{font-size:10px;flex-shrink:0}
+  /* Inputs sit on the row's centre line so a 40px row reads as one band. */
+  #create table.boqt tbody td{vertical-align:middle;padding:var(--row-pad-y) 10px}
+  #create table.boqt tbody td.bq-wbs{vertical-align:middle}
+
+  /* ── Row actions: 2 visible + ⋮ overflow menu ──────────────────── */
+  /* The whole group used to fade in only on hover, which hid the fact that
+     row actions exist at all. The ⋮ now stays faintly visible as a standing
+     affordance; the two shortcuts still appear on hover/focus. */
+  #create .bq-acts{gap:2px;opacity:1}
+  #create .bq-acts>button:not(.bq-more){opacity:0}
+  #create .bq-acts .bq-more{opacity:.4;font-size:15px;line-height:1}
+  #create tr:hover .bq-acts>button,#create .bq-acts:focus-within>button{opacity:1}
+  #create .bq-acts>button:focus-visible{opacity:1;outline:2px solid var(--accent);outline-offset:1px}
+  #create .bq-acts .bq-more[aria-expanded="true"]{background:var(--hi);color:var(--accent)}
+  /* Fixed-positioned (like .bq-ac) so the table's own overflow can't clip it. */
+  .bq-menu{position:fixed;display:none;flex-direction:column;gap:1px;z-index:5000;min-width:186px;
+    background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:5px;
+    box-shadow:0 12px 32px rgba(0,0,0,.4)}
+  .bq-menu.open{display:flex}
+  /* width/height/centring are reset explicitly: .bq-acts button (22×22,
+     justify-content:center) would otherwise apply to these menu rows too. */
+  .bq-menu button{display:flex;align-items:center;justify-content:flex-start;gap:9px;
+    width:100%;height:auto;min-width:0;text-align:left;background:none;border:none;
+    color:var(--ink);font-size:12.5px;font-family:inherit;padding:7px 9px;border-radius:6px;cursor:pointer}
+  .bq-menu button b{width:14px;color:var(--faint);font-weight:400;text-align:center}
+  .bq-menu button:hover{background:var(--hi)}
+  .bq-menu button:hover b{color:var(--accent)}
+  .bq-menu button:disabled{opacity:.35;cursor:default}
+  .bq-menu button:disabled:hover{background:none}
+  .bq-menu-row{display:flex;align-items:center;justify-content:space-between;gap:9px;
+    padding:5px 9px 7px;margin-bottom:2px;border-bottom:1px solid var(--line);font-size:11px;color:var(--faint)}
+
+  /* ── Item library: quieter, denser cards ───────────────────────── */
+  #create .li-desc{-webkit-line-clamp:2}
+  #create .li-meta .tag{padding:1px 5px}
+
+  /* ══ TIER: ≤1500px — standard laptop. Trim chrome, keep type size. ══ */
+  @media(max-width:1500px){
+    .topbar{height:50px;padding:0 var(--sp-4);gap:var(--sp-4)}
+    .topspace{gap:var(--sp-4)}
+    .tstat{display:none}                       /* secondary stats go first */
+    .modes button{padding:7px 12px;font-size:12px}
+    #create .lib{width:30%}
+  }
+  /* ══ TIER: ≤1440px — the working area wins.
+     The table needs ~975px for its natural column widths. Percentage-based
+     library width starved it at 1366px, which pushed Actions off-screen and
+     clipped item names. A fixed, narrower library gives the BOQ the room it
+     needs without squeezing a single column. ══ */
+  @media(max-width:1440px){
+    #create .lib{width:300px;min-width:250px}
+    /* The two optional reference fields give up a little, nothing else does. */
+    #create table.boqt th:nth-child(9),#create table.boqt th:nth-child(10){width:78px!important}
+  }
+  /* ══ TIER: ≤1280px — compact mode. Structure tightens, text does not. ══ */
+  @media(max-width:1280px){
+    :root{--row-pad-y:5px}
+    .topbar{height:46px;gap:var(--sp-3)}
+    .brand h1{font-size:15px} .brand .v{display:none} .brand-sep{margin:0}
+    .modes{padding:3px} .modes button{padding:6px 10px;gap:5px}
+    #create .ctrl{padding:5px var(--sp-3)}
+    #create .rev-row,#create .boq-toolbar{padding:4px var(--sp-3)}
+    #create .boq-filterbar{padding:3px var(--sp-3)}
+    #create .lib{width:285px;min-width:240px}
+    #create .libitem{padding:6px 10px}
+    #create .li-desc{-webkit-line-clamp:1}
+    #create .notes-head{padding:5px var(--sp-3)}
+    #create .boq-foot{padding:5px var(--sp-3);gap:10px}
+    #create .grand{gap:12px}
+    /* Secondary reference fields shrink before anything important does. */
+    #create table.boqt tbody td:nth-child(9) input,
+    #create table.boqt tbody td:nth-child(10) input{min-width:52px;font-size:10.5px}
+  }
+  /* ══ TIER: ≤1100px — icon-only nav, minimum chrome. ══ */
+  @media(max-width:1100px){
+    .brand h1{display:none}
+    /* Labels hide, icons stay — each button keeps title + aria-label, so the
+       name is still available on hover and to a screen reader. */
+    .modes .m-lbl{display:none}
+    .modes button{padding:7px 10px}
+    .modes button svg{width:17px;height:17px}
+    #create .boq-foot .lines{display:none}             /* count lives in the header */
+    #create .grand .gcell:not(.tot) .glbl{font-size:8.5px}
+  }
+  /* ══ TIER: ≤900px — one panel at a time, tabbed. ══ */
+  @media(max-width:900px){
+    #create .create-body{flex-direction:row}           /* tabs swap panels, not stack */
+    #create .lib,#create .boq{width:100%!important;min-width:0!important;flex:1 1 100%!important}
+    #create.tab-boq .lib{display:none}
+    #create.tab-lib .boq{display:none}
+    #create.tab-lib .lib{border-right:none}
+    /* #create-scoped so it beats the base .mobile-tabs{display:none} no
+       matter which of the two rules the stylesheet lists first. */
+    #create .mobile-tabs{display:flex}
+    .split-handle{display:none}
+  }
+  /* ══ TIER: ≤650px — stack the densest control rows. ══ */
+  @media(max-width:650px){
+    #create .rev-row{flex-wrap:wrap;row-gap:var(--sp-1)}
+    #create .boq-foot{flex-wrap:wrap;row-gap:var(--sp-2)}
+    #create .grand{margin-left:0;width:100%;justify-content:space-between}
+    #create .boq-toolbar .bt-srch{flex-basis:100%;order:9}
+  }
+
+  /* ── Library | BOQ tab switcher (only rendered ≤900px) ─────────── */
+  .mobile-tabs{display:none;gap:0;flex-shrink:0;background:var(--panel2);border-bottom:1px solid var(--line)}
+  .mobile-tabs button{flex:1;background:none;border:none;border-bottom:2px solid transparent;color:var(--dim);
+    font-family:inherit;font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+    padding:9px 10px;cursor:pointer;min-height:var(--ctl-h)}
+  .mobile-tabs button.on{color:var(--accent);border-bottom-color:var(--accent);background:var(--panel)}
+  .mobile-tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+  /* ── Comparison: stop long vendor cells from widening their column ──
+     Sticky first columns are NOT done here on purpose: this table's item
+     identity spans six columns (#, Category, Sub-Cat, Item, Description,
+     Unit ≈ 726px). Freezing them would leave almost nothing for vendor
+     columns at 1366px, and freezing only some of them looks broken as the
+     others scroll out from underneath. Which columns to freeze is a design
+     decision, not a default — left alone rather than guessed at. */
+  table.cmpt td.vcell-col{max-width:190px}
+  table.cmpt td.vcell-col .vend .vn{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  /* Focus visibility — keyboard users must always see where they are. */
+  #create .boq-toolbar button:focus-visible,#create .rev-row button:focus-visible,
+  #create .bt-find:focus-visible,.mobile-tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 </style>
 </head>
 <body>
@@ -1130,14 +1314,14 @@
       <h1>TENDERING<i>·</i>SYSTEM</h1><span class="v">v1.0</span>
     </div>
     <div class="modes" id="modes">
-      <button data-m="home" class="on">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H4a1 1 0 0 1-1-1z"/></svg>Menu</button>
-      <button data-m="create">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14"/></svg>Create BOQ</button>
-      <button data-m="quote">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M9 7h6m-6 4h6m-6 4h4M16 3l4 4-9 9H7v-4z"/></svg>Enquiry Management</button>
-      <button data-m="compare">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/></svg>BOQ Master</button>
+      <button data-m="home" class="on" title="Menu" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H4a1 1 0 0 1-1-1z"/></svg><span class="m-lbl">Menu</span></button>
+      <button data-m="create" title="Create BOQ" aria-label="Create BOQ">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14"/></svg><span class="m-lbl">Create BOQ</span></button>
+      <button data-m="quote" title="Enquiry Management" aria-label="Enquiry Management">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 7h6m-6 4h6m-6 4h4M16 3l4 4-9 9H7v-4z"/></svg><span class="m-lbl">Enquiry Management</span></button>
+      <button data-m="compare" title="BOQ Master" aria-label="BOQ Master">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/></svg><span class="m-lbl">BOQ Master</span></button>
     </div>
     <div class="topspace">
       <div id="tsSync" style="display:none;align-items:center;gap:6px;font-size:10.5px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;padding:4px 9px;border:1px solid var(--line);border-radius:20px;background:var(--panel2);white-space:nowrap">
@@ -2966,16 +3150,23 @@ function gstSelHtml(g){
 function typeSelHtml(type){
   return `<select class="bq-typesel" data-act="type" title="Change item type">${Object.keys(BTYPES).map(k=>`<option value="${k}"${k===type?' selected':''}>${BTYPES[k].abbr}</option>`).join('')}</select>`;
 }
+/* Two everyday actions stay visible; the rest live behind ⋮ so the Actions
+   column stops being 150px wide (which pushed it off-screen entirely on a
+   1366px laptop). Every button keeps its data-act, and the row handler is
+   delegated via closest('[data-act]'), so nesting changes no behaviour. */
 function actsHtml(type,canUp,canDown){
   return `<div class="bq-acts">
-    ${typeSelHtml(type)}
-    <button data-act="outdent" title="Outdent">⇤</button>
-    <button data-act="indent" title="Indent">⇥</button>
-    <button data-act="up" title="Move up"${canUp?'':' disabled'}>↑</button>
-    <button data-act="down" title="Move down"${canDown?'':' disabled'}>↓</button>
     <button data-act="child" title="Add child item">↳</button>
-    <button data-act="dup" title="Duplicate">⧉</button>
-    <button data-act="del" class="del-act" title="Delete">×</button>
+    <button data-act="del" class="del-act" title="Delete row">×</button>
+    <button class="bq-more" data-bqmore="1" title="More actions" aria-haspopup="menu" aria-expanded="false">⋮</button>
+    <div class="bq-menu" role="menu">
+      <div class="bq-menu-row"><span>Row type</span>${typeSelHtml(type)}</div>
+      <button data-act="dup"><b>⧉</b>Duplicate</button>
+      <button data-act="indent"><b>⇥</b>Indent</button>
+      <button data-act="outdent"><b>⇤</b>Outdent</button>
+      <button data-act="up"${canUp?'':' disabled'}><b>↑</b>Move up</button>
+      <button data-act="down"${canDown?'':' disabled'}><b>↓</b>Move down</button>
+    </div>
   </div>`;
 }
 function wbsFieldHtml(n,code){
@@ -3028,7 +3219,7 @@ function renderBOQ(){
     if(isNote){
       rows+=`<tr class="bq-row bq-note" data-sid="${b.sid}">
         <td class="bq-wbs"></td><td class="bq-sl"></td>
-        <td colspan="8" style="padding-left:${indent}px"><div class="bq-itemcell">${drag}<span class="bq-caret leaf">▾</span><div class="bq-namewrap">${tag}${descField('descin', b.desc)}</div></div></td>
+        <td colspan="8" style="padding-left:${indent}px"><div class="bq-itemcell">${drag}<span class="bq-caret leaf">▾</span><div class="bq-namewrap bq-noteline">${tag}${descField('descin', b.desc)}</div></div></td>
         <td>${acts}</td></tr>`;
       return;
     }
@@ -3037,7 +3228,7 @@ function renderBOQ(){
       rows+=`<tr class="bq-row bq-grp lv${Math.min(lv,2)}" data-sid="${b.sid}">
         <td class="bq-wbs">${wbsFieldHtml(b,wbs[b.sid])}</td>
         <td class="bq-sl"><b>${nums[b.sid]}</b></td>
-        <td colspan="4" style="padding-left:${indent}px"><div class="bq-itemcell">${drag}${caret}<div class="bq-namewrap">${tag}<input class="pnamein" data-f="name" value="${esc(b.name)}" placeholder="${t.label} name…">${descField('descin',b.desc)}</div></div></td>
+        <td colspan="4" style="padding-left:${indent}px"><div class="bq-itemcell">${drag}${caret}<div class="bq-namewrap"><div class="bq-nameline">${tag}<input class="pnamein" data-f="name" value="${esc(b.name)}" placeholder="${t.label} name…"></div>${descField('descin',b.desc)}</div></div></td>
         <td class="bq-amt"><span class="bq-rowtot">${tot?'₹'+inr(tot):''}</span></td>
         <td colspan="4" style="text-align:right">${acts}</td></tr>`;
       return;
@@ -3052,7 +3243,7 @@ function renderBOQ(){
     rows+=`<tr class="bq-row bq-${b.type}" data-sid="${b.sid}">
       <td class="bq-wbs">${wbsFieldHtml(b,wbs[b.sid])}</td>
       <td class="bq-sl">${nums[b.sid]}${codes[b.sid]?`<div style="font-size:8.5px;color:var(--faint);font-family:'Spline Sans Mono',monospace;margin-top:2px" title="Auto item code (by category)">${codes[b.sid]}</div>`:''}</td>
-      <td style="padding-left:${indent}px;max-width:280px"><div class="bq-itemcell">${drag}${caret}<div class="bq-namewrap">${tag}<div style="display:flex;align-items:center;gap:4px"><input class="namein bq-acname" data-f="name" value="${esc(b.name)}" placeholder="Short name…" autocomplete="off" style="flex:1"><button class="bq-airow" data-aisid="${b.sid}" title="Create description from short name with AI">✨</button></div>${descField('descin', b.desc)}</div></div></td>
+      <td style="padding-left:${indent}px;max-width:280px"><div class="bq-itemcell">${drag}${caret}<div class="bq-namewrap"><div class="bq-nameline">${tag}<input class="namein bq-acname" data-f="name" value="${esc(b.name)}" placeholder="Short name…" autocomplete="off" style="flex:1"><button class="bq-airow" data-aisid="${b.sid}" title="Create description from short name with AI">✨</button></div>${descField('descin', b.desc)}</div></div></td>
       <td class="bq-uom"><input class="uomin" data-f="uom" value="${esc(b.uom)}" placeholder="Unit" list="uomMasterList" autocomplete="off"></td>
       <td>${qtyCell}</td>
       <td><input class="rin" data-f="rate" value="${esc(b.rate)}" placeholder="0" inputmode="decimal"></td>
@@ -3454,6 +3645,80 @@ $('#bToQuote').addEventListener('click',openTransferDialog);
   menu&&menu.addEventListener('click',()=>dd.classList.remove('open'));
   document.addEventListener('click',e=>{ if(!dd.contains(e.target)) dd.classList.remove('open'); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape') dd.classList.remove('open'); });
+})();
+
+/* ── BOQ row ⋮ overflow menu ──────────────────────────────────────
+   Positioned fixed and moved to the pointer, because the menu lives inside
+   .boq-scroll (overflow:auto) and an absolutely-positioned one would be
+   clipped by it on the last rows and the right-hand column. The buttons
+   inside keep their data-act attributes, so the existing delegated row
+   handler runs them unchanged. */
+(function(){
+  function closeAll(except){
+    document.querySelectorAll('.bq-menu.open').forEach(m=>{
+      if(m===except)return;
+      m.classList.remove('open');
+      const b=m.parentNode&&m.parentNode.querySelector('.bq-more');
+      if(b)b.setAttribute('aria-expanded','false');
+    });
+  }
+  document.addEventListener('click',e=>{
+    const btn=e.target.closest('[data-bqmore]');
+    if(!btn){ if(!e.target.closest('.bq-menu')) closeAll(); return; }
+    e.preventDefault(); e.stopPropagation();
+    const menu=btn.parentNode.querySelector('.bq-menu');
+    if(!menu)return;
+    const isOpen=menu.classList.contains('open');
+    closeAll(menu);
+    if(isOpen){ menu.classList.remove('open'); btn.setAttribute('aria-expanded','false'); return; }
+    menu.classList.add('open'); btn.setAttribute('aria-expanded','true');
+    // Anchor to the button, then pull back inside the viewport if needed.
+    const r=btn.getBoundingClientRect(), mh=menu.offsetHeight, mw=menu.offsetWidth;
+    let top=r.bottom+4; if(top+mh>innerHeight-8) top=Math.max(8,r.top-mh-4);
+    let left=r.right-mw; if(left<8) left=8; if(left+mw>innerWidth-8) left=innerWidth-mw-8;
+    menu.style.top=top+'px'; menu.style.left=left+'px';
+  });
+  // Any row action re-renders the table, which discards the menu anyway.
+  document.addEventListener('click',e=>{ if(e.target.closest('.bq-menu [data-act]')) closeAll(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeAll(); });
+  window.addEventListener('resize',()=>closeAll());
+  const sc=document.getElementById('boqScroll');
+  if(sc)sc.addEventListener('scroll',()=>closeAll(),{passive:true});
+})();
+
+/* ── Create BOQ: Library | BOQ tabs on narrow screens ─────────────
+   Below 900px both panels no longer fit side by side. Rather than stacking
+   them (which buries the BOQ under a full-height library), one shows at a
+   time. Above 900px the tab bar is hidden by CSS and both panels show, so
+   the splitter keeps working exactly as before. */
+(function(){
+  const view=document.getElementById('create');
+  const body=view&&view.querySelector('.create-body');
+  if(!view||!body)return;
+  const bar=document.createElement('div');
+  bar.className='mobile-tabs';
+  bar.innerHTML='<button type="button" data-tab="lib">Item Library</button>'+
+                '<button type="button" data-tab="boq">BOQ</button>';
+  body.parentNode.insertBefore(bar,body);
+  function setTab(t){
+    view.classList.toggle('tab-lib',t==='lib');
+    view.classList.toggle('tab-boq',t!=='lib');
+    bar.querySelectorAll('button').forEach(b=>{
+      const on=b.dataset.tab===t;
+      b.classList.toggle('on',on);
+      b.setAttribute('aria-selected',on?'true':'false');
+    });
+    try{localStorage.setItem('boq_panel_tab',t);}catch(e){}
+  }
+  bar.addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)setTab(b.dataset.tab);});
+  let saved='boq';
+  try{saved=localStorage.getItem('boq_panel_tab')||'boq';}catch(e){}
+  setTab(saved);
+  /* Adding from the library should reveal the row it just created. */
+  const list=document.getElementById('cList');
+  if(list)list.addEventListener('click',e=>{
+    if(e.target.closest('.add')&&innerWidth<=900&&view.classList.contains('tab-lib')) setTab('boq');
+  });
 })();
 
 /* ── Library filter bar: collapsed until used, with an active-filter count.
@@ -4679,7 +4944,10 @@ function descField(cls, val){
   const v = esc(val||'');
   const long = (val||'').length > 90;
   const toggle = long ? `<span class="rm-toggle ta-rm">Read more</span>` : '';
-  return `<textarea class="${cls}" data-f="desc" rows="1" placeholder="Description…">${v}</textarea>${toggle}`;
+  // Wrapped so the toggle sits beside the description instead of below it,
+  // which cost every long row an extra line. .ta-rm's handler looks for a
+  // textarea inside parentNode, so this wrapper keeps it working.
+  return `<div class="bq-descline"><textarea class="${cls}" data-f="desc" rows="1" placeholder="Description…">${v}</textarea>${toggle}</div>`;
 }
 // toggle for textarea descriptions
 document.addEventListener('click', e=>{
