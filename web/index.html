@@ -1135,14 +1135,24 @@
   #create .bq-noteline{display:flex;align-items:center;gap:5px}
   #create .bq-noteline .bq-tag{flex-shrink:0}
   #create .bq-noteline textarea.descin{margin-top:0}
-  /* Collapsed description = exactly one line, no clipped half-line and no
-     always-on resize grip. Focus (or Read more) opens it — that is the
-     "editing state", so editing looks deliberate rather than permanent. */
-  #create textarea.descin{height:19px;min-height:19px;max-height:19px;overflow:hidden;resize:none;
-    margin-top:1px;border-radius:4px;transition:none}
+  /* Description box: two lines by default — enough to read most descriptions
+     without opening anything — and freely draggable from the bottom-right
+     corner (resize:both, so the diagonal grip shows). Width is capped at the
+     cell so dragging sideways can never push the table's columns out of
+     alignment; the useful axis is vertical.
+     Two lines instead of one costs about one visible row at 1366×768; that is
+     the trade being made deliberately here. */
+  #create textarea.descin{height:34px;min-height:19px;max-height:340px;max-width:100%;
+    overflow:auto;resize:both;margin-top:1px;border-radius:4px;transition:none}
+  /* Focus is still a visible editing state, but no longer the only way to
+     get a taller box. */
   #create textarea.descin:focus,#create textarea.descin.rm-open{
-    height:auto;min-height:44px;max-height:150px;overflow:auto;resize:vertical;
+    min-height:44px;overflow:auto;
     background:rgba(255,106,44,.06);border-bottom-color:var(--accent);padding:3px 5px;color:var(--fg)}
+  /* Read more opens it to full content height; the grip still works after. */
+  #create textarea.descin.rm-open{height:auto;min-height:96px}
+  /* A note row is all description, so give it the same two lines. */
+  #create .bq-noteline textarea.descin{height:34px}
   /* The AI-describe button is a secondary action — it appeared on every row
      and took width from the item name. Revealed on hover/focus instead, so
      the name keeps its space and stays readable. Still keyboard-reachable. */
