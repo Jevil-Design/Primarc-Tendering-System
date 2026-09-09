@@ -2603,6 +2603,13 @@ function normalizeLevels(){
   syncKinds();
 }
 let bNotes=[]; // Create BOQ notes (strings)
+/* initNotes('b', bNotes, ...) captures this array BY REFERENCE, so its `add()`
+   closure keeps pointing at whichever array was passed at init time. Rebinding
+   bNotes (source import / native-JSON load / revision rollback) detached that
+   closure: every note typed after one of those actions was pushed into the
+   orphaned array — it never rendered, and never reached the CSV/Excel/PDF
+   exports or the draft snapshot, which all read bNotes. Always REPLACE THE
+   CONTENTS in place; never rebind this binding. */
 const cList=$('#cList');
 const ROWH=92, BUF=6;
 
@@ -2972,7 +2979,7 @@ function _impApply(res, srcName){
   boq=res.nodes;
   seq=boq.length?Math.max(...boq.map(b=>b.sid||0)):0;
   migrateBOQ(); bArmedParent=null;
-  if(res.notes && res.notes.length){ bNotes=res.notes; renderNotes('b',bNotes); }
+  if(res.notes && res.notes.length){ bNotes.length=0; res.notes.forEach(n=>bNotes.push(n)); renderNotes('b',bNotes); }
   renderBOQ(); cRender(); bArmBanner(); scheduleAutosave();
   showToast('✓ Imported '+items+' items from '+srcName);
 }
@@ -2986,7 +2993,7 @@ function loadBoqJson(f){
     boq=d.boq; seq=boq.length?Math.max(...boq.map(b=>b.sid||0)):0;
     migrateBOQ(); bArmedParent=null;
     if(d.meta){ if(d.meta.proj!=null)$('#bProj').value=d.meta.proj; if(d.meta.ref!=null&&$('#bRef'))$('#bRef').value=d.meta.ref; if(d.meta.client!=null)$('#bClient').value=d.meta.client; if(d.meta.wo!=null&&$('#bWO'))$('#bWO').value=d.meta.wo; }
-    if(d.notes&&Array.isArray(d.notes)){ bNotes=d.notes; renderNotes('b',bNotes); }
+    if(d.notes&&Array.isArray(d.notes)){ bNotes.length=0; d.notes.forEach(n=>bNotes.push(n)); renderNotes('b',bNotes); }
     renderBOQ(); cRender(); bArmBanner();
     alert('BOQ loaded: '+boq.length+' items.');
   }catch(err){ alert('Could not read file: '+err.message); } };
@@ -3575,7 +3582,7 @@ $('#btExpandAll')?.addEventListener('click',()=>{ boq.forEach(n=>n.collapsed=fal
 $('#btCollapseAll')?.addEventListener('click',()=>{ boq.forEach(n=>{ if(BTYPES[n.type]&&BTYPES[n.type].group) n.collapsed=true; }); renderBOQ(); });
 $('#bTreeFind')?.addEventListener('input',function(){ bTreeFilter=this.value; renderBOQ(); });
 
-$('#bClear').addEventListener('click',()=>{if(boq.length&&confirm('Clear all '+boq.length+' rows?')){boq=[];bArmedParent=null;bArmBanner();renderBOQ();cRender()}});
+$('#bClear').addEventListener('click',()=>{if(boq.length&&confirm('Clear all '+boq.length+' rows?')){boq=[];bArmedParent=null;bArmBanner();renderBOQ();cRender();clearDraft()}});
 
 /* ---- BOQ export helpers ---- */
 function boqMeta(){return {proj:$('#bProj').value||'BOQ',client:$('#bClient').value||''};}
@@ -3666,6 +3673,7 @@ function openTransferDialog(){
     ov.classList.remove('on');
     setMode('quote');
     QM.importFromBOQ({mode,targetId,items,proj:m.proj,client:m.client,notes:bNotes.slice()});
+    clearDraft();   // items now live in the enquiry
   };
 }
 $('#bToQuote').addEventListener('click',openTransferDialog);
@@ -5837,13 +5845,41 @@ function scheduleAutosave(){
   _asTimer=setTimeout(doAutosave,20000);
   _undoCapture();
 }
+/* Per-user working draft, synced to the server so it survives a refresh, a
+   crash, or moving to another machine. CloudflareAPI.draft writes local-first
+   (cf_pending_boq_draft) before its debounced PUT /boq-draft, so a network
+   blip never loses the edit. See backend/routes/boq.js.
+   NOTE: this was previously an empty no-op, and checkRestoreDraft() actively
+   deleted any local draft — in-progress BOQ work had no persistence at all. */
 function doAutosave(){
-  /* Local-browser draft autosave disabled — nothing is written to localStorage. */
+  try{
+    if(window.CloudflareAPI && window.CloudflareAPI.draft && (boq.length || bNotes.length)){
+      window.CloudflareAPI.draft.save(_revSnapshot()).then(r=>{
+        const ind=$('#autosaveInd'); if(!ind) return;
+        ind.textContent=(r&&r.ok)?'✓ Draft saved':'⏳ Saved locally — syncing…';
+        ind.classList.add('show');
+        clearTimeout(ind._hideTimer);
+        ind._hideTimer=setTimeout(()=>ind.classList.remove('show'),2200);
+      });
+    }
+  }catch(e){ console.error('[autosave]',e); }   /* never fail silently */
+}
+function clearDraft(){
+  try{ if(window.CloudflareAPI && window.CloudflareAPI.draft) window.CloudflareAPI.draft.clear(); }catch(e){}
+  try{ localStorage.removeItem(AS_KEY); }catch(e){}
 }
 function checkRestoreDraft(){
-  /* Disabled along with doAutosave(); also purge any pre-existing draft so the
-     restore prompt never resurfaces for browsers that saved one previously. */
-  try{ localStorage.removeItem(AS_KEY); }catch(e){}
+  try{ localStorage.removeItem(AS_KEY); }catch(e){}   /* retire the old local-only key */
+  if(!(window.CloudflareAPI && window.CloudflareAPI.draft) || boq.length) return;
+  window.CloudflareAPI.draft.get().then(r=>{
+    const d=r&&r.draft;
+    if(!d||!Array.isArray(d.boq)||!d.boq.length||boq.length) return;   // user may have started typing
+    const when=r.updatedAt?new Date(r.updatedAt).toLocaleString():'earlier';
+    if(confirm(`Resume your unsaved BOQ draft?\n\n${d.boq.length} item${d.boq.length===1?'':'s'} — saved ${when}\n\nCancel to start fresh (the draft is kept either way).`)){
+      _applyRevSnapshot(d);
+      showToast('↩ Draft restored');
+    }
+  }).catch(()=>{});
 }
 
 /* ── Revision control ─────────────────────────────────── */
@@ -5867,7 +5903,7 @@ function bumpRevision(){
 function _applyRevSnapshot(snap){
   if(!snap||!snap.boq)return false;
   boq=JSON.parse(JSON.stringify(snap.boq));
-  bNotes=JSON.parse(JSON.stringify(snap.notes||[]));
+  bNotes.length=0; JSON.parse(JSON.stringify(snap.notes||[])).forEach(n=>bNotes.push(n));
   seq=snap.seq||boq.length;
   migrateBOQ();
   if($('#bProj'))$('#bProj').value=snap.proj||'';
@@ -8158,6 +8194,15 @@ function techTable(q){
   h+=`</tbody></table></div></div>`;return h;
 }
 function commercialTable(q){
+  /* A vendor saved before `commercial.custom` existed (older qm_data_v2 blobs,
+     imported rows) has no such array, and the custom-rows union below did
+     v.commercial.custom.forEach(...) unguarded — one legacy vendor threw
+     TypeError and took the whole Comparative Statement view down with it.
+     Normalise here, the same way the vendor portal already does. */
+  (q.vendors||[]).forEach(v=>{
+    if(!v.commercial||typeof v.commercial!=='object')v.commercial={};
+    if(!Array.isArray(v.commercial.custom))v.commercial.custom=[];
+  });
   const fields=[['paymentTerms','Payment Terms'],['creditPeriod','Credit Period'],['deliverySchedule','Delivery Schedule'],['materialBaseRate','Material Base Rate'],['warranty','Warranty / DLP'],['validity','Validity'],['escalation','Escalation Clause'],['gstInclusion','GST']];
   let h=`<div class="qm-panel"><h3>Commercial Comparison</h3><div class="qm-scrollx"><table class="qm-tbl"><thead><tr><th>Term</th><th>Client Requirement</th>${q.vendors.map(v=>`<th>${esc(v.name)}</th>`).join('')}</tr></thead><tbody>`;
   const ct=q.terms||{};
@@ -8392,6 +8437,17 @@ function pdfTableBase(chrome,M){return {margin:{left:M,right:M,top:12},didDrawPa
   styles:{fontSize:8,cellPadding:1.8,overflow:'linebreak',valign:'middle',lineColor:PDF_BRAND.LINE,lineWidth:0.1,textColor:[45,50,58]},
   headStyles:{fillColor:PDF_BRAND.INK,textColor:255,fontStyle:'bold',fontSize:8},
   alternateRowStyles:{fillColor:PDF_BRAND.ZEBRA}};}
+
+/* These three live inside the `window.QM = (function(){...})()` closure, but the
+   BOQ PDF export and both vendor-comparison PDF exports are defined in the
+   earlier <script> block, outside it. Without this they hit
+   "ReferenceError: pdfHeader is not defined" and produced no document at all —
+   three export buttons silently broken. Exported here rather than moved, so
+   the shared brand chrome stays defined in one place. */
+window.pdfHeader = pdfHeader;
+window.pdfRs = pdfRs;
+window.pdfTableBase = pdfTableBase;
+window.PDF_BRAND = PDF_BRAND;
 
 /* Vendor-facing PDF of the full quotation: project meta, item rates + amounts, commercial terms, totals.
    Works from the vendor's end (portalCtx is set whenever the portal is open). */
@@ -10100,8 +10156,8 @@ function csExport(q,fmt){
   for(let p=1;p<=pages;p++){doc.setPage(p);doc.setFontSize(6.8);doc.setTextColor(150,155,163);doc.setFont('helvetica','normal');doc.text('Page '+p+' of '+pages,pw-M,H-4.5,{align:'right'});}
   doc.save('CS_'+q.base.replace(/\//g,'-')+'.pdf');
 }
-function csPrintHtml(q){const vr=vendorRank(q);let h=`<h1>Comparative Statement</h1><p>${q.base} · ${q.projectName} — ${q.subject||''}</p><table border=1 cellspacing=0 cellpadding=5><tr><th>#</th><th>Description</th><th>Qty</th><th>UOM</th>${q.vendors.map(v=>'<th>'+v.name+'</th>').join('')}</tr>`;
-  q.items.forEach((it,i)=>{const rank=itemRank(q,i);const rm={};rank.forEach((x,k)=>rm[x.vi]=k);h+=`<tr><td>${i+1}</td><td>${it.desc}</td><td>${it.qty}</td><td>${it.uom||''}</td>${q.vendors.map((v,vi)=>{const a=lineAmt(q,v,i);return '<td>'+(a>0?'₹'+inr(a)+(rm[vi]!=null?' (L'+(rm[vi]+1)+')':''):'-')+'</td>';}).join('')}</tr>`;});
+function csPrintHtml(q){const vr=vendorRank(q);let h=`<h1>Comparative Statement</h1><p>${esc(q.base)} · ${esc(q.projectName)} — ${esc(q.subject||'')}</p><table border=1 cellspacing=0 cellpadding=5><tr><th>#</th><th>Description</th><th>Qty</th><th>UOM</th>${q.vendors.map(v=>'<th>'+esc(v.name)+'</th>').join('')}</tr>`;
+  q.items.forEach((it,i)=>{const rank=itemRank(q,i);const rm={};rank.forEach((x,k)=>rm[x.vi]=k);h+=`<tr><td>${i+1}</td><td>${esc(it.desc)}</td><td>${it.qty}</td><td>${esc(it.uom||'')}</td>${q.vendors.map((v,vi)=>{const a=lineAmt(q,v,i);return '<td>'+(a>0?'₹'+inr(a)+(rm[vi]!=null?' (L'+(rm[vi]+1)+')':''):'-')+'</td>';}).join('')}</tr>`;});
   h+=`<tr><td colspan=4><b>TOTAL (base)</b></td>${q.vendors.map((v,vi)=>{const rk=vr.findIndex(x=>x.vi===vi);return '<td><b>₹'+inr(vendorBase(q,v))+(rk>=0?' L'+(rk+1):'')+'</b></td>';}).join('')}</tr></table>`;return h;}
 function bidExport(q,fmt){
   const vr=vendorRank(q);const sel=q.vendors.find(v=>v.status==='approved')||(vr.length?q.vendors[vr[0].vi]:null);
@@ -10121,9 +10177,9 @@ function bidExport(q,fmt){
     doc.text('Base value '+pdfRs(vendorBase(q,sel))+'    ·    Incl. GST '+pdfRs(vendorTotal(q,sel)),M+6,y+20.5);}
   finish('Bid_'+q.base.replace(/\//g,'-')+'.pdf');
 }
-function bidPrintHtml(q,sel,vr){let h=`<h1>Bid Analysis Report</h1><p>${q.base} · ${q.projectName}</p><table border=1 cellspacing=0 cellpadding=5><tr><th>Vendor</th><th>Items</th><th>Base</th><th>Incl GST</th><th>Rank</th></tr>`;
-  q.vendors.forEach((v,vi)=>{const quoted=v.lines.filter(l=>num(l.rate)>0).length;const rk=vr.findIndex(x=>x.vi===vi);h+=`<tr><td>${v.name}</td><td>${quoted}/${qCountItems(q)}</td><td>₹${inr(vendorBase(q,v))}</td><td>₹${inr(vendorTotal(q,v))}</td><td>${rk>=0?'L'+(rk+1):'-'}</td></tr>`;});
-  h+=`</table><h2 style="color:#1b8a5a">Recommendation: ${sel?sel.name+' — '+vendorId(q,sel):'—'}</h2>`;return h;}
+function bidPrintHtml(q,sel,vr){let h=`<h1>Bid Analysis Report</h1><p>${esc(q.base)} · ${esc(q.projectName)}</p><table border=1 cellspacing=0 cellpadding=5><tr><th>Vendor</th><th>Items</th><th>Base</th><th>Incl GST</th><th>Rank</th></tr>`;
+  q.vendors.forEach((v,vi)=>{const quoted=v.lines.filter(l=>num(l.rate)>0).length;const rk=vr.findIndex(x=>x.vi===vi);h+=`<tr><td>${esc(v.name)}</td><td>${quoted}/${qCountItems(q)}</td><td>₹${inr(vendorBase(q,v))}</td><td>₹${inr(vendorTotal(q,v))}</td><td>${rk>=0?'L'+(rk+1):'-'}</td></tr>`;});
+  h+=`</table><h2 style="color:#1b8a5a">Recommendation: ${sel?esc(sel.name)+' — '+esc(vendorId(q,sel)):'—'}</h2>`;return h;}
 function rfqPdf(q){const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});
   const {startY,chrome,finish,pw,M,B}=pdfHeader(doc,{title:'REQUEST FOR ENQUIRY',subtitle:q.base,rightTop:PROJREF[q.ref]||q.ref||'',rightBot:'Due '+(q.dueDate||'—'),footer:'Primarc · RFQ',running:q.base});
   /* meta */
@@ -10144,7 +10200,7 @@ function rfqPdf(q){const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',for
 function printHTML(title,body){
   const css='<style>*{-webkit-print-color-adjust:exact;print-color-adjust:exact}body{font-family:Arial,Helvetica,sans-serif;padding:24px;color:#111;margin:0}table{border-collapse:collapse;width:100%;font-size:12px}th{background:#bc5b28;color:#fff;text-align:left}td,th{border:1px solid #ccc;padding:6px}h1{font-size:20px;margin:0 0 4px}h2{font-size:15px}p{color:#555;margin:0 0 14px}@page{margin:14mm}</style>';
   const doc='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+title+'</title>'+css+'</head><body>'+body+'</body></html>';
-  const w=window.open('','_blank');
+  const w=window.open('','_blank','noopener');
   if(w&&w.document){                       // popup allowed
     w.document.open();w.document.write(doc);w.document.close();
     const go=()=>{try{w.focus();w.print();}catch(e){}};
