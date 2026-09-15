@@ -1298,6 +1298,73 @@
 /* THEME: restore before paint to avoid flash. Dark default; light opt-in; OS-follow on first visit. */
 (function(){try{var saved=localStorage.getItem('ts_theme');if(!saved){saved=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';}if(saved==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();
 </script>
+<!-- ═══ SIGN-IN COVER ═══════════════════════════════════════════════
+     The app shell is static markup, so it used to paint the dashboard
+     immediately and only raise the login gate after `await TSApi.me()`
+     came back — one network round trip during which an unauthenticated
+     visitor saw the whole home page.
+
+     This cover is in the static HTML, so it is painted BEFORE the app is
+     ever visible, and lifted only once the session state is known. It is
+     an overlay rather than `display:none` on the shell: the app beneath
+     still lays out normally, so boot-time width/height measurements read
+     real numbers instead of zero.
+
+     It is NOT a security boundary — the data lives behind the API, which
+     enforces the session and the permission matrix server-side. This only
+     stops the empty shell from flashing up. ══════════════════════════ -->
+<style>
+  #authSplash{position:fixed;inset:0;z-index:100001;background:var(--bg,#0e1014);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Archivo',system-ui,sans-serif;transition:opacity .18s ease}
+  #authSplash.gone{opacity:0;pointer-events:none}
+  #authSplash .as-box{text-align:center;max-width:min(360px,88vw)}
+  #authSplash .as-mark{font-size:19px;font-weight:800;letter-spacing:-.2px;
+    color:var(--ink,#e8eaef);margin-bottom:9px}
+  #authSplash .as-msg{font-size:12.5px;color:var(--faint,#646d7d)}
+  #authSplash .as-bar{width:132px;height:3px;border-radius:2px;margin:19px auto 0;
+    background:var(--line,#2b313d);overflow:hidden}
+  #authSplash .as-bar i{display:block;width:40%;height:100%;border-radius:2px;
+    background:var(--accent,#ff6a2c);animation:as-slide 1.05s ease-in-out infinite}
+  @keyframes as-slide{0%{transform:translateX(-100%)}100%{transform:translateX(330%)}}
+  #authSplash button{margin-top:17px;background:var(--accent,#ff6a2c);color:#fff;border:none;
+    border-radius:8px;padding:9px 18px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+  @media (prefers-reduced-motion:reduce){#authSplash .as-bar i{animation:none;width:100%}}
+</style>
+<div id="authSplash" role="status" aria-live="polite">
+  <div class="as-box">
+    <div class="as-mark">Primarc Tendering System</div>
+    <div class="as-msg" id="asMsg">Checking your sign-in…</div>
+    <div class="as-bar" id="asBar"><i></i></div>
+  </div>
+</div>
+<script>
+/* Lifted by Auth.boot() once it knows whether to show the app or the login
+   gate. If boot never gets that far (script error, API unreachable) the
+   cover STAYS and offers a reload — failing closed, so a broken boot cannot
+   end up revealing the shell. */
+window.__authCover=(function(){
+  var el=document.getElementById('authSplash'), done=false;
+  var stuck=setTimeout(function(){
+    if(done||!el)return;
+    var m=document.getElementById('asMsg'), b=document.getElementById('asBar');
+    if(m)m.textContent='Could not reach the server. Check your connection and try again.';
+    if(b)b.style.display='none';
+    if(!document.getElementById('asRetry')){
+      var btn=document.createElement('button');
+      btn.id='asRetry'; btn.textContent='Reload';
+      btn.onclick=function(){location.reload();};
+      el.querySelector('.as-box').appendChild(btn);
+    }
+  },15000);
+  return { lift:function(){
+    if(done)return; done=true; clearTimeout(stuck);
+    if(!el)return;
+    el.classList.add('gone');
+    setTimeout(function(){ if(el&&el.parentNode)el.parentNode.removeChild(el); el=null; },220);
+  }};
+})();
+</script>
 <template id="__bundler_thumbnail" data-bg-color="#0e1014">
   <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
     <rect width="1200" height="800" fill="#0e1014"/>
@@ -1924,6 +1991,19 @@
     else if(state==='saving')  set('var(--accent2)','Saving…','Changes are being sent to the server');
     else if(state==='saved'){  set('var(--green)','Saved','All changes stored in the database'); }
     else if(state==='resynced')set('var(--green)','Synced','Reloaded from the server');
+    else if(state==='restricted'){
+      /* Not an error: this role legitimately cannot see some sections. Tell
+         the user once so an empty list is not mistaken for missing data. */
+      var w=(detail&&detail.withheld)||[], names={quotations:'Enquiries',deleted:'Deleted items',
+        vendorMaster:'Vendor Master',workOrders:'Work Orders',masterCustom:'BOQ Master',
+        vendorQuotes:'Vendor quotes & rates'};
+      var list=w.map(function(k){return names[k]||k;}).filter(function(v,i,a){return a.indexOf(v)===i;}).join(', ');
+      set('var(--green)','Synced','Your role cannot view: '+list);
+      if(!window.__restrictedNoticeShown && typeof showToast==='function'){
+        window.__restrictedNoticeShown=true;
+        showToast('Hidden by your role: '+list);
+      }
+    }
     else if(state==='conflict')set('var(--accent)','Reloaded','Someone else changed this record — the server copy was loaded');
     else if(state==='signed-out')set('var(--red)','Signed out','Your session expired');
     else if(state==='rejected'){ set('var(--red)','Not saved',(detail&&detail.message)||'The server refused this change');
@@ -10239,7 +10319,27 @@ const Auth=(function(){
   };
   const PERM_KEYS=[['users','Manage Users'],['create','Create / Add'],['edit','Edit Records'],['del','Delete Records'],['approve','Approve Tenders'],['workorder','Issue Work Orders'],['settings','Change Settings'],['export','Export / Print']];
   const PKEY='ts_perms';
-  let PERM=(function(){try{const s=JSON.parse(localStorage.getItem(PKEY));if(s){const m={};Object.keys(PERM_DEFAULT).forEach(r=>m[r]=Object.assign({},PERM_DEFAULT[r],s[r]||{}));return m;}}catch(e){}return JSON.parse(JSON.stringify(PERM_DEFAULT));})();
+  /* PERM drives what the UI offers. It used to be seeded straight from
+     localStorage['ts_perms'], which any user could edit in devtools to hand
+     themselves Manage Users / Delete / Approve. It is now seeded from the
+     factory defaults and replaced by the server's matrix at sign-in, so the
+     browser copy is a cache of a server decision rather than an input to
+     one. The stored copy is honoured only in offline/local mode, where
+     there is no server to ask.
+
+     This is a usability guard, NOT the security boundary. The real check is
+     server-side (backend/permissions.js + backend/lib/state-acl.js), which
+     decides which sections of the tender data this account may read or
+     write. Editing PERM by hand now only reveals buttons whose API calls
+     come back 403. */
+  let PERM=JSON.parse(JSON.stringify(PERM_DEFAULT));
+  let PERM_FROM_SERVER=false;
+  function _mergePerms(src){const m={};Object.keys(PERM_DEFAULT).forEach(r=>m[r]=Object.assign({},PERM_DEFAULT[r],(src&&src[r])||{}));return m;}
+  /* Offline mode only — with a live API the server's matrix is authoritative. */
+  function _seedLocalPerms(){
+    if(PERM_FROM_SERVER)return;
+    try{const s=JSON.parse(localStorage.getItem(PKEY)); if(s)PERM=_mergePerms(s);}catch(e){}
+  }
   function savePerms(){try{(window.safeSetItem||localStorage.setItem.bind(localStorage))(PKEY,JSON.stringify(PERM));}catch(e){}}
   let session=null, idleTimer=null, editingUserId=null, umFilter='', umSel=[], umScroll=0, umScrollLive=0;
   const ROLE_DESC={'Super Admin':'Full control + user management','Admin':'Full control + user management','QS Engineer':'Create/edit/delete BOQs, enquiries, settings','Purchase':'Create & edit; no deletions','Contractor':'Submit enquiries only','Viewer':'Read-only access'};
@@ -10377,6 +10477,7 @@ const Auth=(function(){
       ${showHint?`<div class="hint">First-time setup — default account:<br><b>Username:</b> admin &nbsp; <b>Password:</b> admin123<br>You'll be asked to change it after sign-in.</div>`:''}
     </div>`;
     g.style.display='flex';
+    if(window.__authCover)window.__authCover.lift();   // gate is up: safe to uncover
     const go=document.getElementById('auGo');
     const submit=async()=>{
       const u=document.getElementById('auU').value.trim().toLowerCase();
@@ -10390,7 +10491,7 @@ const Auth=(function(){
         try{
           const r=await window.TSApi.login(u,p);
           session={uid:r.user.id,username:r.user.username,name:r.user.name,role:r.user.role,ts:Date.now(),last:Date.now()};
-          if(r.perms)PERM=Object.assign(JSON.parse(JSON.stringify(PERM_DEFAULT)),r.perms);
+          if(r.perms){PERM=_mergePerms(r.perms);PERM_FROM_SERVER=true;}
           try{ await window.TSApi.listUsers(); }catch(e){}
           g.style.display='none';
           applyRole(); startIdle();
@@ -10720,26 +10821,28 @@ const Auth=(function(){
       // list afterward, and in the background, since nothing needs it before
       // the gate or the dashboard's first paint.
       try{ const me=await window.TSApi.me();
-        if(me&&me.perms)PERM=Object.assign(JSON.parse(JSON.stringify(PERM_DEFAULT)),me.perms);
+        if(me&&me.perms){PERM=_mergePerms(me.perms);PERM_FROM_SERVER=true;}
         if(me&&me.user){ const u=me.user;
           session={uid:u.id,username:u.username,name:u.name,role:u.role,ts:Date.now(),last:Date.now()};
         } else session=null;
       }catch(e){}
       buildChip();
       if(session){ applyRole(); startIdle();
+        if(window.__authCover)window.__authCover.lift();
         window.TSApi.listUsers().catch(()=>{});
         if(window.TSApi.session&&window.TSApi.session.mustChange)setTimeout(()=>changePassword(true),300);
         if(typeof AI!=='undefined'&&AI.refreshConfig)AI.refreshConfig().then(()=>{if(typeof updateNiBanner==='function')updateNiBanner();if(typeof updateGemStatus==='function')updateGemStatus();}).catch(()=>{});
       } else showLogin();
       return;
     }
+    _seedLocalPerms();     // offline mode only: no server matrix to ask for
     await ensureDefault();
-    if(checkSetupLink())return;          // user arriving via an invite link
+    if(checkSetupLink()){ if(window.__authCover)window.__authCover.lift(); return; }   // invite link
     let s=load(SKEY,null); if(!s){try{s=JSON.parse(sessionStorage.getItem(SKEY));}catch(e){}}
     // validate session user still exists & active
     if(s){ const rec=users().find(x=>x.id===s.uid&&x.active!==false); if(rec){session=s;} }
     buildChip();
-    if(session){ applyRole(); startIdle(); }
+    if(session){ applyRole(); startIdle(); if(window.__authCover)window.__authCover.lift(); }
     else { showLogin(); }
   }
   return {boot,can,logout,
@@ -10935,6 +11038,7 @@ window.Auth=Auth;
 
 /* boot: vendor portal deep-link → otherwise gate the normal app behind login */
 if(!checkPortal()){ Auth.boot(); }
+else if(window.__authCover){ window.__authCover.lift(); }   // vendor portal is public by token
 window.addEventListener('hashchange',()=>{if(location.hash.match(/[vt]=/)){checkPortal();}});
 startCloudPoll();
 

@@ -120,13 +120,18 @@
            n(db.masterCustom) === 0;
   }
 
-  var _resyncing = false;
+  var _resyncing = false, _withheld = [];
   async function resync() {
     if (_resyncing) return; _resyncing = true;
     try {
       var r = await api.request('GET', '/app-state');
       _ver = (r && r.version) || 0;
       var server = r && r.state;
+      /* The server redacts sections this role may not read (see
+         backend/lib/state-acl.js). Say so, or an empty Work Orders list
+         reads as lost data and someone re-enters it. */
+      _withheld = (r && r.withheld) || [];
+      if (_withheld.length) emit('restricted', { withheld: _withheld });
       var local = currentDB();
       if (!isEmptyDB(server)) {
         adoptDB(server);
@@ -265,6 +270,8 @@
 
     // ── data sync ──
     resync: resync,
+    /* Which sections this account is not allowed to see, from the last sync. */
+    withheld: function () { return _withheld.slice(); },
     flushNow: flushNow,
     push: push,
   };

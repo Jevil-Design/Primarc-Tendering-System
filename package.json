@@ -8,6 +8,6 @@
     "@vercel/blob": "^2.8.0"
   },
   "scripts": {
-    "test": "node --test backend/"
+    "test": "node --test \"backend/**/*.test.mjs\""
   }
 }

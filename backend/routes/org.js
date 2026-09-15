@@ -1,4 +1,4 @@
-import { requirePerm, MODULE } from '../permissions.js';
+import { requirePerm, can, MODULE } from '../permissions.js';
 import { logAudit } from '../audit.js';
 import { newId } from '../lib/util.js';
 import { errors } from '../lib/response.js';
@@ -50,10 +50,27 @@ export default function register(router) {
     return { id };
   });
 
+  /* system_settings is a mixed bag: UI preferences sit in the same table as
+     `app_state_v1`, which is the ENTIRE tender dataset (routes/app-state.js).
+     This handler used to select every row and hand the lot to any signed-in
+     caller, so /settings was a second, unguarded copy of the whole database
+     that bypassed even app-state's own checks. Read it as an allow-list now. */
+
+  /* Settings every signed-in user legitimately needs to render the UI. */
+  const UI_KEYS = new Set(['ui_perms', 'ui_user_roles']);
+  /* Never served here whatever the caller's rights — app state has its own
+     per-section ACL, and the migration report quotes raw legacy records. */
+  const NEVER = new Set(['app_state_v1', 'migration_report']);
+
   router.get('/settings', async (ctx) => {
+    const full = can(ctx, MODULE.SETTINGS, 'view') || can(ctx, MODULE.ADMIN, 'view');
     const rows = await ctx.env.DB.prepare('select setting_key, setting_value from system_settings').all();
     const out = {};
-    for (const r of rows.results) { try { out[r.setting_key] = JSON.parse(r.setting_value); } catch { out[r.setting_key] = r.setting_value; } }
+    for (const r of rows.results) {
+      if (NEVER.has(r.setting_key)) continue;
+      if (!full && !UI_KEYS.has(r.setting_key)) continue;
+      try { out[r.setting_key] = JSON.parse(r.setting_value); } catch { out[r.setting_key] = r.setting_value; }
+    }
     const policy = await ctx.env.DB.prepare('select * from system_policy where id = 1').first();
     return { settings: out, policy };
   });
