@@ -1553,6 +1553,209 @@ button.pk:focus-visible{ outline:2px solid var(--blue); outline-offset:2px }
 }
 
 </style>
+<style id="authV2CSS">
+/* ═══════════════════════════════════════════════════════════════════════
+   LOGIN — enterprise split-screen
+   ───────────────────────────────────────────────────────────────────────
+   Every rule is scoped to #authGate.auth-v2 so it outranks the runtime
+   injectCSS() sheet (#authGate .card) on specificity rather than on source
+   order — injectCSS() appends to <head> at call time and would otherwise win.
+
+   Palette: navy branding panel, white/charcoal form, restrained Primarc
+   orange for the single primary action. The architectural motif is inline
+   SVG line-art — no stock photography, no external asset, nothing to fail
+   to load on a slow site connection.
+   ═══════════════════════════════════════════════════════════════════════ */
+#authGate.auth-v2{
+  /* dark (the app's default): navy panel + CHARCOAL form, not near-black */
+  --av2-surface:#1b2230; --av2-field:#141a25; --av2-border:#636f85;  /* 3.44:1 on field */
+  --av2-border-str:#8794ab; --av2-ink:#eef2f8; --av2-dim:#a9b6c9; --av2-faint:#8793a8;
+}
+html[data-theme="light"] #authGate.auth-v2{
+  /* light: navy panel + WHITE form */
+  --av2-surface:#ffffff; --av2-field:#f5f7fa; --av2-border:#7b8595;  /* 3.47:1 on field */
+  --av2-border-str:#5d6878; --av2-ink:#141c28; --av2-dim:#505a6b; --av2-faint:#6d7889;
+}
+#authGate.auth-v2{
+  position:fixed; inset:0; z-index:100000; display:flex;
+  background:var(--av2-surface); font-family:'Archivo',system-ui,sans-serif;
+  align-items:stretch; justify-content:stretch; padding:0; overflow:auto;
+}
+#authGate.auth-v2 .av2{ display:grid; grid-template-columns:1.15fr 1fr; width:100%; min-height:100% }
+
+/* ── branding panel ─────────────────────────────────────────────────── */
+#authGate.auth-v2 .av2-brand{
+  position:relative; overflow:hidden; display:flex; flex-direction:column;
+  justify-content:space-between; gap:26px; padding:42px 46px;
+  background:linear-gradient(160deg,#152440 0%,#0e1a2e 48%,#0a1422 100%);
+  color:#e9eef7;
+}
+#authGate.auth-v2 .av2-art{
+  position:absolute; inset:0; width:100%; height:100%;
+  pointer-events:none; opacity:.5;
+}
+#authGate.auth-v2 .av2-brand > *{ position:relative; z-index:1 }
+#authGate.auth-v2 .av2-bt{ display:flex; align-items:center; gap:13px }
+#authGate.auth-v2 .av2-bt svg.av2-logo{ width:132px; height:auto }
+#authGate.auth-v2 .av2-bt svg.av2-logo path{ fill:#fff }
+#authGate.auth-v2 .av2-bt .av2-div{ width:1px; height:26px; background:rgba(255,255,255,.22) }
+#authGate.auth-v2 .av2-bt .av2-wm{
+  font-size:12px; font-weight:700; letter-spacing:1.6px; text-transform:uppercase; color:#aebdd4;
+}
+#authGate.auth-v2 .av2-brand h1{
+  margin:0 0 14px; font-size:clamp(25px,2.5vw,37px); font-weight:800;
+  line-height:1.14; letter-spacing:-.8px; color:#fff; max-width:19ch;
+}
+#authGate.auth-v2 .av2-brand h1 em{ font-style:normal; color:var(--accent,#ff6a2c) }
+#authGate.auth-v2 .av2-brand .av2-lead{
+  margin:0 0 28px; font-size:13.5px; line-height:1.62; color:#b4c2d7; max-width:48ch;
+}
+#authGate.auth-v2 .av2-feats{ list-style:none; margin:0; padding:0; display:grid; gap:15px }
+#authGate.auth-v2 .av2-feats li{ display:flex; gap:13px; align-items:flex-start }
+#authGate.auth-v2 .av2-fic{
+  flex:0 0 34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12);
+}
+#authGate.auth-v2 .av2-fic svg{ width:17px; height:17px; stroke:var(--accent,#ff6a2c); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round }
+#authGate.auth-v2 .av2-feats b{ display:block; font-size:12.5px; font-weight:700; color:#fff; margin-bottom:2px }
+#authGate.auth-v2 .av2-feats span{ display:block; font-size:11.5px; line-height:1.5; color:#9fb0c8; max-width:42ch }
+#authGate.auth-v2 .av2-bf{ font-size:10.5px; color:#7e90aa; letter-spacing:.3px }
+
+/* ── login panel ────────────────────────────────────────────────────── */
+#authGate.auth-v2 .av2-login{
+  display:flex; align-items:center; justify-content:center;
+  padding:42px 40px; background:var(--av2-surface);
+}
+#authGate.auth-v2 .card.av2-form{
+  width:100%; max-width:372px; background:none; border:0; border-radius:0;
+  padding:0; box-shadow:none; display:block;
+}
+#authGate.auth-v2 .av2-form h2{
+  margin:0 0 5px; font-size:25px; font-weight:800; letter-spacing:-.4px; color:var(--av2-ink);
+}
+#authGate.auth-v2 .av2-sub{ margin:0 0 26px; font-size:13px; color:var(--av2-dim); line-height:1.5 }
+#authGate.auth-v2 .av2-field{ margin-bottom:16px }
+#authGate.auth-v2 .av2-field > label{
+  display:block; margin:0 0 6px; font-size:11px; font-weight:700;
+  letter-spacing:.5px; text-transform:uppercase; color:var(--av2-dim);
+}
+#authGate.auth-v2 .av2-field input[type=text],
+#authGate.auth-v2 .av2-field input[type=password]{
+  width:100%; box-sizing:border-box; font:inherit; font-size:14px;
+  padding:11px 13px; border-radius:9px; color:var(--av2-ink);
+  background:var(--av2-field); border:1.5px solid var(--av2-border);
+  transition:border-color .13s, box-shadow .13s;
+}
+#authGate.auth-v2 .av2-field input:focus{
+  outline:none; border-color:var(--accent,#ff6a2c);
+  box-shadow:0 0 0 3px rgba(255,106,44,.16);
+}
+#authGate.auth-v2 .av2-field input[aria-invalid="true"]{ border-color:var(--red,#e04848) }
+#authGate.auth-v2 .av2-field input[aria-invalid="true"]:focus{ box-shadow:0 0 0 3px rgba(224,72,72,.16) }
+
+/* password + reveal */
+#authGate.auth-v2 .av2-pw{ position:relative }
+#authGate.auth-v2 .av2-pw input{ padding-right:44px !important }
+#authGate.auth-v2 .av2-eye{
+  position:absolute; right:5px; top:50%; transform:translateY(-50%);
+  width:33px; height:33px; display:flex; align-items:center; justify-content:center;
+  background:none; border:0; border-radius:7px; cursor:pointer; color:var(--av2-dim); padding:0;
+}
+#authGate.auth-v2 .av2-eye:hover{ color:var(--av2-ink); background:var(--av2-field) }
+#authGate.auth-v2 .av2-eye:focus-visible{ outline:2px solid var(--accent,#ff6a2c); outline-offset:1px }
+#authGate.auth-v2 .av2-eye svg{ width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round }
+
+/* per-field validation message */
+#authGate.auth-v2 .av2-fe{
+  display:none; margin-top:5px; font-size:11.5px; color:var(--red,#e04848); font-weight:600;
+}
+#authGate.auth-v2 .av2-fe.on{ display:block }
+
+/* remember me (offline mode only — see showLogin) */
+#authGate.auth-v2 .row{
+  display:flex; align-items:center; gap:8px; margin:0 0 18px; font-size:12.5px; color:var(--av2-dim);
+}
+#authGate.auth-v2 .row input[type=checkbox]{ width:15px; height:15px; accent-color:var(--accent,#ff6a2c); margin:0; flex-shrink:0 }
+#authGate.auth-v2 .row label{ margin:0; font-size:12.5px; color:var(--av2-dim); text-transform:none; letter-spacing:0; font-weight:500 }
+
+/* primary action — spinner is driven purely by :disabled, which the existing
+   submit() already toggles, so no extra state plumbing is needed */
+#authGate.auth-v2 button.go{
+  width:100%; margin:4px 0 0; position:relative; cursor:pointer;
+  background:var(--accent,#ff6a2c); color:#fff; border:0; border-radius:9px;
+  padding:12px; font:inherit; font-size:14.5px; font-weight:700; letter-spacing:.2px;
+  display:flex; align-items:center; justify-content:center; gap:9px;
+  transition:background .13s, opacity .13s;
+}
+#authGate.auth-v2 button.go:hover:not(:disabled){ background:var(--accent-deep,#d9541c) }
+#authGate.auth-v2 button.go:focus-visible{ outline:2px solid var(--av2-ink); outline-offset:2px }
+#authGate.auth-v2 button.go:disabled{ opacity:.78; cursor:progress }
+#authGate.auth-v2 button.go .av2-spin{ display:none; width:15px; height:15px; flex-shrink:0 }
+#authGate.auth-v2 button.go:disabled .av2-spin{
+  display:block; border:2px solid rgba(255,255,255,.35); border-top-color:#fff;
+  border-radius:50%; animation:av2spin .6s linear infinite;
+}
+#authGate.auth-v2 button.go:disabled .av2-go-t::after{ content:'\2026' }
+@keyframes av2spin{ to{ transform:rotate(360deg) } }
+@media (prefers-reduced-motion:reduce){
+  #authGate.auth-v2 button.go:disabled .av2-spin{ animation-duration:2s }
+}
+
+/* server-side auth error */
+#authGate.auth-v2 .err{
+  min-height:0; margin-top:13px; font-size:12.5px; color:var(--red,#e04848); font-weight:600; line-height:1.45;
+}
+#authGate.auth-v2 .err:not(:empty){
+  padding:9px 11px; border-radius:8px;
+  background:rgba(224,72,72,.09); border:1px solid rgba(224,72,72,.26);
+}
+#authGate.auth-v2 .av2-help{
+  margin:20px 0 0; padding-top:16px; border-top:1px solid var(--av2-border);
+  font-size:11.5px; line-height:1.55; color:var(--av2-faint);
+}
+#authGate.auth-v2 .av2-sec{
+  margin-top:11px; display:flex; gap:7px; align-items:flex-start;
+  font-size:11px; line-height:1.5; color:var(--av2-faint);
+}
+#authGate.auth-v2 .av2-sec svg{ width:13px; height:13px; flex-shrink:0; margin-top:1px; stroke:currentColor; fill:none; stroke-width:1.8 }
+#authGate.auth-v2 .hint{
+  margin-top:16px; padding:10px 12px; border-radius:8px; font-size:11.5px; line-height:1.55;
+  background:var(--amber-soft,rgba(217,154,6,.12)); border:1px solid rgba(217,154,6,.3); color:var(--av2-dim);
+}
+
+/* ── responsive ─────────────────────────────────────────────────────── */
+/* Tablet and below: one column. The branding panel keeps only its header and
+   headline so the form stays above the fold instead of being pushed down. */
+@media (max-width:900px){
+  #authGate.auth-v2 .av2{ grid-template-columns:1fr; grid-template-rows:auto 1fr }
+  #authGate.auth-v2 .av2-brand{ padding:24px 26px; gap:14px }
+  #authGate.auth-v2 .av2-feats, #authGate.auth-v2 .av2-bf{ display:none }
+  #authGate.auth-v2 .av2-brand h1{ font-size:22px; max-width:28ch; margin-bottom:8px }
+  #authGate.auth-v2 .av2-brand .av2-lead{ margin-bottom:0; font-size:12.5px; max-width:60ch }
+  #authGate.auth-v2 .av2-login{ padding:28px 26px 36px }
+}
+@media (max-width:560px){
+  #authGate.auth-v2 .av2-brand{ padding:18px 18px; gap:10px }
+  #authGate.auth-v2 .av2-brand h1{ font-size:19px; letter-spacing:-.4px }
+  #authGate.auth-v2 .av2-brand .av2-lead{ display:none }
+  #authGate.auth-v2 .av2-bt svg.av2-logo{ width:104px }
+  #authGate.auth-v2 .av2-login{ padding:22px 18px 30px }
+  #authGate.auth-v2 .av2-form h2{ font-size:21px }
+  #authGate.auth-v2 .av2-sub{ margin-bottom:20px; font-size:12.5px }
+  /* 16px prevents iOS Safari zooming the page on focus, and keeps the
+     touch target comfortable. */
+  #authGate.auth-v2 .av2-field input[type=text],
+  #authGate.auth-v2 .av2-field input[type=password]{ font-size:16px; padding:12px 13px }
+  #authGate.auth-v2 button.go{ padding:13px }
+}
+/* Short landscape (phone on its side): drop the branding band entirely. */
+@media (max-height:460px) and (max-width:900px){
+  #authGate.auth-v2 .av2-brand{ display:none }
+  #authGate.auth-v2 .av2{ grid-template-rows:1fr }
+  #authGate.auth-v2 .av2-login{ padding:18px }
+}
+
+</style>
 </head>
 <body>
 <script>
@@ -10780,28 +10983,171 @@ const Auth=(function(){
     `;
     document.head.appendChild(s);
   }
+  /* Inline SVG only — no external image to fail to load on a site connection. */
+  const AV2_IC={
+    tender:'<path d="M14 3v4a1 1 0 0 0 1 1h4M7 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 13h6M9 17h4"/>',
+    compare:'<path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/>',
+    approve:'<path d="M20 6 9 17l-5-5"/><path d="M4 20h16"/>'
+  };
+  /* ── login page behaviour: reveal toggle, inline validation ────────── */
+  const AV2_EYE_SHOW='<svg viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.8"/></svg>';
+  const AV2_EYE_HIDE='<svg viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 6.1A9.7 9.7 0 0 1 12 5.5c6.4 0 10 6.5 10 6.5a18 18 0 0 1-2.4 3.3M6.6 7.8A17.6 17.6 0 0 0 2 12s3.6 6.5 10 6.5a9.6 9.6 0 0 0 3.2-.52"/><path d="M9.5 10.3a2.8 2.8 0 0 0 3.9 3.9"/></svg>';
+
+  function _av2FieldErr(id,msg){
+    const inp=document.getElementById(id), out=document.getElementById(id+'E');
+    if(!inp||!out) return;
+    if(msg){ out.textContent=msg; out.classList.add('on'); inp.setAttribute('aria-invalid','true'); }
+    else   { out.textContent=''; out.classList.remove('on'); inp.removeAttribute('aria-invalid'); }
+  }
+  function _av2Validate(){
+    const u=document.getElementById('auU'), p=document.getElementById('auP');
+    if(!u||!p) return true;                       // legacy markup: let it through
+    let first=null;
+    if(!u.value.trim()){ _av2FieldErr('auU','Enter your username or email.'); first=first||u; }
+    else _av2FieldErr('auU','');
+    if(!p.value){ _av2FieldErr('auP','Enter your password.'); first=first||p; }
+    else _av2FieldErr('auP','');
+    if(first){ first.focus(); return false; }
+    return true;
+  }
+  function _av2Wire(g){
+    const eye=g.querySelector('#auEye'), pw=g.querySelector('#auP');
+    if(eye&&pw){
+      eye.innerHTML=AV2_EYE_SHOW;
+      eye.addEventListener('click',()=>{
+        const show=pw.type==='password';
+        pw.type=show?'text':'password';
+        eye.innerHTML=show?AV2_EYE_HIDE:AV2_EYE_SHOW;
+        eye.setAttribute('aria-pressed',show?'true':'false');
+        const lbl=show?'Hide password':'Show password';
+        eye.setAttribute('aria-label',lbl); eye.title=lbl;
+        pw.focus();
+      });
+    }
+    /* A real <form> so password managers offer to fill and save, but the
+       submit event is cancelled: signing in is an async API call, not a
+       navigation. Enter is handled by the existing keydown on .card. */
+    const form=g.querySelector('#auForm');
+    if(form) form.addEventListener('submit',e=>{ e.preventDefault(); });
+    /* autofocus inside innerHTML never fires on a hidden element, so place
+       the caret explicitly once the gate is on screen. */
+    setTimeout(function(){ var u=g.querySelector('#auU');
+      if(u && !u.value){ try{ u.focus(); }catch(e){} } },60);
+    /* Clear a field's complaint as soon as the user starts fixing it. */
+    ['auU','auP'].forEach(id=>{
+      const i=g.querySelector('#'+id);
+      if(i) i.addEventListener('input',()=>{
+        if(i.getAttribute('aria-invalid')) _av2FieldErr(id,'');
+        const err=document.getElementById('auErr'); if(err) err.textContent='';
+      });
+    });
+  }
   function showLogin(){
     injectCSS();
     const only=users();
-    const showHint=only.length===1&&only[0].username==='admin'&&only[0].mustChange;
+    /* The default-credentials notice is TRUE only in offline mode, where
+       ensureDefault() is what created admin/admin123 in this browser. With a
+       live API the server bootstraps its own admin with its own password, so
+       printing "admin123" there would be both wrong and a disclosure. */
+    const showHint=!API()&&only.length===1&&only[0].username==='admin'&&only[0].mustChange;
+    /* "Remember me" switches localStorage vs sessionStorage in the offline
+       path. The server path ignores it entirely — createSession() always uses
+       SESSION_ABSOLUTE_HOURS and TSApi.login() sends no flag — so rendering
+       the checkbox against a live API would be a control that does nothing. */
+    const canRemember=!API();
     let g=document.getElementById('authGate');
     if(!g){g=document.createElement('div');g.id='authGate';document.body.appendChild(g);}
-    g.innerHTML=`<div class="card">
-      <h2>Tendering System</h2><div class="sub">Sign in to continue</div>
-      <label>Username</label><input type="text" id="auU" autocomplete="off" autofocus>
-      <label>Password</label><input type="password" id="auP" autocomplete="off">
-      <div class="row"><input type="checkbox" id="auR"><label for="auR" style="margin:0;text-transform:none;letter-spacing:0;font-size:12px;color:var(--dim)">Remember me on this device</label></div>
-      <button class="go" id="auGo">Sign In</button>
-      <div class="err" id="auErr"></div>
-      ${showHint?`<div class="hint">First-time setup — default account:<br><b>Username:</b> admin &nbsp; <b>Password:</b> admin123<br>You'll be asked to change it after sign-in.</div>`:''}
+    g.classList.add('auth-v2');
+    const feat=(ic,t,d)=>`<li><span class="av2-fic"><svg viewBox="0 0 24 24">${ic}</svg></span>`+
+      `<span><b>${t}</b><span>${d}</span></span></li>`;
+    g.innerHTML=`<div class="av2">
+      <aside class="av2-brand">
+        <svg class="av2-art" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs><linearGradient id="av2g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ffffff" stop-opacity=".12"/>
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient></defs>
+          <g stroke="url(#av2g)" stroke-width="1.1" fill="none">
+            <path d="M-40 640 L180 420 L180 800 M180 420 L360 540 L360 800 M360 540 L520 450 L520 800 M520 450 L680 530"/>
+            <path d="M60 800 L60 520 L180 420 M240 800 L240 580 M300 800 L300 560 M420 800 L420 600 M470 800 L470 520"/>
+            <path d="M60 560 L180 560 M60 620 L240 620 M240 660 L360 660 M360 700 L520 700 M420 640 L520 640"/>
+            <circle cx="180" cy="420" r="4"/><circle cx="360" cy="540" r="4"/><circle cx="520" cy="450" r="4"/>
+          </g>
+          <g stroke="#ffffff" stroke-opacity=".05" stroke-width="1" fill="none">
+            <path d="M0 120 H600 M0 200 H600 M0 280 H600"/>
+            <path d="M120 60 V340 M300 60 V340 M480 60 V340"/>
+          </g>
+        </svg>
+        <div class="av2-bt"><span class="av2-logo-slot"></span><span class="av2-div"></span>
+          <span class="av2-wm">Tendering System</span></div>
+        <div>
+          <h1>Smarter Procurement.<br><em>Better Project Control.</em></h1>
+          <p class="av2-lead">Run a tender end to end — issue project-coded RFQs to vendors, collect
+            quotations through secure links, compare rates side by side, and turn the award into a
+            work order. One record of every rate, revision and approval.</p>
+          <ul class="av2-feats">
+            ${feat(AV2_IC.tender,'Tenders &amp; RFQs','Issue enquiries to multiple vendors and track invitations, responses and deadlines.')}
+            ${feat(AV2_IC.compare,'Commercial comparison','L1\u2013L5 ranking on evaluated totals, with quoted, negotiated and approved rates kept distinct.')}
+            ${feat(AV2_IC.approve,'Approvals &amp; work orders','Designation-based sign-off with financial limits and a full audit trail.')}
+          </ul>
+        </div>
+        <div class="av2-bf">Primarc Projects Pvt. Ltd. \u00b7 Internal procurement system</div>
+      </aside>
+      <main class="av2-login">
+        <form class="card av2-form" id="auForm" novalidate autocomplete="on">
+          <h2>Welcome back</h2>
+          <p class="av2-sub">Sign in to continue to the tendering system.</p>
+          <div class="av2-field">
+            <label for="auU">Username or email</label>
+            <input type="text" id="auU" name="username" autocomplete="username"
+              autocapitalize="none" spellcheck="false" aria-describedby="auUE" autofocus>
+            <span class="av2-fe" id="auUE"></span>
+          </div>
+          <div class="av2-field">
+            <label for="auP">Password</label>
+            <div class="av2-pw">
+              <input type="password" id="auP" name="password" autocomplete="current-password"
+                aria-describedby="auPE">
+              <button type="button" class="av2-eye" id="auEye" aria-pressed="false"
+                aria-label="Show password" title="Show password"></button>
+            </div>
+            <span class="av2-fe" id="auPE"></span>
+          </div>
+          ${canRemember?`<div class="row"><input type="checkbox" id="auR">`+
+            `<label for="auR">Keep me signed in on this device</label></div>`:''}
+          <button class="go" id="auGo" type="button">
+            <i class="av2-spin" aria-hidden="true"></i><span class="av2-go-t">Sign In</span></button>
+          <div class="err" id="auErr" role="alert" aria-live="assertive"></div>
+          <p class="av2-help">Forgotten your password? This system has no self-service reset \u2014
+            ask an administrator to issue you a temporary one.</p>
+          <div class="av2-sec"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/>
+            <path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            <span>Your password is checked on the server and never stored in this browser.</span></div>
+          ${showHint?`<div class="hint"><b>First-time setup on this device</b><br>Sign in as
+            <b>admin</b> with the starter password, then change it when prompted.</div>`:''}
+        </form>
+      </main>
     </div>`;
+    /* Reuse the brand mark already in the top bar instead of duplicating
+       ~2KB of path data in a second place. */
+    try{
+      const src=document.querySelector('.topbar .brand-logo'), slot=g.querySelector('.av2-logo-slot');
+      if(src&&slot){ const c=src.cloneNode(true); c.removeAttribute('class');
+        c.setAttribute('class','av2-logo'); slot.appendChild(c); }
+      else if(slot){ slot.textContent='PRIMARC'; slot.style.cssText='font-weight:800;font-size:19px;letter-spacing:1px;color:#fff'; }
+    }catch(e){}
+    _av2Wire(g);
     g.style.display='flex';
     if(window.__authCover)window.__authCover.lift();   // gate is up: safe to uncover
     const go=document.getElementById('auGo');
     const submit=async()=>{
+      if(go.disabled) return;          // no double submit while in flight
       const u=document.getElementById('auU').value.trim().toLowerCase();
       const p=document.getElementById('auP').value;
       const err=document.getElementById('auErr');
+      /* Catch the empty cases here so an obvious slip does not cost a round
+         trip — and, more importantly, does not count against the server's
+         failed-attempt lockout. The server still validates everything. */
+      if(!_av2Validate()) return;
       go.disabled=true; err.textContent='';
 
       if(API()){
