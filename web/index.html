@@ -1292,6 +1292,267 @@
   #create .boq-toolbar button:focus-visible,#create .rev-row button:focus-visible,
   #create .bt-find:focus-visible,.mobile-tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 </style>
+<style id="procShellCSS">
+/* ═══════════════════════════════════════════════════════════════════════
+   PROCUREMENT SHELL — left sidebar + workspace header
+   ───────────────────────────────────────────────────────────────────────
+   The modules a QS actually works in (Comparative Statement, Approvals,
+   Work Orders, Vendor Master, Audit) were all sub-tabs inside Enquiry
+   Management — two clicks deep and invisible from the landing page. This
+   layer promotes them to first-class navigation.
+
+   Placement is pure CSS GRID on the existing .app, which already had
+   .topbar + the five .view panels as its only direct children. Declaring
+   grid areas re-positions them without reparenting a single node, so every
+   existing id, handler and view stays exactly where it was.
+
+   Brand note: the sidebar is deep navy as specified, surfaces stay on the
+   existing light/dark tokens, and PRIMARC ORANGE is kept for primary
+   actions — it is the actual brand (the logo is orange), so recolouring
+   every CTA blue would have made the product less Primarc, not more.
+   Blue is used for informational accents instead.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  --sb-w:232px; --sb-w-min:64px;
+  --sb-bg:#101a2c; --sb-bg2:#0b1322; --sb-line:#1e2c45;
+  --sb-ink:#e8edf6; --sb-dim:#8fa0bd; --sb-hi:#17243a;
+  --sb-active:#1d3356;
+}
+html[data-theme="light"]{ --sb-bg:#132135; --sb-bg2:#0d1829; --sb-line:#243754; }
+
+/* ── layout ───────────────────────────────────────────────────────────── */
+.app.has-sb{
+  display:grid;
+  grid-template-columns:var(--sb-w) minmax(0,1fr);
+  /* topbar / workspace header / active view. The header is its OWN band
+     rather than a node moved inside the current view: views replace their
+     own innerHTML (the dashboard does), which silently destroyed a header
+     parented into them. */
+  grid-template-rows:auto auto minmax(0,1fr);
+  height:100vh;
+}
+.app.has-sb.sb-min{ --sb-w:var(--sb-w-min); }
+.app.has-sb > #pSidebar{ grid-column:1; grid-row:1 / span 3; }
+.app.has-sb > .topbar{ grid-column:2; grid-row:1; }
+.app.has-sb > #pwsHead{ grid-column:2; grid-row:2; min-width:0; }
+.app.has-sb > .view{ grid-column:2; grid-row:3; min-width:0; min-height:0; }
+/* #admin is a .view too, so it is covered by the rule above. */
+
+/* ── sidebar ──────────────────────────────────────────────────────────── */
+#pSidebar{
+  background:linear-gradient(180deg,var(--sb-bg),var(--sb-bg2));
+  border-right:1px solid var(--sb-line);
+  display:flex; flex-direction:column; min-height:0; z-index:120;
+  font-family:'Archivo',system-ui,sans-serif;
+}
+#pSidebar .sb-top{
+  height:58px; flex-shrink:0; display:flex; align-items:center; gap:9px;
+  padding:0 14px; border-bottom:1px solid var(--sb-line);
+}
+#pSidebar .sb-mark{
+  width:28px; height:28px; border-radius:7px; flex-shrink:0;
+  background:var(--accent); color:#fff; font-weight:800; font-size:13px;
+  display:flex; align-items:center; justify-content:center; letter-spacing:-.5px;
+}
+#pSidebar .sb-name{ min-width:0 }
+#pSidebar .sb-name b{ display:block; font-size:12.5px; color:var(--sb-ink); font-weight:700; letter-spacing:.2px; white-space:nowrap }
+#pSidebar .sb-name i{ display:block; font-size:9.5px; color:var(--sb-dim); font-style:normal; text-transform:uppercase; letter-spacing:.7px; white-space:nowrap }
+#pSidebar .sb-scroll{ flex:1; overflow-y:auto; overflow-x:hidden; padding:10px 8px 14px }
+#pSidebar .sb-grp{
+  font-size:9.5px; text-transform:uppercase; letter-spacing:.9px; font-weight:700;
+  color:var(--sb-dim); opacity:.75; padding:14px 10px 6px; white-space:nowrap;
+}
+#pSidebar .sb-grp:first-child{ padding-top:4px }
+#pSidebar button.sb-i{
+  width:100%; display:flex; align-items:center; gap:10px;
+  background:none; border:0; border-radius:8px; cursor:pointer;
+  padding:8px 10px; margin:1px 0; color:var(--sb-dim);
+  font:inherit; font-size:12.5px; font-weight:600; text-align:left;
+  transition:background .12s, color .12s;
+}
+#pSidebar button.sb-i:hover{ background:var(--sb-hi); color:var(--sb-ink) }
+#pSidebar button.sb-i:focus-visible{ outline:2px solid var(--blue); outline-offset:-2px }
+#pSidebar button.sb-i.on{ background:var(--sb-active); color:#fff }
+#pSidebar button.sb-i.on::before{
+  content:''; position:absolute; left:0; width:3px; height:22px;
+  border-radius:0 3px 3px 0; background:var(--accent);
+}
+#pSidebar button.sb-i{ position:relative }
+#pSidebar button.sb-i svg{ width:17px; height:17px; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round }
+#pSidebar button.sb-i .sb-t{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+#pSidebar button.sb-i .sb-ct{
+  margin-left:auto; flex-shrink:0; font-size:10px; font-weight:700;
+  background:var(--sb-hi); color:var(--sb-dim); border-radius:9px; padding:1px 6px; min-width:18px; text-align:center; font-variant-numeric:tabular-nums;
+}
+#pSidebar button.sb-i.on .sb-ct{ background:rgba(255,255,255,.16); color:#fff }
+#pSidebar button.sb-i .sb-ct.warn{ background:var(--accent); color:#fff }
+#pSidebar .sb-foot{
+  flex-shrink:0; border-top:1px solid var(--sb-line); padding:9px 10px;
+  display:flex; align-items:center; gap:8px;
+}
+#pSidebar .sb-foot .sb-who{ min-width:0; flex:1 }
+#pSidebar .sb-foot .sb-who b{ display:block; font-size:11.5px; color:var(--sb-ink); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+#pSidebar .sb-foot .sb-who i{ display:block; font-size:9.5px; color:var(--sb-dim); font-style:normal; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+#pSidebar .sb-tog{
+  background:none; border:1px solid var(--sb-line); border-radius:7px; cursor:pointer;
+  color:var(--sb-dim); width:28px; height:28px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+#pSidebar .sb-tog:hover{ color:var(--sb-ink); background:var(--sb-hi) }
+#pSidebar .sb-tog svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+
+/* collapsed rail: icons only */
+.sb-min #pSidebar .sb-grp,
+.sb-min #pSidebar .sb-name,
+.sb-min #pSidebar .sb-t,
+.sb-min #pSidebar .sb-ct,
+.sb-min #pSidebar .sb-who{ display:none }
+.sb-min #pSidebar .sb-top{ justify-content:center; padding:0 }
+.sb-min #pSidebar button.sb-i{ justify-content:center; padding:9px 0 }
+.sb-min #pSidebar .sb-foot{ justify-content:center }
+
+/* ── workspace header: breadcrumb + title + actions ───────────────────── */
+.pws-head{
+  flex-shrink:0; padding:14px 20px 12px; border-bottom:1px solid var(--line);
+  background:var(--panel); display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap;
+}
+.pws-head .pws-l{ min-width:0; flex:1 }
+.pws-crumb{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--faint); margin-bottom:5px; flex-wrap:wrap }
+.pws-crumb span{ white-space:nowrap }
+.pws-crumb i{ font-style:normal; opacity:.5 }
+.pws-crumb b{ color:var(--dim); font-weight:600 }
+.pws-head h2{ margin:0; font-size:var(--fs-page-title,21px); font-weight:800; color:var(--ink); letter-spacing:-.3px; line-height:1.15 }
+.pws-head .pws-desc{ margin:4px 0 0; font-size:var(--fs-secondary,12px); color:var(--dim); max-width:72ch; line-height:1.45 }
+.pws-head .pws-r{ display:flex; align-items:center; gap:8px; flex-shrink:0 }
+
+/* ── responsive ───────────────────────────────────────────────────────── */
+@media (max-width:1180px){ .app.has-sb{ --sb-w:var(--sb-w-min) } .app.has-sb .sb-grp,
+  .app.has-sb #pSidebar .sb-name, .app.has-sb #pSidebar .sb-t,
+  .app.has-sb #pSidebar .sb-ct, .app.has-sb #pSidebar .sb-who{ display:none }
+  .app.has-sb #pSidebar .sb-top{ justify-content:center; padding:0 }
+  .app.has-sb #pSidebar button.sb-i{ justify-content:center; padding:9px 0 }
+  .app.has-sb #pSidebar .sb-foot{ justify-content:center } }
+
+/* Below 860px the rail becomes an off-canvas drawer so the table keeps its
+   width; .sb-open is toggled by the hamburger in the top bar. */
+@media (max-width:860px){
+  .app.has-sb{ grid-template-columns:minmax(0,1fr) }
+  .app.has-sb > #pSidebar{
+    position:fixed; inset:0 auto 0 0; width:var(--sb-w-min);
+    transform:translateX(-100%); transition:transform .18s ease; box-shadow:4px 0 24px rgba(0,0,0,.4);
+  }
+  .app.has-sb.sb-open > #pSidebar{ transform:none; width:232px }
+  .app.has-sb.sb-open > #pSidebar .sb-grp,
+  .app.has-sb.sb-open > #pSidebar .sb-name,
+  .app.has-sb.sb-open > #pSidebar .sb-t,
+  .app.has-sb.sb-open > #pSidebar .sb-ct,
+  .app.has-sb.sb-open > #pSidebar .sb-who{ display:revert }
+  .app.has-sb.sb-open > #pSidebar .sb-top{ justify-content:flex-start; padding:0 14px }
+  .app.has-sb.sb-open > #pSidebar button.sb-i{ justify-content:flex-start; padding:8px 10px }
+  .app.has-sb > .topbar{ grid-column:1 }
+  .app.has-sb > #pwsHead{ grid-column:1 }
+  .app.has-sb > .view{ grid-column:1 }
+  .pws-head{ padding:11px 13px 10px }
+}
+#sbScrim{ display:none }
+@media (max-width:860px){
+  .app.has-sb.sb-open #sbScrim{ display:block; position:fixed; inset:0; z-index:119; background:rgba(0,0,0,.45) }
+}
+#sbBurger{ display:none }
+@media (max-width:860px){ #sbBurger{ display:flex } }
+
+/* The old horizontal mode strip is replaced by the sidebar. The BUTTONS stay
+   in the DOM — every existing handler, and setMode() itself, are driven
+   through them — they are just not shown twice. */
+.app.has-sb > .topbar .modes,
+/* Same for Enquiry Management's own tab strip: all ten of its destinations
+   are now first-class sidebar items, so showing both was two rows of
+   navigation competing for the same clicks. The buttons remain in the DOM
+   because QM's setNav() marks the live one with .on and the sidebar reads
+   that to decide what to highlight. Only the TABS are hidden — the
+   notification bell and New Enquiry are actions, and stay visible. */
+.app.has-sb #qmSubnav > button[data-q]{
+  position:absolute; width:1px; height:1px; overflow:hidden;
+  clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap;
+}
+/* With the tabs gone the strip is just an action bar: push it right. */
+.app.has-sb #qmSubnav{ justify-content:flex-end }
+
+/* ── Procurement dashboard (replaces the decorative landing screen) ───── */
+#home.view.on{ display:block; overflow-y:auto }
+.pdash{ padding:20px 22px 34px; max-width:1560px }
+.pdash-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:18px; flex-wrap:wrap; margin-bottom:16px }
+.pdash-head h2{ margin:0; font-size:var(--fs-page-title,22px); font-weight:800; color:var(--ink); letter-spacing:-.3px }
+.pdash-head p{ margin:5px 0 0; font-size:var(--fs-secondary,12px); color:var(--dim); max-width:78ch; line-height:1.5 }
+
+/* KPI cards — real figures, each one a link into the filtered records */
+.pk-grid{ display:grid; gap:11px; grid-template-columns:repeat(auto-fill,minmax(188px,1fr)); margin-bottom:18px }
+button.pk{
+  display:flex; flex-direction:column; gap:3px; text-align:left; cursor:pointer;
+  background:var(--panel); border:1px solid var(--line); border-radius:11px;
+  padding:13px 14px; font:inherit; transition:border-color .13s, transform .13s, box-shadow .13s;
+}
+button.pk:hover{ border-color:var(--accent); transform:translateY(-1px); box-shadow:0 5px 16px rgba(0,0,0,.09) }
+button.pk:focus-visible{ outline:2px solid var(--blue); outline-offset:2px }
+.pk-l{ font-size:10.5px; text-transform:uppercase; letter-spacing:.6px; font-weight:700; color:var(--faint) }
+.pk-n{ font-size:25px; font-weight:800; color:var(--ink); line-height:1.1; font-variant-numeric:tabular-nums }
+.pk-s{ font-size:11px; color:var(--dim) }
+.pk-pct{ font-size:10px; color:var(--faint); font-weight:600 }
+
+.pdash-2{ display:grid; gap:11px; grid-template-columns:minmax(0,2fr) minmax(0,1fr); margin-bottom:11px }
+@media (max-width:900px){ .pdash-2{ grid-template-columns:minmax(0,1fr) } }
+.pcard{ background:var(--panel); border:1px solid var(--line); border-radius:11px; padding:15px 16px; margin-bottom:11px }
+.pcard h3{ margin:0 0 12px; font-size:var(--fs-heading,14px); font-weight:700; color:var(--ink) }
+.pbig{ font-size:27px; font-weight:800; color:var(--ink); line-height:1; font-variant-numeric:tabular-nums }
+.psml{ font-size:11px; color:var(--dim); margin-top:2px }
+
+/* pipeline */
+.pp-row{ display:flex; align-items:center; gap:10px; margin:7px 0 }
+.pp-k{ flex:0 0 92px; font-size:11.5px; color:var(--dim); font-weight:600 }
+.pp-bar{ flex:1; height:8px; border-radius:5px; background:var(--panel3); overflow:hidden; min-width:40px }
+.pp-bar i{ display:block; height:100%; border-radius:5px; background:var(--blue) }
+.pp-n{ flex:0 0 34px; text-align:right; font-size:12px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums }
+.pp-tot{ margin-top:10px; padding-top:9px; border-top:1px solid var(--line2); font-size:11px; color:var(--faint) }
+.pp-draft{ background:var(--faint) } .pp-sent{ background:var(--blue) }
+.pp-opened{ background:var(--violet) } .pp-submitted{ background:var(--accent) }
+.pp-approved{ background:var(--green) } .pp-expired{ background:var(--red) }
+
+/* compact data table — QS/commercial density */
+.ptbl{ width:100%; border-collapse:collapse; font-size:12.5px }
+.ptbl th{
+  text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.6px; font-weight:700;
+  color:var(--faint); padding:7px 10px; border-bottom:1px solid var(--line); white-space:nowrap;
+  position:sticky; top:0; background:var(--panel);
+}
+.ptbl td{ padding:8px 10px; border-bottom:1px solid var(--line2); color:var(--ink) }
+.ptbl tbody tr{ cursor:pointer }
+.ptbl tbody tr:hover{ background:var(--hi) }
+.ptbl .num{ text-align:right; font-variant-numeric:tabular-nums }
+.ptbl .mono{ font-family:'Spline Sans Mono',ui-monospace,monospace; font-size:11.5px }
+
+/* status badges — colour PLUS text, never colour alone */
+.pst{ display:inline-block; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+  padding:2px 7px; border-radius:10px; border:1px solid transparent; white-space:nowrap }
+.pst-draft{ background:var(--panel3); color:var(--dim); border-color:var(--line) }
+.pst-sent{ background:rgba(94,155,240,.14); color:var(--blue); border-color:rgba(94,155,240,.3) }
+.pst-opened{ background:rgba(167,139,250,.14); color:var(--violet); border-color:rgba(167,139,250,.3) }
+.pst-submitted{ background:rgba(255,106,44,.14); color:var(--accent); border-color:rgba(255,106,44,.3) }
+.pst-approved{ background:var(--green-soft); color:var(--green); border-color:rgba(52,211,153,.3) }
+.pst-expired{ background:rgba(248,113,113,.14); color:var(--red); border-color:rgba(248,113,113,.3) }
+
+/* empty state with a next action, not a dead end */
+.pempty{ text-align:center; padding:30px 18px }
+.pempty b{ display:block; font-size:14px; color:var(--ink); margin-bottom:5px }
+.pempty p{ margin:0 auto 14px; font-size:12px; color:var(--dim); max-width:46ch; line-height:1.5 }
+
+@media (max-width:760px){
+  .pdash{ padding:13px 13px 26px }
+  .pk-grid{ grid-template-columns:repeat(auto-fill,minmax(145px,1fr)) }
+  .pk-n{ font-size:21px }
+  .ptbl{ font-size:11.5px }
+}
+
+</style>
 </head>
 <body>
 <script>
@@ -9917,6 +10178,64 @@ function openCloudSettings(){
 const api={
   open,
   go(s){section=s;curId=(s==='cs'||s==='bid')?curId:null;render();$('#qmMain').scrollTop=0;},
+
+  /* ── Procurement dashboard figures ──────────────────────────────────────
+     Computed HERE, inside this module, so every number uses the SAME
+     helpers the Comparative Statement ranks on — vendorTotal(), hasQuote(),
+     qStatus(), isExpired(). A dashboard that re-implemented the rate maths
+     would eventually disagree with the CS, and on a tender that is not a
+     cosmetic bug.
+
+     Read-only by contract: nothing in here may touch a record. In
+     particular it must NOT call apprState(), which lazily WRITES
+     q.approval={...} onto the enquiry — merely opening a dashboard would
+     then dirty the document and trigger a save. q.approval is read
+     defensively instead. */
+  metrics(){
+    const qs=(DB.quotations||[]);
+    const byStatus={};
+    const projects=new Set();
+    let quotesReceived=0, pendingCS=0, pendingAppr=0, tenderValue=0, valuedCount=0;
+
+    qs.forEach(q=>{
+      const st=qStatus(q);
+      byStatus[st]=(byStatus[st]||0)+1;
+      if(q.projectName) projects.add(String(q.projectName).trim().toLowerCase());
+
+      const quoted=(q.vendors||[]).filter(hasQuote);
+      quotesReceived+=quoted.length;
+
+      if(quoted.length){
+        /* Lowest EVALUATED total (incl. GST) — the figure the comparative
+           statement treats as L1, not the lowest raw rate. */
+        const totals=quoted.map(v=>vendorTotal(q,v)).filter(n=>isFinite(n)&&n>0);
+        if(totals.length){ tenderValue+=Math.min.apply(null,totals); valuedCount++; }
+        /* Quotes are in but no award yet → a comparative statement is owed. */
+        if(st==='submitted') pendingCS++;
+      }
+
+      const appr=q.approval;                       // never apprState(): it writes
+      if(apprEligible(q) && (!appr || appr.status!=='approved')) pendingAppr++;
+    });
+
+    return {
+      projects:projects.size,
+      totalEnquiries:qs.length,
+      activeTenders:qs.filter(q=>['sent','opened','submitted'].includes(qStatus(q))).length,
+      rfqsIssued:qs.filter(q=>(q.vendors||[]).some(v=>v.status&&v.status!=='draft')).length,
+      quotesReceived, pendingCS, pendingAppr, valuedCount, tenderValue,
+      workOrders:(DB.workOrders||[]).length,
+      vendorsOnFile:(DB.vendorMaster||[]).length,
+      expired:qs.filter(isExpired).length,
+      byStatus,
+      recent:qs.slice().sort((a,b)=>(b.createdTs||0)-(a.createdTs||0)).slice(0,8).map(q=>({
+        id:q.id, ref:q.base||'', project:q.projectName||'', client:q.client||'',
+        vendors:(q.vendors||[]).length,
+        responses:(q.vendors||[]).filter(hasQuote).length,
+        due:q.dueDate||'', status:qStatus(q)
+      }))
+    };
+  },
   openQ,editQ(id){openEditor(id);},
   _closeEditor(){$('#qmEditorOv').classList.remove('on');},
   _addItem(){_collect();edit.items.push({id:uid(),type:'item',level:0,short:'',desc:'',qty:1,uom:'',spec:'',drawing:''});qNormalizeLevels(edit.items);renderEditor($('#qmEditorOv'));},
@@ -11092,6 +11411,389 @@ return api;
   var mm=document.getElementById('qmMain');
   if(mm) new MutationObserver(function(){ document.querySelectorAll('.qm-w .wn').forEach(hook); }).observe(mm,{childList:true,subtree:true});
 })();
+</script>
+<script id="procShellJS">
+/* ═══════════════════════════════════════════════════════════════════════
+   PROCUREMENT SHELL — sidebar navigation + workspace header + dashboard
+   ───────────────────────────────────────────────────────────────────────
+   Routing is DELEGATED, never reimplemented. Every destination resolves to
+   either a real `#modes button[data-m]` click or `QM.go(section)` — the two
+   mechanisms the app already used — so setMode(), the lazy initCreate()/
+   initCompare() calls and QM's own render() keep running exactly as before.
+   Nothing here owns application state.
+   ═══════════════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var SB_KEY='ts_sb_min';                 /* UI preference only */
+
+  function el(id){ return document.getElementById(id); }
+  function app(){ return document.querySelector('.app'); }
+
+  /* ── icons ──────────────────────────────────────────────────────────── */
+  var I={
+    dash:'<path d="M3 13h8V3H3zM13 9h8V3h-8zM13 21h8v-8h-8zM3 21h8v-4H3z"/>',
+    proj:'<path d="M3 21V8l9-5 9 5v13M9 21v-6h6v6"/>',
+    tender:'<path d="M14 3v4a1 1 0 0 0 1 1h4M7 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 13h6M9 17h4"/>',
+    rfq:'<path d="M4 4h16v5H4zM4 13h7v7H4zM15 13h5v7h-5z"/>',
+    vendor:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M17 11l2 2 3-3"/>',
+    boq:'<path d="M5 3h14v18H5zM9 8h6M9 12h6M9 16h3"/>',
+    quote:'<path d="M12 2v20M17 6H9.5a2.5 2.5 0 0 0 0 5h5a2.5 2.5 0 0 1 0 5H6"/>',
+    cs:'<path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/>',
+    bid:'<path d="M3 17l5-6 4 3 5-7 4 5"/><circle cx="8" cy="11" r="1.4"/>',
+    appr:'<path d="M20 6 9 17l-5-5"/>',
+    wo:'<path d="M10 3h4l.5 2.6 2.3 1 2.4-1.2 2 3.4-2 1.7.0 2.6 2 1.7-2 3.4-2.4-1.2-2.3 1L14 21h-4l-.5-2.6-2.3-1-2.4 1.2-2-3.4 2-1.7v-2.6l-2-1.7 2-3.4 2.4 1.2 2.3-1z"/><circle cx="12" cy="12" r="2.6"/>',
+    rep:'<path d="M4 20V10m5 10V4m5 16v-7m5 7V8"/>',
+    audit:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+    trash:'<path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/>',
+    set:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7.5 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 2.6 7.5a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H7a1.6 1.6 0 0 0 1-1.5V1a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V7a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>'
+  };
+  var svg=function(p){ return '<svg viewBox="0 0 24 24" aria-hidden="true">'+p+'</svg>'; };
+
+  /* ── destinations ───────────────────────────────────────────────────────
+     mode  : the data-m button to click (the app's own view switch)
+     q     : optional QM sub-section to open afterwards via QM.go()
+     Labels follow the brief; every one lands on a screen that already
+     exists. Nothing here is a placeholder. */
+  var NAV=[
+    ['Overview',[
+      ['dash',   'Dashboard',             I.dash,   {mode:'home'}],
+      ['proj',   'Projects',              I.proj,   {mode:'admin', adminView:'projects'}]
+    ]],
+    ['Tendering',[
+      ['enq',    'Enquiries / Tenders',   I.tender, {mode:'quote', q:'list',       count:'totalEnquiries'}],
+      ['rfq',    'RFQ Dashboard',         I.rfq,    {mode:'quote', q:'dash'}],
+      ['cs',     'Comparative Statement', I.cs,     {mode:'quote', q:'cs',         count:'pendingCS', warn:true}],
+      ['bid',    'Bid Analysis',          I.bid,    {mode:'quote', q:'bid'}],
+      ['appr',   'Approvals',             I.appr,   {mode:'quote', q:'approvals',  count:'pendingAppr', warn:true}],
+      ['wo',     'Work Orders',           I.wo,     {mode:'quote', q:'workorders', count:'workOrders'}]
+    ]],
+    ['Masters',[
+      ['boq',    'BOQ Builder',           I.boq,    {mode:'create'}],
+      ['bmaster','BOQ Master',            I.quote,  {mode:'compare'}],
+      ['vmaster','Vendor Master',         I.vendor, {mode:'quote', q:'vmaster',    count:'vendorsOnFile'}],
+      ['vanal',  'Vendor Analysis',       I.rep,    {mode:'quote', q:'vendors'}]
+    ]],
+    ['Records',[
+      ['audit',  'Audit & Logs',          I.audit,  {mode:'quote', q:'audit'}],
+      ['del',    'Deleted Items',         I.trash,  {mode:'quote', q:'deleted'}],
+      ['admin',  'Settings & Users',      I.set,    {mode:'admin', adminView:'dashboard'}]
+    ]]
+  ];
+  var BY={}; NAV.forEach(function(g){ g[1].forEach(function(r){ BY[r[0]]={label:r[1],group:g[0],dest:r[3]}; }); });
+
+  /* ── build ──────────────────────────────────────────────────────────── */
+  function build(){
+    var a=app(); if(!a || el('pSidebar')) return;
+    var aside=document.createElement('aside');
+    aside.id='pSidebar';
+    aside.setAttribute('aria-label','Main navigation');
+    var h='<div class="sb-top"><div class="sb-mark">P</div>'
+        + '<div class="sb-name"><b>Primarc</b><i>Tendering</i></div></div>'
+        + '<nav class="sb-scroll">';
+    NAV.forEach(function(g){
+      h+='<div class="sb-grp">'+g[0]+'</div>';
+      g[1].forEach(function(r){
+        h+='<button class="sb-i" type="button" data-sb="'+r[0]+'" title="'+r[1]+'">'
+          + svg(r[2])+'<span class="sb-t">'+r[1]+'</span>'
+          + (r[3].count?'<span class="sb-ct" data-ct="'+r[3].count+'"'+(r[3].warn?' data-warn="1"':'')+'></span>':'')
+          + '</button>';
+      });
+    });
+    h+='</nav><div class="sb-foot">'
+      + '<div class="sb-who"><b id="sbWho">—</b><i id="sbRole"></i></div>'
+      + '<button class="sb-tog" id="sbTog" type="button" title="Collapse / expand sidebar" aria-label="Collapse or expand sidebar">'
+      + '<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button></div>';
+    aside.innerHTML=h;
+    a.insertBefore(aside,a.firstChild);
+
+    var scrim=document.createElement('div'); scrim.id='sbScrim';
+    a.appendChild(scrim);
+    scrim.addEventListener('click',function(){ a.classList.remove('sb-open'); });
+
+    a.classList.add('has-sb');
+    try{ if(localStorage.getItem(SB_KEY)==='1') a.classList.add('sb-min'); }catch(e){}
+
+    aside.addEventListener('click',function(e){
+      var b=e.target.closest('button[data-sb]');
+      if(b){ goto(b.dataset.sb); a.classList.remove('sb-open'); return; }
+      if(e.target.closest('#sbTog')){
+        if(window.matchMedia('(max-width:860px)').matches){ a.classList.toggle('sb-open'); return; }
+        a.classList.toggle('sb-min');
+        try{ localStorage.setItem(SB_KEY, a.classList.contains('sb-min')?'1':'0'); }catch(e2){}
+      }
+    });
+  }
+
+  /* ── navigate ───────────────────────────────────────────────────────── */
+  function goto(key){
+    var d=(BY[key]||{}).dest; if(!d) return;
+    var btn=document.querySelector('#modes button[data-m="'+d.mode+'"]');
+    if(btn){ btn.click(); }
+    else if(d.mode==='admin'){
+      var ab=el('navAdminBtn'); if(ab) ab.click();
+    }
+    if(d.q && window.QM && typeof window.QM.go==='function'){
+      try{ window.QM.go(d.q); }catch(e){ console.error('[shell] QM.go failed',e); }
+    }
+    /* ERP.open() is async (it seeds, then builds its shell), so ERP.go()
+       can land before the console exists. Retry briefly rather than
+       silently dropping the section. */
+    if(d.adminView && window.ERP && typeof window.ERP.go==='function'){
+      var tries=0;
+      (function send(){
+        try{
+          window.ERP.go(d.adminView);
+          if(!document.querySelector('#erpNav a[data-v]') && ++tries<12) return setTimeout(send,90);
+        }catch(e){ if(++tries<12) return setTimeout(send,90);
+                   console.error('[shell] ERP.go failed',e); }
+        paint();
+      })();
+    }
+    current=key; paint();
+  }
+
+  /* ── active state + workspace header ────────────────────────────────── */
+  var current='dash';
+
+  /* Derive the active item from what is ACTUALLY on screen, so navigating
+     by any other route (a KPI card, a deep link, QM's own subnav) still
+     lights up the right sidebar row. */
+  function detect(){
+    var view=document.querySelector('.view.on'); if(!view) return current;
+    var m=view.id;
+    if(m==='home')    return 'dash';
+    if(m==='create')  return 'boq';
+    if(m==='compare') return 'bmaster';
+    if(m==='admin'){
+      /* The console marks its own active section; map it back so the
+         sidebar highlights Projects rather than Settings. */
+      var av=document.querySelector('#erpNav a[data-v].on');
+      return (av && av.dataset.v==='projects') ? 'proj' : 'admin';
+    }
+    if(m==='quote'){
+      var on=document.querySelector('#qmSubnav button[data-q].on');
+      var q=on?on.dataset.q:'dash';
+      var hit=null;
+      Object.keys(BY).forEach(function(k){ if(BY[k].dest.q===q) hit=k; });
+      return hit||'enq';
+    }
+    return current;
+  }
+
+  var DESC={
+    dash:'Live procurement position across every project — tenders, responses, approvals and committed value.',
+    proj:'Projects available to the tendering system. Add or edit them in the Administration console.',
+    enq:'Every enquiry and tender, with invited vendors, response counts and submission deadlines.',
+    rfq:'RFQ activity by status, with drill-down into pending, submitted and expired enquiries.',
+    cs:'Vendor rates side by side, ranked on the configured evaluation basis. Quoted, negotiated and approved rates are kept distinct.',
+    bid:'Analysis supporting a recommendation. A recommendation must be accepted by a person — L1 is never the automatic winner.',
+    appr:'Items awaiting approval, with the current approver and how long each has been pending.',
+    wo:'Work orders raised against awarded enquiries, with contract value and issue status.',
+    boq:'Build a Bill of Quantities — search the master library, group into sections, set quantities and rates.',
+    bmaster:'Every item quoted by two or more vendors across history, ranked lowest to highest.',
+    vmaster:'Contractor and supplier directory — codes, contacts, GSTIN and verification status.',
+    vanal:'Vendor participation and quoting behaviour across tenders.',
+    audit:'Append-only record of who changed what, and when.',
+    del:'Soft-deleted records, restorable until permanently removed.',
+    admin:'Users, roles, permissions, projects and system configuration.'
+  };
+
+  function paint(){
+    var key=detect(); current=key;
+    var meta=BY[key]||{label:'',group:''};
+    document.querySelectorAll('#pSidebar button[data-sb]').forEach(function(b){
+      b.classList.toggle('on', b.dataset.sb===key);
+      if(b.dataset.sb===key) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+    });
+    var head=el('pwsHead'); if(!head) return;
+    el('pwsCrumb').innerHTML='<span><b>Primarc</b></span><i>/</i><span>'+esc(meta.group)+'</span><i>/</i><span><b>'+esc(meta.label)+'</b></span>';
+    el('pwsTitle').textContent=meta.label||'';
+    el('pwsDesc').textContent=DESC[key]||'';
+    /* The dashboard carries its own title block, so the shared header is
+       hidden there rather than showing two titles. */
+    var view=document.querySelector('.view.on');
+    head.style.display = (view && view.id==='home') ? 'none' : '';
+  }
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  /* ── badge counts (real figures only) ───────────────────────────────── */
+  function counts(){
+    if(!(window.QM && typeof window.QM.metrics==='function')) return;
+    var m; try{ m=window.QM.metrics(); }catch(e){ console.error('[shell] metrics failed',e); return; }
+    document.querySelectorAll('#pSidebar .sb-ct').forEach(function(s){
+      var v=m[s.dataset.ct];
+      if(v==null||v===0){ s.textContent=''; s.style.display='none'; return; }
+      /* Inventory counts (954 vendors on file) are information, not a
+         to-do list — truncating them to "99+" hid the real figure for no
+         benefit. Only genuinely unbounded counts need a cap. */
+      s.style.display=''; s.textContent=v>999?'999+':String(v);
+      s.classList.toggle('warn', s.dataset.warn==='1');
+    });
+    return m;
+  }
+
+  function who(){
+    var w=el('sbWho'), r=el('sbRole'); if(!w) return;
+    var s=(window.TSApi&&window.TSApi.session)||null;
+    var chip=document.querySelector('#authChip .an'), rl=document.querySelector('#authChip .ar');
+    w.textContent=(s&&(s.name||s.username))||(chip&&chip.textContent)||'Signed in';
+    r.textContent=(s&&s.role)||(rl&&rl.textContent)||'';
+  }
+
+  /* ── wire up ────────────────────────────────────────────────────────── */
+  function init(){
+    if(!app()) return;
+    build();
+
+    /* Workspace header, moved into whichever view is active by paint(). */
+    var head=document.createElement('div');
+    head.className='pws-head'; head.id='pwsHead';
+    head.innerHTML='<div class="pws-l"><div class="pws-crumb" id="pwsCrumb"></div>'
+      + '<h2 id="pwsTitle"></h2><p class="pws-desc" id="pwsDesc"></p></div>'
+      + '<div class="pws-r" id="pwsActions"></div>';
+    /* Child of .app, positioned by grid. It must NOT live inside a view:
+       a view that re-renders its innerHTML would delete it. */
+    app().appendChild(head);
+
+    /* Hamburger for the off-canvas drawer, next to the existing top icons. */
+    var anchor=el('globalSearchBtn');
+    if(anchor&&anchor.parentNode&&!el('sbBurger')){
+      var bg=document.createElement('button');
+      bg.id='sbBurger'; bg.className='theme-tog'; bg.type='button';
+      bg.title='Menu'; bg.setAttribute('aria-label','Open navigation');
+      bg.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+      bg.addEventListener('click',function(){ app().classList.toggle('sb-open'); });
+      anchor.parentNode.insertBefore(bg, anchor);
+    }
+
+    /* Re-paint whenever the app changes view or QM changes sub-section —
+       observed rather than hooked, so no existing handler is wrapped. */
+    var mo=new MutationObserver(function(){ paint(); });
+    document.querySelectorAll('.view').forEach(function(v){
+      mo.observe(v,{attributes:true,attributeFilter:['class']});
+    });
+    var sub=el('qmSubnav');
+    if(sub) mo.observe(sub,{attributes:true,attributeFilter:['class'],subtree:true});
+    /* #erpNav is built lazily by ERP.open(); watch #admin for it to appear
+       and for its active-section class to move. */
+    var adm=el('admin');
+    if(adm) mo.observe(adm,{attributes:true,attributeFilter:['class'],subtree:true,childList:true});
+
+    paint(); who(); counts(); dashboard();
+
+    /* Keep badges and the dashboard honest after any server sync. */
+    if(window.TSApi&&window.TSApi.onStatus){
+      window.TSApi.onStatus(function(st){
+        if(st==='resynced'||st==='saved'||st==='restricted'){ counts(); dashboard(); who(); }
+      });
+    }
+    window.addEventListener('resize',function(){
+      if(!window.matchMedia('(max-width:860px)').matches) app().classList.remove('sb-open');
+    });
+    window.PShell={ go:goto, refresh:function(){ paint(); counts(); dashboard(); }, metrics:counts };
+  }
+
+  /* ── dashboard (§4) — every figure from QM.metrics() ────────────────── */
+  function dashboard(){
+    var host=el('home'); if(!host) return;
+    if(!(window.QM && typeof window.QM.metrics==='function')) return;
+    var m; try{ m=window.QM.metrics(); }catch(e){ console.error('[shell] dashboard metrics failed',e); return; }
+
+    var inr=function(n){ try{ return '₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:0}); }
+                         catch(e){ return '₹'+(n||0); } };
+    var short=function(n){ n=Number(n||0);
+      if(n>=1e7) return '₹'+(n/1e7).toFixed(2)+' Cr';
+      if(n>=1e5) return '₹'+(n/1e5).toFixed(2)+' L';
+      return inr(n); };
+
+    var K=[
+      ['Projects',             m.projects,       'with tender activity',        'proj'],
+      ['Active Tenders',       m.activeTenders,  'open for response',           'enq'],
+      ['RFQs Issued',          m.rfqsIssued,     'sent to vendors',             'rfq'],
+      ['Quotations Received',  m.quotesReceived, 'vendor submissions',          'enq'],
+      ['Pending Comparatives', m.pendingCS,      'quotes in, not yet awarded',  'cs'],
+      ['Pending Approvals',    m.pendingAppr,    'awaiting sign-off',           'appr'],
+      ['Work Orders',          m.workOrders,     'raised',                      'wo'],
+      ['Lowest Evaluated Value', short(m.tenderValue), m.valuedCount+' tender'+(m.valuedCount===1?'':'s')+' with quotes', 'cs']
+    ];
+
+    var cards=K.map(function(k){
+      return '<button class="pk" type="button" data-pkgo="'+k[3]+'">'
+           + '<span class="pk-l">'+esc(k[0])+'</span>'
+           + '<span class="pk-n">'+esc(k[1])+'</span>'
+           + '<span class="pk-s">'+esc(k[2])+'</span></button>';
+    }).join('');
+
+    /* pipeline by stage — counts only, no invented proportions */
+    var ORDER=[['draft','Draft'],['sent','Published'],['opened','Viewed'],
+               ['submitted','Submitted'],['approved','Awarded'],['expired','Expired']];
+    /* Share of the whole pipeline, not share of the largest stage. Scaling
+       against the max made every bar 100% wide whenever the stages were
+       level (all 1s) — arithmetically true, but it read as "everything is
+       full". Against the total, a stage's bar means what a reader assumes:
+       how much of the pipeline is sitting there. */
+    var totalN=ORDER.reduce(function(t,s){ return t+(m.byStatus[s[0]]||0); },0)||1;
+    var pipe=ORDER.map(function(s){
+      var n=m.byStatus[s[0]]||0, pc=n/totalN*100;
+      return '<div class="pp-row"><span class="pp-k">'+s[1]+'</span>'
+           + '<span class="pp-bar"><i class="pp-'+s[0]+'" style="width:'+pc.toFixed(1)+'%"></i></span>'
+           + '<span class="pp-n">'+n+'</span></div>';
+    }).join('')
+    + '<div class="pp-tot">'+totalN+' enquir'+(totalN===1?'y':'ies')+' in the pipeline</div>';
+
+    var rows=m.recent.length ? m.recent.map(function(r){
+      var pct=r.vendors?Math.round(r.responses/r.vendors*100):0;
+      return '<tr data-pkq="'+esc(r.id)+'">'
+        + '<td class="mono">'+esc(r.ref||'—')+'</td>'
+        + '<td>'+esc(r.project||'—')+'</td>'
+        + '<td class="num">'+r.vendors+'</td>'
+        + '<td class="num">'+r.responses+(r.vendors?' <span class="pk-pct">'+pct+'%</span>':'')+'</td>'
+        + '<td>'+esc(r.due||'—')+'</td>'
+        + '<td><span class="pst pst-'+esc(r.status)+'">'+esc(r.status)+'</span></td></tr>';
+    }).join('') : '';
+
+    var table = m.recent.length
+      ? '<table class="ptbl"><thead><tr><th>Reference</th><th>Project</th>'
+        + '<th class="num">Invited</th><th class="num">Responses</th><th>Due</th><th>Status</th>'
+        + '</tr></thead><tbody>'+rows+'</tbody></table>'
+      : '<div class="pempty"><b>No enquiries yet</b>'
+        + '<p>Create a Bill of Quantities, then transfer it to an enquiry to start inviting vendors.</p>'
+        + '<button class="btn primary" type="button" data-pkgo="boq">Build a BOQ</button></div>';
+
+    host.innerHTML =
+      '<div class="pdash">'
+      + '<div class="pdash-head"><div><h2>Procurement Dashboard</h2>'
+      + '<p>Live position across every project. Figures come from the tender records themselves, '
+      + 'using the same rate calculations as the Comparative Statement.</p></div></div>'
+      + '<div class="pk-grid">'+cards+'</div>'
+      + '<div class="pdash-2">'
+      +   '<section class="pcard"><h3>Tender pipeline by stage</h3>'+pipe+'</section>'
+      +   '<section class="pcard"><h3>Vendor master</h3>'
+      +     '<div class="pbig">'+m.vendorsOnFile+'</div><div class="psml">vendors on file</div>'
+      +     '<div class="pbig" style="margin-top:14px">'+m.expired+'</div><div class="psml">enquiries past due date</div>'
+      +     '<button class="btn" type="button" data-pkgo="vmaster" style="margin-top:14px">Open Vendor Master</button>'
+      +   '</section>'
+      + '</div>'
+      + '<section class="pcard"><h3>Recent enquiries</h3>'+table+'</section>'
+      + '</div>';
+
+    host.querySelectorAll('[data-pkgo]').forEach(function(b){
+      b.addEventListener('click',function(){ goto(b.dataset.pkgo); });
+    });
+    host.querySelectorAll('tr[data-pkq]').forEach(function(tr){
+      tr.addEventListener('click',function(){
+        var btn=document.querySelector('#modes button[data-m="quote"]'); if(btn) btn.click();
+        if(window.QM&&window.QM.openQ){ try{ window.QM.openQ(tr.dataset.pkq); }catch(e){ window.QM.go&&window.QM.go('list'); } }
+      });
+    });
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
+  else init();
+})();
+
 </script>
 </body>
 </html>
