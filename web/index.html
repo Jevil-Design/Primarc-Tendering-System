@@ -1436,12 +1436,12 @@
    Blue is used for informational accents instead.
    ═══════════════════════════════════════════════════════════════════════ */
 :root{
-  --sb-w:232px; --sb-w-min:64px;
-  --sb-bg:#101a2c; --sb-bg2:#0b1322; --sb-line:#1e2c45;
-  --sb-ink:#e8edf6; --sb-dim:#8fa0bd; --sb-hi:#17243a;
-  --sb-active:#1d3356;
+  --sb-w:248px; --sb-w-min:76px;
+  --sb-bg:#0d1a30; --sb-bg2:#070f1e; --sb-line:#22324f;
+  --sb-ink:#f4f7fc; --sb-dim:#b9c6dc; --sb-grp:#7d90b2; --sb-hi:#1a2b47;
+  --sb-active:rgba(255,106,44,.18); --sb-active2:rgba(255,106,44,.06);
 }
-html[data-theme="light"]{ --sb-bg:#132135; --sb-bg2:#0d1829; --sb-line:#243754; }
+html[data-theme="light"]{ --sb-bg:#11213b; --sb-bg2:#0a1528; --sb-line:#263a5c; }
 
 /* ── layout ───────────────────────────────────────────────────────────── */
 .app.has-sb{
@@ -1465,43 +1465,50 @@ html[data-theme="light"]{ --sb-bg:#132135; --sb-bg2:#0d1829; --sb-line:#243754; 
 #pSidebar{
   background:linear-gradient(180deg,var(--sb-bg),var(--sb-bg2));
   border-right:1px solid var(--sb-line);
+  /* lifts the rail off the workspace so it reads as the primary navigation */
+  box-shadow:6px 0 22px -6px rgba(3,8,20,.55);
   display:flex; flex-direction:column; min-height:0; z-index:120;
   font-family:'Archivo',system-ui,sans-serif;
 }
 #pSidebar .sb-top{
-  height:58px; flex-shrink:0; display:flex; align-items:center; gap:9px;
-  padding:0 14px; border-bottom:1px solid var(--sb-line);
+  height:58px; flex-shrink:0; display:flex; align-items:center; gap:11px;
+  padding:0 16px; border-bottom:1px solid var(--sb-line);
 }
 #pSidebar .sb-mark{
-  width:28px; height:28px; border-radius:7px; flex-shrink:0;
-  background:var(--accent); color:#fff; font-weight:800; font-size:13px;
+  width:36px; height:36px; border-radius:10px; flex-shrink:0;
+  background:linear-gradient(135deg,#ff7a3d,var(--accent) 55%,#d9531c); color:#fff; font-weight:800; font-size:16px;
+  box-shadow:0 4px 14px -3px rgba(255,106,44,.55), inset 0 1px 0 rgba(255,255,255,.25);
   display:flex; align-items:center; justify-content:center; letter-spacing:-.5px;
 }
 #pSidebar .sb-name{ min-width:0 }
-#pSidebar .sb-name b{ display:block; font-size:12.5px; color:var(--sb-ink); font-weight:700; letter-spacing:.2px; white-space:nowrap }
-#pSidebar .sb-name i{ display:block; font-size:9.5px; color:var(--sb-dim); font-style:normal; text-transform:uppercase; letter-spacing:.7px; white-space:nowrap }
-#pSidebar .sb-scroll{ flex:1; overflow-y:auto; overflow-x:hidden; padding:10px 8px 14px }
+#pSidebar .sb-name b{ display:block; font-size:14px; color:var(--sb-ink); font-weight:700; letter-spacing:.2px; white-space:nowrap }
+#pSidebar .sb-name i{ display:block; font-size:10px; color:var(--sb-grp); font-style:normal; text-transform:uppercase; letter-spacing:.7px; white-space:nowrap }
+#pSidebar .sb-scroll{ flex:1; overflow-y:auto; overflow-x:hidden; padding:10px 10px 12px }
 #pSidebar .sb-grp{
-  font-size:9.5px; text-transform:uppercase; letter-spacing:.9px; font-weight:700;
-  color:var(--sb-dim); opacity:.75; padding:14px 10px 6px; white-space:nowrap;
+  font-size:10px; text-transform:uppercase; letter-spacing:1.1px; font-weight:800;
+  color:var(--sb-grp); padding:13px 12px 6px; white-space:nowrap;
 }
 #pSidebar .sb-grp:first-child{ padding-top:4px }
 #pSidebar button.sb-i{
   width:100%; display:flex; align-items:center; gap:10px;
   background:none; border:0; border-radius:8px; cursor:pointer;
-  padding:8px 10px; margin:1px 0; color:var(--sb-dim);
-  font:inherit; font-size:12.5px; font-weight:600; text-align:left;
+  padding:8px 12px; margin:1px 0; color:var(--sb-dim);
+  font:inherit; font-size:13.5px; font-weight:600; text-align:left;
   transition:background .12s, color .12s;
 }
 #pSidebar button.sb-i:hover{ background:var(--sb-hi); color:var(--sb-ink) }
-#pSidebar button.sb-i:focus-visible{ outline:2px solid var(--blue); outline-offset:-2px }
-#pSidebar button.sb-i.on{ background:var(--sb-active); color:#fff }
+#pSidebar button.sb-i:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px }
+#pSidebar button.sb-i.on{
+  background:linear-gradient(90deg,var(--sb-active),var(--sb-active2)); color:#fff; font-weight:700;
+  box-shadow:inset 0 0 0 1px rgba(255,106,44,.28);
+}
+#pSidebar button.sb-i.on svg{ color:var(--accent); stroke-width:2.1 }
 #pSidebar button.sb-i.on::before{
-  content:''; position:absolute; left:0; width:3px; height:22px;
-  border-radius:0 3px 3px 0; background:var(--accent);
+  content:''; position:absolute; left:-10px; width:4px; height:26px;
+  border-radius:0 4px 4px 0; background:var(--accent); box-shadow:0 0 10px rgba(255,106,44,.6);
 }
 #pSidebar button.sb-i{ position:relative }
-#pSidebar button.sb-i svg{ width:17px; height:17px; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round }
+#pSidebar button.sb-i svg{ width:20px; height:20px; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round }
 #pSidebar button.sb-i .sb-t{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 #pSidebar button.sb-i .sb-ct{
   margin-left:auto; flex-shrink:0; font-size:10px; font-weight:700;
@@ -1510,7 +1517,7 @@ html[data-theme="light"]{ --sb-bg:#132135; --sb-bg2:#0d1829; --sb-line:#243754; 
 #pSidebar button.sb-i.on .sb-ct{ background:rgba(255,255,255,.16); color:#fff }
 #pSidebar button.sb-i .sb-ct.warn{ background:var(--accent); color:#fff }
 #pSidebar .sb-foot{
-  flex-shrink:0; border-top:1px solid var(--sb-line); padding:9px 10px;
+  flex-shrink:0; border-top:1px solid var(--sb-line); padding:11px 12px;
   display:flex; align-items:center; gap:8px;
 }
 #pSidebar .sb-foot .sb-who{ min-width:0; flex:1 }
@@ -1518,21 +1525,40 @@ html[data-theme="light"]{ --sb-bg:#132135; --sb-bg2:#0d1829; --sb-line:#243754; 
 #pSidebar .sb-foot .sb-who i{ display:block; font-size:9.5px; color:var(--sb-dim); font-style:normal; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 #pSidebar .sb-tog{
   background:none; border:1px solid var(--sb-line); border-radius:7px; cursor:pointer;
-  color:var(--sb-dim); width:28px; height:28px; flex-shrink:0;
+  color:var(--sb-ink); width:32px; height:32px; flex-shrink:0; background:var(--sb-hi);
   display:flex; align-items:center; justify-content:center;
 }
 #pSidebar .sb-tog:hover{ color:var(--sb-ink); background:var(--sb-hi) }
 #pSidebar .sb-tog svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
 
 /* collapsed rail: icons only */
-.sb-min #pSidebar .sb-grp,
 .sb-min #pSidebar .sb-name,
 .sb-min #pSidebar .sb-t,
-.sb-min #pSidebar .sb-ct,
 .sb-min #pSidebar .sb-who{ display:none }
 .sb-min #pSidebar .sb-top{ justify-content:center; padding:0 }
 .sb-min #pSidebar button.sb-i{ justify-content:center; padding:9px 0 }
 .sb-min #pSidebar .sb-foot{ justify-content:center }
+/* group labels become dividers, so the four sections stay visible */
+.sb-min #pSidebar .sb-grp{ font-size:0; padding:0; height:1px; margin:8px 12px; background:var(--sb-line) }
+.sb-min #pSidebar .sb-grp:first-child{ display:none }
+/* counts become a dot — only for items that need action */
+.sb-min #pSidebar .sb-ct{ position:absolute; top:7px; right:13px; margin:0; padding:0; min-width:0; width:9px; height:9px; font-size:0; border-radius:50%; box-shadow:0 0 0 2px var(--sb-bg) }
+.sb-min #pSidebar .sb-ct:not(.warn){ display:none }
+/* label flyout for the icon rail (positioned by JS: the nav scrolls, so a CSS ::after would be clipped) */
+#sbTip{ position:fixed; z-index:400; pointer-events:none; opacity:0; transform:translateX(-4px);
+  transition:opacity .1s, transform .1s; background:#0a1426; color:#f4f7fc; border:1px solid #2a3c5e;
+  font:600 12.5px 'Archivo',system-ui,sans-serif; padding:7px 11px; border-radius:7px; white-space:nowrap;
+  box-shadow:0 8px 24px rgba(0,0,0,.4) }
+#sbTip.on{ opacity:1; transform:none }
+/* short laptop screens (≈768px tall): keep all 15 destinations on screen without scrolling */
+@media (max-height:800px){
+  #pSidebar .sb-scroll{ padding-top:6px; padding-bottom:6px }
+  #pSidebar button.sb-i{ padding-top:6px; padding-bottom:6px }
+  #pSidebar .sb-grp{ padding-top:9px; padding-bottom:4px }
+  .sb-min #pSidebar button.sb-i, .app.has-sb:not(.sb-open) #pSidebar button.sb-i{ padding-top:7px; padding-bottom:7px }
+  .sb-min #pSidebar .sb-grp{ margin:6px 12px }
+}
+#sbTip b{ color:#ff8a52; font-weight:700; margin-left:6px }
 
 /* ── workspace header: compact single-row breadcrumb + title + description ─── */
 .pws-head{
@@ -1566,9 +1592,13 @@ html[data-theme="light"] .pws-head .pws-desc{ color:#64748b }
 html[data-theme="light"] .pws-desc-sep, html[data-theme="light"] .pws-crumb-sep{ color:#94a3b8 }
 
 /* ── responsive ───────────────────────────────────────────────────────── */
-@media (max-width:1180px){ .app.has-sb{ --sb-w:var(--sb-w-min) } .app.has-sb .sb-grp,
+@media (max-width:1180px){ .app.has-sb{ --sb-w:var(--sb-w-min) }
   .app.has-sb #pSidebar .sb-name, .app.has-sb #pSidebar .sb-t,
-  .app.has-sb #pSidebar .sb-ct, .app.has-sb #pSidebar .sb-who{ display:none }
+  .app.has-sb #pSidebar .sb-who{ display:none }
+  .app.has-sb #pSidebar .sb-grp{ font-size:0; padding:0; height:1px; margin:8px 12px; background:var(--sb-line) }
+  .app.has-sb #pSidebar .sb-grp:first-child{ display:none }
+  .app.has-sb #pSidebar .sb-ct{ position:absolute; top:7px; right:13px; margin:0; padding:0; min-width:0; width:9px; height:9px; font-size:0; border-radius:50%; box-shadow:0 0 0 2px var(--sb-bg) }
+  .app.has-sb #pSidebar .sb-ct:not(.warn){ display:none }
   .app.has-sb #pSidebar .sb-top{ justify-content:center; padding:0 }
   .app.has-sb #pSidebar button.sb-i{ justify-content:center; padding:9px 0 }
   .app.has-sb #pSidebar .sb-foot{ justify-content:center } }
@@ -1581,14 +1611,17 @@ html[data-theme="light"] .pws-desc-sep, html[data-theme="light"] .pws-crumb-sep{
     position:fixed; inset:0 auto 0 0; width:var(--sb-w-min);
     transform:translateX(-100%); transition:transform .18s ease; box-shadow:4px 0 24px rgba(0,0,0,.4);
   }
-  .app.has-sb.sb-open > #pSidebar{ transform:none; width:232px }
+  .app.has-sb.sb-open > #pSidebar{ transform:none; width:248px }
   .app.has-sb.sb-open > #pSidebar .sb-grp,
   .app.has-sb.sb-open > #pSidebar .sb-name,
   .app.has-sb.sb-open > #pSidebar .sb-t,
   .app.has-sb.sb-open > #pSidebar .sb-ct,
   .app.has-sb.sb-open > #pSidebar .sb-who{ display:revert }
-  .app.has-sb.sb-open > #pSidebar .sb-top{ justify-content:flex-start; padding:0 14px }
-  .app.has-sb.sb-open > #pSidebar button.sb-i{ justify-content:flex-start; padding:8px 10px }
+  .app.has-sb.sb-open > #pSidebar .sb-grp{ font-size:10px; padding:13px 12px 6px; height:auto; margin:0; background:none; display:block }
+  .app.has-sb.sb-open > #pSidebar .sb-ct{ position:static; width:auto; height:auto; min-width:18px; padding:1px 6px; font-size:10px; border-radius:9px; box-shadow:none; margin-left:auto }
+  .app.has-sb.sb-open > #pSidebar .sb-ct:not(.warn){ display:revert }
+  .app.has-sb.sb-open > #pSidebar .sb-top{ justify-content:flex-start; padding:0 16px }
+  .app.has-sb.sb-open > #pSidebar button.sb-i{ justify-content:flex-start; padding:8px 12px }
   .app.has-sb > .topbar{ grid-column:1 }
   .app.has-sb > #pwsHead{ grid-column:1 }
   .app.has-sb > .view{ grid-column:1 }
@@ -12540,7 +12573,7 @@ return api;
     NAV.forEach(function(g){
       h+='<div class="sb-grp">'+g[0]+'</div>';
       g[1].forEach(function(r){
-        h+='<button class="sb-i" type="button" data-sb="'+r[0]+'" title="'+r[1]+'">'
+        h+='<button class="sb-i" type="button" data-sb="'+r[0]+'" aria-label="'+r[1]+'">'
           + svg(r[2])+'<span class="sb-t">'+r[1]+'</span>'
           + (r[3].count?'<span class="sb-ct" data-ct="'+r[3].count+'"'+(r[3].warn?' data-warn="1"':'')+'></span>':'')
           + '</button>';
@@ -12558,6 +12591,26 @@ return api;
     scrim.addEventListener('click',function(){ a.classList.remove('sb-open'); });
 
     a.classList.add('has-sb');
+
+    /* Icon-rail flyout: shows the item's name (and pending count) beside the
+       icon whenever the rail is too narrow to show labels. */
+    var tip=document.createElement('div'); tip.id='sbTip'; tip.setAttribute('aria-hidden','true');
+    document.body.appendChild(tip);
+    var hideTip=function(){ tip.classList.remove('on'); };
+    var showTip=function(e){
+      var b=e.target.closest&&e.target.closest('#pSidebar button.sb-i');
+      if(!b||aside.offsetWidth>140){ hideTip(); return; }
+      var ct=b.querySelector('.sb-ct'), n=ct&&ct.style.display!=='none'?ct.textContent:'';
+      tip.innerHTML=''; tip.appendChild(document.createTextNode(b.getAttribute('aria-label')||''));
+      if(n){ var c=document.createElement('b'); c.textContent=n; tip.appendChild(c); }
+      var r=b.getBoundingClientRect();
+      tip.style.left=(r.right+10)+'px'; tip.style.top=(r.top+r.height/2-tip.offsetHeight/2)+'px';
+      tip.classList.add('on');
+    };
+    aside.addEventListener('mouseover',showTip); aside.addEventListener('focusin',showTip);
+    aside.addEventListener('mouseleave',hideTip); aside.addEventListener('focusout',hideTip);
+    aside.querySelector('.sb-scroll').addEventListener('scroll',hideTip,{passive:true});
+    aside.addEventListener('click',hideTip);
     try{ if(localStorage.getItem(SB_KEY)==='1') a.classList.add('sb-min'); }catch(e){}
 
     aside.addEventListener('click',function(e){

@@ -344,31 +344,34 @@
     s.textContent = `
     #admin{font-family:'Archivo',sans-serif}
     .erp-wrap{display:flex;width:100%;height:100%;overflow:hidden}
-    .erp-side{width:230px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;transition:width .18s ease}
-    .erp-side.collapsed{width:58px}
+    .erp-side{width:244px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;transition:width .18s ease;box-shadow:4px 0 16px -6px rgba(0,0,0,.28);position:relative;z-index:2}
+    .erp-side.collapsed{width:70px}
     .erp-side-head{display:flex;align-items:center;gap:9px;padding:14px 16px 12px;border-bottom:1px solid var(--line);min-height:34px}
-    .erp-side-head .badge{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#c9501a);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-    .erp-side-head .badge svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2}
-    .erp-side-head .t{font-size:12.5px;font-weight:800;color:var(--ink);line-height:1.1;letter-spacing:.2px}
+    .erp-side-head .badge{width:36px;height:36px;border-radius:10px;box-shadow:0 4px 14px -3px rgba(255,106,44,.5);background:linear-gradient(135deg,var(--accent),#c9501a);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .erp-side-head .badge svg{width:19px;height:19px;stroke:#fff;fill:none;stroke-width:2}
+    .erp-side-head .t{font-size:14px;font-weight:800;color:var(--ink);line-height:1.1;letter-spacing:.2px}
     .erp-side-head .t span{display:block;font-size:8.5px;font-weight:600;color:var(--faint);letter-spacing:1.2px;text-transform:uppercase;margin-top:2px}
     .erp-side.collapsed .t,.erp-side.collapsed .erp-nav-lbl,.erp-side.collapsed .erp-nav-sec,.erp-side.collapsed .erp-nav .pin,.erp-side.collapsed .erp-side-foot .txt{display:none}
     .erp-nav{flex:1;overflow-y:auto;padding:8px 8px 16px}
-    .erp-nav-sec{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--faint);padding:14px 10px 5px}
-    .erp-nav a{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:7px;color:var(--dim);font-size:12.5px;font-weight:600;cursor:pointer;text-decoration:none;position:relative;transition:.12s;margin-bottom:1px}
-    .erp-nav a svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.9;flex-shrink:0}
-    .erp-nav a:hover{background:var(--hi);color:var(--ink)}
-    .erp-nav a.on{background:rgba(255,106,44,.13);color:var(--accent)}
-    .erp-nav a.on::before{content:'';position:absolute;left:-8px;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--accent)}
+    .erp-nav-sec{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--faint);padding:16px 12px 6px}
+    .erp-nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;color:var(--ink);opacity:.82;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;position:relative;transition:.12s;margin-bottom:1px}
+    .erp-nav a svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;flex-shrink:0}
+    .erp-nav a:hover{background:var(--hi);color:var(--ink);opacity:1}
+    .erp-nav a.on{background:linear-gradient(90deg,rgba(255,106,44,.2),rgba(255,106,44,.07));color:var(--accent);opacity:1;font-weight:700;box-shadow:inset 0 0 0 1px rgba(255,106,44,.28)}
+    .erp-nav a.on svg{stroke-width:2.1}
+    .erp-nav a.on::before{content:'';position:absolute;left:-8px;top:8px;bottom:8px;width:4px;border-radius:0 4px 4px 0;background:var(--accent);box-shadow:0 0 10px rgba(255,106,44,.55)}
+    .erp-side.collapsed .erp-nav-sec{display:block;font-size:0;padding:0;height:1px;margin:9px 12px;background:var(--line)}
+    .erp-side.collapsed .erp-nav-sec:first-child{display:none}
     .erp-nav a .pin{margin-left:auto;font-size:11px;color:var(--faint);opacity:0;transition:.12s}
     .erp-nav a:hover .pin{opacity:.7}
     .erp-nav a .pin.on{opacity:1;color:var(--accent2)}
     .erp-nav a .cnt{margin-left:auto;font-size:10px;font-family:'Spline Sans Mono',monospace;background:var(--panel3);color:var(--faint);padding:1px 7px;border-radius:10px}
-    .erp-side.collapsed .erp-nav a{justify-content:center;padding:9px 0}
+    .erp-side.collapsed .erp-nav a{justify-content:center;padding:12px 0}
     .erp-side.collapsed .erp-nav a .cnt{display:none}
     .erp-side-foot{padding:9px;border-top:1px solid var(--line)}
     .erp-collapse{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--faint);font-size:11.5px;font-weight:600;padding:7px 10px;border-radius:7px;cursor:pointer;font-family:inherit}
     .erp-collapse:hover{background:var(--hi);color:var(--ink)}
-    .erp-collapse svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+    .erp-collapse svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
 
     .erp-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
     .erp-bar{display:flex;align-items:center;gap:14px;padding:13px 22px;border-bottom:1px solid var(--line);background:var(--bg);flex-shrink:0}
