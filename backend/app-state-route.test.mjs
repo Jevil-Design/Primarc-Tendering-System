@@ -95,7 +95,15 @@ function makeEnv({ isAdmin = false, grants = {} } = {}) {
         async run() {
           if (q.startsWith('update sessions set last_seen_at')) return { meta: { changes: 1 } };
           if (q.startsWith('insert into system_settings')) {
+            if (q.includes('do nothing') && settings.has(args[1])) return { meta: { changes: 0 } };
             settings.set(args[1], args[2]);
+            return { meta: { changes: 1 } };
+          }
+          if (q.startsWith("update system_settings set setting_value = ?, updated_by = ? where setting_key = ? and coalesce(json_extract(setting_value, '$.__version'), 0) = ?")) {
+            if (db.__beforeWrite) { const f = db.__beforeWrite; db.__beforeWrite = null; f(settings); }
+            const cur = settings.has(args[2]) ? (JSON.parse(settings.get(args[2])).__version || 0) : null;
+            if (cur !== args[3]) return { meta: { changes: 0 } };
+            settings.set(args[2], args[0]);
             return { meta: { changes: 1 } };
           }
           if (q.startsWith('insert into audit_logs')) { audits.push(args); return { meta: { changes: 1 } }; }
@@ -212,6 +220,42 @@ test('a version conflict does not become a way to read the hidden sections', asy
   assert.equal(put.body.error.details.state.quotations.length, 1, 'what they may see is still returned');
 });
 
+test('a save that loses a race with another computer is refused, not silently written over it', async () => {
+  /* Version check and write used to be two statements: a write landing
+     between them was erased without trace. Simulate exactly that. */
+  const e = makeEnv({ isAdmin: true });
+  const got = await call(e, 'GET', '/app-state');
+  const mine = got.body.data.state;
+  mine.workOrders[0].amount = 1;
+  e.db.__beforeWrite = (settings) => {
+    const theirs = tenderData(); theirs.workOrders[0].amount = 999;
+    settings.set('app_state_v1', JSON.stringify({ __version: 8, data: theirs }));
+  };
+  const put = await call(e, 'PUT', '/app-state', { data: mine, baseVersion: got.body.data.version });
+  assert.equal(put.status, 409);
+  assert.equal(put.body.error.details.serverVersion, 8, 'the client is told the version it lost to');
+  const stored = JSON.parse(e.settings.get('app_state_v1'));
+  assert.equal(stored.data.workOrders[0].amount, 999, "the other computer's save survived");
+});
+
+test('a save without baseVersion can no longer overwrite stored data', async () => {
+  /* It used to mean "force": a stale browser flushing on logout replaced
+     everything other computers had saved since it last synced. */
+  const e = makeEnv({ isAdmin: true });
+  const stale = tenderData(); stale.workOrders = [];
+  const put = await call(e, 'PUT', '/app-state', { data: stale });
+  assert.equal(put.status, 409);
+  assert.equal(JSON.parse(e.settings.get('app_state_v1')).data.workOrders.length, 1, 'nothing was erased');
+});
+
+test('the very first save, onto an empty server, still works without a version', async () => {
+  const e = makeEnv({ isAdmin: true });
+  e.settings.delete('app_state_v1');
+  const put = await call(e, 'PUT', '/app-state', { data: tenderData() });
+  assert.equal(put.status, 200);
+  assert.equal(put.body.data.version, 1);
+});
+
 /* ── the second leak: /settings was a back door to the same blob ── */
 
 test('/settings no longer hands out the tender database', async () => {
@@ -246,4 +290,17 @@ test('no cookie means no data, whatever the route', async () => {
     const res = await worker.fetch(new Request('https://x.test/api' + p), e.env);
     assert.equal(res.status, 401, p + ' must refuse an anonymous caller');
   }
+});
+
+test('a state change from another site is refused even with a valid session cookie', async () => {
+  const e = makeEnv({ isAdmin: true });
+  e.db.__sessionHash = await sha256Hex(TOKEN + '|' + SECRET);
+  const send = (origin) => worker.fetch(new Request('https://x.test/api/app-state', {
+    method: 'PUT',
+    headers: { cookie: 'ts_sid=' + TOKEN, 'content-type': 'application/json', ...(origin ? { origin } : {}) },
+    body: JSON.stringify({ data: tenderData(), baseVersion: 7 }),
+  }), e.env);
+  assert.equal((await send('https://evil.example')).status, 403, 'cross-site');
+  assert.equal(JSON.parse(e.settings.get('app_state_v1')).__version, 7, 'nothing written');
+  assert.equal((await send('https://x.test')).status, 200, 'same origin still works');
 });

@@ -61,7 +61,15 @@ export default function register(router) {
   router.put('/purchase-orders/:id', async (ctx) => {
     requirePerm(ctx, MODULE.PURCHASE_ORDER, 'edit');
     const b = ctx.body || {};
-    const map = { poDate: 'po_date', deliveryDate: 'delivery_date', status: 'status',
+    // status is not editable here: approval goes through /approve, which
+    // checks the approve right and the user's financial limit. Setting
+    // status:'approved' through PUT used to skip both.
+    if (b.status !== undefined) throw errors.validation('Status cannot be changed here — use Approve.');
+    const cur = await ctx.env.DB.prepare('select status from purchase_orders where id = ? and deleted_at is null')
+      .bind(ctx.params.id).first();
+    if (!cur) throw errors.notFound('Purchase order not found.');
+    if (cur.status === 'approved' && !ctx.user.is_admin) throw errors.locked('An approved purchase order cannot be edited.');
+    const map = { poDate: 'po_date', deliveryDate: 'delivery_date',
       vendorId: 'vendor_id', projectId: 'project_id', workOrderId: 'work_order_id' };
     const sets = [], binds = [];
     for (const [k, col] of Object.entries(map)) if (b[k] !== undefined) { sets.push(`${col} = ?`); binds.push(b[k]); }

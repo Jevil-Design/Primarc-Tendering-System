@@ -16,6 +16,35 @@
   const $ = (s, r) => (r || document).querySelector(s);
   const val = (id) => { const e = document.getElementById(id); return e ? e.value : ''; };
 
+  /* ───────── server mode ─────────
+     With the API connected, sign-in is checked by the server — so creating,
+     locking, deleting or re-passwording a user only in this browser's
+     localStorage reported success while changing nothing that matters.
+     These helpers send the account change to the server and then reload the
+     list from it. ERP-only details the server has no column for yet
+     (department, designation, photo, project access …) stay on this
+     computer and are re-attached to the server record after each reload. */
+  const SERVER = () => !!(window.TSApi && window.TSApi.active && window.TSApi.session && window.CloudflareAPI);
+  const LOCAL_ONLY = ['empId', 'mobile', 'photo', 'signature', 'departmentId', 'designationId', 'reportingManagerId',
+    'branchId', 'companyId', 'joiningDate', 'expiryDate', 'remarks', 'overrides', 'avatarColor', 'initials',
+    'projectAccess', 'lockReason', 'created'];
+  async function serverRefresh(extra) {
+    const before = new Map(users().map(u => [u.id, u]));
+    if (extra) before.set(extra.id, Object.assign({}, before.get(extra.id) || {}, extra));
+    const fresh = await window.TSApi.listUsers();
+    setUsers(fresh.map(f => {
+      const old = before.get(f.id) || {}, keep = {};
+      LOCAL_ONLY.forEach(k => { if (old[k] !== undefined) keep[k] = old[k]; });
+      const status = f.status === 'suspended' ? 'locked' : (f.status === 'inactive' ? 'inactive' : 'active');
+      return Object.assign(keep, f, { status, platformAccess: f.active, active: f.active });
+    }));
+  }
+  async function serverDo(fn, okMsg, extra) {
+    try { const r = await fn(); await serverRefresh(extra && extra(r)); if (okMsg) toast(okMsg); renderMain(); return r || true; }
+    catch (e) { alert('Not saved — ' + ((e && e.message) || 'the server refused the change') + '.'); renderMain(); return false; }
+  }
+  const setStatus = (id, status) => window.CloudflareAPI.users.update(id, { status });
+
   /* ───────── overlay (drawer / modal) ───────── */
   function ensureOv() {
     let ov = document.getElementById('erpOv');
@@ -736,6 +765,13 @@
     _bulk: (action) => {
       const ids = S.u.sel.slice(); if (!ids.length) return;
       if (action === 'delete' && !confirm('Delete ' + ids.length + ' user(s)? This cannot be undone.')) return;
+      if (SERVER()) {
+        const run = action === 'delete' ? () => window.TSApi.bulkDelete(ids)
+          : action === 'activate' || action === 'deactivate' ? () => window.TSApi.bulkActive(ids, action === 'activate')
+          : () => Promise.all(ids.map(id => setStatus(id, action === 'lock' ? 'suspended' : 'active')));
+        serverDo(run, '✓ ' + ids.length + ' user(s) updated').then(ok => { if (ok) { logAudit({ module: 'Administration', action: 'Bulk ' + action, target: ids.length + ' users', newVal: action }); S.u.sel = []; renderMain(); } });
+        return;
+      }
       const all = users();
       ids.forEach(id => {
         if (id === 'u_admin') return;
@@ -754,20 +790,28 @@
     lockUser: (id) => {
       const reason = prompt('Lock reason:\n(Employee Resigned · Terminated · Security Investigation · Policy Violation · Other)', 'Security Investigation');
       if (reason == null) return;
+      if (SERVER()) {
+        const u0 = userById(id);
+        serverDo(() => setStatus(id, 'suspended'), '🔒 ' + (u0 ? u0.name : 'User') + ' locked', () => ({ id, lockReason: reason }))
+          .then(ok => { if (ok) logAudit({ module: 'Administration', action: 'Account Locked', target: u0 && u0.name, oldVal: 'Active', newVal: 'Locked — ' + reason, reason }); });
+        return;
+      }
       const u = userById(id); u.status = 'locked'; u.lockReason = reason; u.active = false; u.sessions = []; persistUser(u);
       logAudit({ module: 'Administration', action: 'Account Locked', target: u.name, oldVal: 'Active', newVal: 'Locked — ' + reason, reason });
       notify('lock', 'User locked', u.name + ' was locked — ' + reason); toast('🔒 ' + u.name + ' locked'); renderMain();
     },
-    unlockUser: (id) => { const u = userById(id); u.status = 'active'; u.lockReason = ''; u.failedLogins = 0; u.active = u.platformAccess !== false; persistUser(u); logAudit({ module: 'Administration', action: 'Account Unlocked', target: u.name, oldVal: 'Locked', newVal: 'Active' }); toast('🔓 ' + u.name + ' unlocked'); renderMain(); },
+    unlockUser: (id) => { if (SERVER()) { const u0 = userById(id); serverDo(() => setStatus(id, 'active'), '🔓 ' + (u0 ? u0.name : 'User') + ' unlocked', () => ({ id, lockReason: '' })); return; } const u = userById(id); u.status = 'active'; u.lockReason = ''; u.failedLogins = 0; u.active = u.platformAccess !== false; persistUser(u); logAudit({ module: 'Administration', action: 'Account Unlocked', target: u.name, oldVal: 'Locked', newVal: 'Active' }); toast('🔓 ' + u.name + ' unlocked'); renderMain(); },
     resetPw: async (id) => {
       const u = userById(id); const np = prompt('Set a new password for ' + u.name + ':'); if (np == null) return;
       if (np.length < (policy().minLen || 8)) { alert('Password too short (min ' + (policy().minLen || 8) + ').'); return; }
+      if (SERVER()) { serverDo(() => window.TSApi.updateUser(id, { password: np }), '✓ Password reset for ' + u.name + ' — they must change it at next sign-in'); return; }
       const salt = rndSalt(); const { algo, h } = await hash(np, salt); u.salt = salt; u.hash = h; u.algo = algo; u.mustChange = true; persistUser(u);
       logAudit({ module: 'Administration', action: 'Password Reset', target: u.name, newVal: 'Forced change on next login' });
       toast('✓ Password reset for ' + u.name);
     },
-    forceLogout: (id) => { const u = userById(id); u.sessions = []; persistUser(u); logAudit({ module: 'Administration', action: 'Force Logout', target: u.name, newVal: 'All sessions terminated' }); toast('⎋ ' + u.name + ' logged out everywhere'); renderMain(); },
+    forceLogout: (id) => { if (SERVER()) { alert('Ending one user\'s sessions is not available from here yet. Resetting their password, or locking the account, signs them out everywhere.'); return; } const u = userById(id); u.sessions = []; persistUser(u); logAudit({ module: 'Administration', action: 'Force Logout', target: u.name, newVal: 'All sessions terminated' }); toast('⎋ ' + u.name + ' logged out everywhere'); renderMain(); },
     togglePA: (id) => {
+      if (SERVER()) { const u0 = userById(id); const on = u0 && u0.platformAccess === false; serverDo(() => window.TSApi.updateUser(id, { active: on }), on ? '✓ Access granted' : '⊘ Access revoked'); return; }
       const u = userById(id); u.platformAccess = u.platformAccess === false; u.active = u.platformAccess && u.status === 'active';
       if (!u.platformAccess) u.sessions = [];
       persistUser(u);
@@ -783,7 +827,7 @@
         toast('Cloned settings — set name, email & username');
       }, 80);
     },
-    delUser: (id) => { if (id === 'u_admin') { alert('The Super Admin account cannot be deleted.'); return; } const u = userById(id); if (!confirm('Delete ' + u.name + '? This cannot be undone.')) return; setUsers(users().filter(x => x.id !== id)); logAudit({ module: 'Administration', action: 'User Deleted', target: u.name }); toast('🗑 ' + u.name + ' deleted'); renderMain(); },
+    delUser: (id) => { if (id === 'u_admin') { alert('The Super Admin account cannot be deleted.'); return; } const u = userById(id); if (!confirm('Delete ' + u.name + '? This cannot be undone.')) return; if (SERVER()) { serverDo(() => window.TSApi.bulkDelete([id]), '🗑 ' + u.name + ' deleted').then(ok => { if (ok) logAudit({ module: 'Administration', action: 'User Deleted', target: u.name }); }); return; } setUsers(users().filter(x => x.id !== id)); logAudit({ module: 'Administration', action: 'User Deleted', target: u.name }); toast('🗑 ' + u.name + ' deleted'); renderMain(); },
 
     _clearPhoto: () => { draft.photo = null; const el = $('#uPhoto'); if (el) { el.style.backgroundImage = ''; el.style.background = '#ff6a2c'; el.innerHTML = (val('fName').trim().split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() || 'NU') + '<div class="ov">Upload</div>'; } },
     _pwMeter: () => { const v = val('fPw'); const bar = $('#fPwBar'); if (!bar) return; let s = 0; if (v.length >= 8) s++; if (/[A-Z]/.test(v)) s++; if (/[0-9]/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++; const pct = [0, 30, 55, 80, 100][s]; const col = ['', 'var(--red)', 'var(--accent2)', 'var(--blue)', 'var(--green)'][s]; bar.style.width = pct + '%'; bar.style.background = col; },
@@ -816,6 +860,19 @@
       let role = 'Viewer';
       if (dg) { const lv = dg.level || 9; if (lv <= 2) role = 'Admin'; else if (/purchase/i.test(dg.name)) role = 'Purchase'; else if (lv <= 6) role = 'QS Engineer'; }
       rec.role = u.role === 'Super Admin' ? 'Super Admin' : role;
+      if (SERVER()) {
+        const extras = {}; LOCAL_ONLY.forEach(k => { if (rec[k] !== undefined) extras[k] = rec[k]; });
+        const active = status === 'active' && $('#fPa').checked;
+        const r = await serverDo(async () => {
+          if (editing) { await window.TSApi.updateUser(editId, { name, email, role: rec.role, active, ...(pw ? { password: pw } : {}) }); return { userId: editId }; }
+          const c = await window.TSApi.createUser({ username: un, name, email, password: pw, role: rec.role });
+          if (!active && c && c.userId) await window.TSApi.updateUser(c.userId, { active: false });
+          return c;
+        }, editing ? '✓ User updated' : '✓ User created', (res) => Object.assign({ id: (res && res.userId) || editId }, extras));
+        if (!r) return fail('Not saved — see the message above.');
+        logAudit({ module: 'Administration', action: editing ? 'User Edited' : 'User Created', target: name, newVal: desigName(rec.designationId) + ' · ' + deptName(rec.departmentId) });
+        closeOv(); renderMain(); return;
+      }
       if (pw) { const salt = rndSalt(); const { algo, h } = await hash(pw, salt); rec.salt = salt; rec.hash = h; rec.algo = algo; rec.mustChange = !editing && (policy().mustChangeFirst !== false); }
       if (!editing && !rec.created) rec.created = Date.now();
       const all = users(); const i = all.findIndex(x => x.id === rec.id); if (i >= 0) all[i] = rec; else all.push(rec); setUsers(all);

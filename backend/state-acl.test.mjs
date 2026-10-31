@@ -190,3 +190,24 @@ test('notifications and seq are never withheld — the app cannot number documen
   assert.equal(state.seq.ENQ, 3);
   assert.equal(state.notifications.length, 1);
 });
+
+test('a rate-blind editor cannot erase the quotes of enquiries in the deleted bin', () => {
+  const stored = sampleState();
+  stored.deleted = [{ id: 'q9', base: 'ENQ/AAD/2026/009', items: [{ desc: 'Plaster' }],
+                      vendors: [{ name: 'Old Co', lines: [{ rate: 120, gst: 18 }] }] }];
+  const acl = stateAccess(ctxWith({ [MODULE.ENQUIRY]: ['view', 'edit'] }));
+  const sent = wire(redactState(stored, acl).state);
+  assert.deepEqual(sent.deleted[0].vendors, [], 'rates were withheld on read');
+  const { data } = mergeStateWrite(sent, wire(stored), acl);
+  assert.equal(data.deleted[0].vendors[0].lines[0].rate, 120, 'and survive the save');
+});
+
+test('restoring a binned enquiry from a rate-blind client keeps its quotes', () => {
+  const stored = sampleState();
+  stored.deleted = [stored.quotations.pop()];                 // q1 sits in the bin
+  const acl = stateAccess(ctxWith({ [MODULE.ENQUIRY]: ['view', 'edit'] }));
+  const sent = wire(redactState(stored, acl).state);
+  sent.quotations.push(sent.deleted.pop());                   // user restores it
+  const { data } = mergeStateWrite(sent, wire(stored), acl);
+  assert.equal(data.quotations[0].vendors[0].lines[0].rate, 385);
+});

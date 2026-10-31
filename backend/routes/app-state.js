@@ -31,13 +31,30 @@ async function readRow(env) {
   const row = await env.DB.prepare(
     'select setting_value from system_settings where setting_key = ?'
   ).bind(KEY).first();
-  if (!row) return { version: 0, data: null };
+  if (!row) return { version: 0, data: null, raw: null };
   try {
     const parsed = JSON.parse(row.setting_value);
-    return { version: parsed.__version || 0, data: parsed.data ?? null };
+    return { version: parsed.__version || 0, data: parsed.data ?? null, raw: row.setting_value };
   } catch {
-    return { version: 0, data: null };
+    return { version: 0, data: null, raw: row.setting_value };
   }
+}
+
+/* Compare-and-swap on the version: the write only lands if the row still
+   carries the version we read. Checking the version and then writing in two
+   statements let two simultaneous saves both pass the check — the second
+   silently erased the first. Returns false when someone else wrote between. */
+async function writeRow(env, prevVersion, exists, nextRaw, userId) {
+  const res = !exists
+    ? await env.DB.prepare(
+        `insert into system_settings (id, setting_key, setting_value, updated_by) values (?,?,?,?)
+         on conflict(setting_key) do nothing`
+      ).bind(newId(), KEY, nextRaw, userId).run()
+    : await env.DB.prepare(
+        `update system_settings set setting_value = ?, updated_by = ?
+         where setting_key = ? and coalesce(json_extract(setting_value, '$.__version'), 0) = ?`
+      ).bind(nextRaw, userId, KEY, prevVersion).run();
+  return !!(res && res.meta && res.meta.changes);
 }
 
 export default function register(router) {
@@ -60,29 +77,32 @@ export default function register(router) {
     const acl = stateAccess(ctx);
     if (acl.blind) throw errors.forbidden('Your role has no access to tender data.');
 
-    const { version: curVersion, data: curData } = await readRow(ctx.env);
+    // Optimistic concurrency: every save names the version it was based on.
+    // Omitting it means "I expect nothing stored yet" (version 0) — it used
+    // to mean "overwrite whatever is there", which let a stale browser
+    // flushing on logout erase everything saved since it last synced.
+    const baseVersion = (body.baseVersion === undefined || body.baseVersion === null)
+      ? 0 : Number(body.baseVersion);
+    const { version: curVersion, data: curData, raw } = await readRow(ctx.env);
 
-    // Optimistic concurrency. baseVersion omitted = force (used only for the
-    // very first seed); otherwise it must match what is on the server.
-    if (body.baseVersion !== undefined && body.baseVersion !== null &&
-        Number(body.baseVersion) !== curVersion) {
-      // The conflict body hands the client the server's copy so it can adopt
-      // it without a second round trip — so it has to be redacted exactly like
-      // a GET, or a losing save would become a way to read the whole document.
-      throw errors.conflict('The data was changed on another computer. Reload before saving.',
-        { serverVersion: curVersion, state: redactState(curData, acl).state });
-    }
+    // The conflict body hands the client the server's copy so it can merge
+    // without a second round trip — so it has to be redacted exactly like a
+    // GET, or a losing save would become a way to read the whole document.
+    const conflict = (version, data) => errors.conflict(
+      'The data was changed on another computer. Reload before saving.',
+      { serverVersion: version, state: redactState(data, acl).state });
+
+    if (baseVersion !== curVersion) throw conflict(curVersion, curData);
 
     // Throws 403 on an unauthorised edit; re-grafts sections the caller
     // was not allowed to see so their blanks cannot delete anyone's data.
     const { data: merged, restored } = mergeStateWrite(body.data, curData, acl);
 
     const next = { __version: curVersion + 1, data: merged };
-    await ctx.env.DB.prepare(
-      `insert into system_settings (id, setting_key, setting_value, updated_by) values (?,?,?,?)
-       on conflict(setting_key) do update set setting_value = excluded.setting_value,
-         updated_by = excluded.updated_by`
-    ).bind(newId(), KEY, JSON.stringify(next), ctx.user.id).run();
+    if (!(await writeRow(ctx.env, curVersion, raw !== null, JSON.stringify(next), ctx.user.id))) {
+      const fresh = await readRow(ctx.env);
+      throw conflict(fresh.version, fresh.data);
+    }
 
     if (restored.length) {
       await logAudit(ctx, { module: 'Administration', action: 'app_state_section_preserved',

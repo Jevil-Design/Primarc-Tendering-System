@@ -125,6 +125,32 @@ Tests: `npm test` (`backend/gst.test.mjs`, 29 cases — no framework needed).
 
 ---
 
+## Saving and sync
+
+The tender dataset is one versioned document (`GET|PUT /api/app-state`). Every
+save names the version it started from; the server writes it with an atomic
+compare-and-swap. A save that lost the race is merged record by record in the
+browser (`web/sync-merge.js`): different records edited on two computers both
+survive; the same record edited on both keeps the server copy and the user's
+version goes to a recovery list (**Download mine** on the conflict toast,
+`TSApi.downloadRecovery()`). Unsent changes survive a reload and are retried
+with backoff; the status pill shows Saving / Saved / Offline / Conflict.
+
+---
+
+## Testing locally
+
+```
+npm test                          # unit + integration (backend, sync merge)
+node scripts/local-server.mjs     # full stack on local SQLite — prints the first-admin command
+npm install --no-save puppeteer-core@23
+node tests/e2e/run.mjs            # Chrome end-to-end on a throwaway DB (CHROME_PATH=… if needed)
+```
+
+See `AUDIT-REPORT.md` for the 31 Oct 2026 audit: bug register, evidence and open items.
+
+---
+
 ## Deploy
 
 Full instructions, including the first-admin bootstrap and the Turso/Blob

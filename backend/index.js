@@ -79,6 +79,20 @@ export default {
     const path = (url.pathname.replace(/^\/api(\/|$)/, '/') || '/').replace(/\/$/, '') || '/';
     const key = `${request.method} ${path}`;
 
+    /* CSRF: the session cookie rides along on cross-site requests (it is
+       SameSite=None when COOKIE_SECURE), and the router accepts empty or
+       form-style bodies — so a page elsewhere could POST /work-orders/:id/
+       approve as a signed-in approver. Browsers always send Origin on such
+       requests; refuse any state change from an origin that is neither this
+       one nor explicitly allowed. (No Origin header = not a browser form.) */
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
+      const origin = request.headers.get('Origin');
+      const allowed = (env?.ALLOWED_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean);
+      if (origin && origin !== url.origin && !allowed.includes(origin)) {
+        return fail('FORBIDDEN', 'Cross-site request blocked.', { status: 403, request, env });
+      }
+    }
+
     let user = null, sessionId = null, permissions = {};
     try {
       const s = await resolveSession(env, request);

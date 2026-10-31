@@ -71,6 +71,11 @@ export default function register(router) {
     const id = ctx.params.id;
     const before = await ctx.env.DB.prepare(`select ${SAFE} from users u where u.id = ?`).bind(id).first();
     if (!before) throw errors.notFound('User not found.');
+    if (before.is_admin && !ctx.user.is_admin) {
+      // Administration "edit" alone used to be enough to set an admin's
+      // password or email and then sign in as them.
+      throw errors.forbidden('Only an administrator can modify an administrator.');
+    }
 
     const b = ctx.body || {};
     const sets = [], binds = [];
@@ -126,8 +131,9 @@ export default function register(router) {
   router.post('/users/:id/reset-password', async (ctx) => {
     requirePerm(ctx, MODULE.ADMIN, 'edit');
     const id = ctx.params.id;
-    const row = await ctx.env.DB.prepare('select id, username from users where id = ? and deleted_at is null').bind(id).first();
+    const row = await ctx.env.DB.prepare('select id, username, is_admin from users where id = ? and deleted_at is null').bind(id).first();
     if (!row) throw errors.notFound('User not found.');
+    if (row.is_admin && !ctx.user.is_admin) throw errors.forbidden('Only an administrator can reset the password of an administrator.');
 
     const pw = generateTemporaryPassword();
     await ctx.env.DB.prepare(
@@ -148,8 +154,9 @@ export default function register(router) {
     if (!targets.length) return { changed: 0 };
 
     const marks = targets.map(() => '?').join(',');
-    await ctx.env.DB.prepare(`update users set status = ? where id in (${marks})`)
-      .bind(active ? 'active' : 'inactive', ...targets).run();
+    // A non-admin may not disable (or re-enable) administrators.
+    await ctx.env.DB.prepare(`update users set status = ? where id in (${marks}) and (is_admin = 0 or ? = 1)`)
+      .bind(active ? 'active' : 'inactive', ...targets, ctx.user.is_admin ? 1 : 0).run();
     if (!active) for (const id of targets) await revokeAllForUser(ctx.env, id);
 
     await logAudit(ctx, { module: 'Administration', action: active ? 'enable_users' : 'disable_users',
@@ -164,9 +171,11 @@ export default function register(router) {
     const marks = ids.map(() => '?').join(',');
     // Soft delete: BOQs, enquiries and work orders reference these rows, so a
     // hard delete would break the audit trail and every created_by link.
+    // A non-admin may not delete administrators (deleting the last one would
+    // also re-open /auth/bootstrap).
     await ctx.env.DB.prepare(
-      `update users set deleted_at = ?, status = 'inactive' where id in (${marks})`
-    ).bind(nowIso(), ...ids).run();
+      `update users set deleted_at = ?, status = 'inactive' where id in (${marks}) and (is_admin = 0 or ? = 1)`
+    ).bind(nowIso(), ...ids, ctx.user.is_admin ? 1 : 0).run();
     for (const id of ids) await revokeAllForUser(ctx.env, id);
     await logAudit(ctx, { module: 'Administration', action: 'delete_users', entityType: 'users', target: ids.join(',') });
     return { deleted: ids.length };

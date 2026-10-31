@@ -101,6 +101,9 @@ export default function register(router) {
         'Content-Type': doc.content_type || 'application/octet-stream',
         'Content-Disposition': `attachment; filename="${doc.file_name}"`,
         'Cache-Control': 'private, max-age=0, no-store',
+        // The type is whatever the uploader claimed; never let it be sniffed
+        // into something executable.
+        'X-Content-Type-Options': 'nosniff',
       },
     });
   });

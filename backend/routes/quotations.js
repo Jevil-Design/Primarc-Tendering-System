@@ -211,6 +211,18 @@ async function submitQuote(ctx, isSubmit) {
   const ev = await resolveToken(ctx.env, ctx.body?.token);
   if (!ev) throw errors.unauthorized('This link is invalid or has expired.');
   if (ev.locked_at) throw errors.locked('Your quotation is locked and can no longer be changed.');
+  if (ev.submission_deadline) {
+    // A bare date means "by the end of that day".
+    const d = /^\d{4}-\d{2}-\d{2}$/.test(ev.submission_deadline)
+      ? Date.parse(ev.submission_deadline + 'T23:59:59') : Date.parse(ev.submission_deadline);
+    if (Number.isFinite(d) && Date.now() > d) throw errors.locked('The submission deadline for this enquiry has passed.');
+  }
+  // A draft save writes the live lines in place. After a submission that
+  // would silently change the rates being compared, with no revision record —
+  // changes after submitting must go through Submit, which snapshots them.
+  if (!isSubmit && ['submitted', 'revised'].includes(ev.invitation_status)) {
+    throw errors.conflict('This quotation has already been submitted — use Submit to send a revision.');
+  }
 
   await writeLines(ctx.env, { id: ev.id, enquiry_id: ev.enq_id }, ctx.body?.lines || {}, ctx.body?.terms);
 

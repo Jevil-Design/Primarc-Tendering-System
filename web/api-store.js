@@ -74,6 +74,7 @@
     return {
       id: u.id, username: u.username, name: u.full_name || u.username,
       email: u.email || '', role: role, active: u.status !== 'inactive' && u.status !== 'suspended',
+      status: u.status || 'active',   // 'suspended' is what ERP Admin shows as Locked
       // Named to match what every consumer actually reads: the login
       // handler's r.user.mustChange (forces the change-password prompt right
       // after sign-in) and pwStatus()'s x.mustChange (the "Temporary" badge
@@ -101,9 +102,29 @@
     return session;
   }
 
-  /* ═══ core data sync ═══ */
-  var _ver = 0;                 // server version this client last saw
-  var _seeded = false;
+  /* ═══ core data sync ═══
+     The whole tender dataset is one versioned document on the server. Rules:
+     • Every save names the version it was based on; the server refuses it
+       (409) if someone else saved first.
+     • A refused save is MERGED record by record (sync-merge.js) instead of
+       being thrown away: different enquiries edited on two computers both
+       survive; the same record edited on both keeps the server's copy and
+       ours is kept in a recovery list the user can download.
+     • "Unsent changes" is remembered across reloads (ts_sync_meta.dirty), so
+       work done offline, or not yet pushed when the tab closed, is sent on the
+       next sign-in rather than being replaced by the server copy.
+     • Network/server failures really are retried, with backoff. */
+  var M = window.TSSyncMerge;
+  var META_KEY = 'ts_sync_meta', BASE_KEY = 'ts_sync_base', RECOVERY_KEY = 'ts_sync_recovery';
+  function readJSON(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+  function writeJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+
+  var meta = readJSON(META_KEY) || {};     // { uid, ver, dirty } — survives reloads
+  var _ver = meta.ver || 0;                 // server version the local copy is based on
+  var _editSeq = 0;
+  function saveMeta() { meta.ver = _ver; writeJSON(META_KEY, meta); }
+  function setBase(state) { if (M) writeJSON(BASE_KEY, M.fingerprint(state)); }
+  function uid() { return session && session.uid; }
 
   // The app is wrapped in an IIFE, so its DB/render are not reachable from here.
   // It exposes window.__tsHooks (getDB/setDB) inside its own scope for us.
@@ -120,79 +141,194 @@
            n(db.masterCustom) === 0;
   }
 
+  /* Take the server copy as the new agreed base. Meta is written BEFORE
+     setDB re-renders, so a save triggered by that render still counts. */
+  function adopt(state, version) {
+    _ver = version; setBase(state);
+    meta.dirty = false; meta.uid = uid() || meta.uid; saveMeta();
+    adoptDB(state);
+  }
+
+  /* Recovery list: the user's own versions of records that could not be
+     saved. Kept small (only changed records) and capped. */
+  function stashRecovery(items, reason) {
+    if (!items || !items.length) return;
+    var list = readJSON(RECOVERY_KEY) || [];
+    list.unshift({ ts: Date.now(), user: session && session.username, reason: reason,
+      items: items.map(function (c) { return { collection: c.collection, label: c.label, local: c.local }; }) });
+    list = list.slice(0, 10);
+    while (!writeJSON(RECOVERY_KEY, list)) {
+      if (list.length === 1) { downloadJSON(list); break; }   // storage full: hand it to the user now
+      list = list.slice(0, Math.ceil(list.length / 2));
+    }
+  }
+  function downloadJSON(data) {
+    try {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+      a.download = 'tendering-unsaved-changes-' + new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-') + '.json';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 5000);
+    } catch (e) {}
+  }
+
+  /* Our unsent edits meet a server copy that moved on: merge them. */
+  var _conflictStreak = 0;
+  function reconcile(server, version) {
+    var local = currentDB();
+    var baseFp = readJSON(BASE_KEY);
+    if (!M || !baseFp || !local) {
+      // No record of the last agreed copy (first sync after an upgrade):
+      // nothing to merge against, so keep the server copy and save ours aside.
+      stashRecovery(M ? M.changes(null, local || {}) : [], 'conflict');
+      adopt(server, version);
+      emit('conflict', { conflicts: [{ label: 'Unsent changes' }] });
+      return;
+    }
+    var res = M.merge(baseFp, local, server);
+    if (res.conflicts.length) stashRecovery(res.conflicts, 'conflict');
+    var changed = M.hash(res.state) !== M.hash(server);
+    _ver = version; setBase(server);
+    meta.dirty = changed; meta.uid = uid() || meta.uid; saveMeta();
+    adoptDB(res.state);
+    emit(res.conflicts.length ? 'conflict' : 'merged', { conflicts: res.conflicts, renumbered: res.renumbered });
+    if (changed) {
+      // Bounded: two computers saving in lock-step must not ping-pong forever.
+      if (++_conflictStreak > 5) { _conflictStreak = 0; scheduleRetry(); }
+      else doPush();
+    }
+  }
+
   var _resyncing = false, _withheld = [];
   async function resync() {
     if (_resyncing) return; _resyncing = true;
     try {
       var r = await api.request('GET', '/app-state');
-      _ver = (r && r.version) || 0;
-      var server = r && r.state;
+      var server = r && r.state, version = (r && r.version) || 0;
       /* The server redacts sections this role may not read (see
          backend/lib/state-acl.js). Say so, or an empty Work Orders list
          reads as lost data and someone re-enters it. */
       _withheld = (r && r.withheld) || [];
       if (_withheld.length) emit('restricted', { withheld: _withheld });
       var local = currentDB();
-      if (!isEmptyDB(server)) {
-        adoptDB(server);
-        emit('resynced');
-      } else if (!isEmptyDB(local)) {
-        // Server is empty/absent but THIS computer has data — push it up rather
-        // than wiping local work. This both seeds a fresh server and repairs an
-        // accidental empty seed from another (data-less) device.
-        await push(true);
+      var mine = !meta.uid || meta.uid === uid();
+      if (meta.dirty && mine && !isEmptyDB(local)) {
+        // Unsent work from this account (offline, or the tab closed mid-save).
+        if (version === _ver) doPush();          // nothing new upstream: just send it
+        else reconcile(server, version);           // upstream moved on: merge
+        return;
       }
-      // both empty → nothing to do
+      if (meta.dirty && !mine && !isEmptyDB(local)) {
+        // Another account's unsent edits on this shared computer: never send
+        // them under this login, but do not silently destroy them either.
+        stashRecovery(M ? M.changes(readJSON(BASE_KEY), local) : [], 'other-account');
+      }
+      if (!isEmptyDB(server)) {
+        adopt(server, version);
+        emit('resynced');
+      } else if (!isEmptyDB(local) && mine) {
+        // Server is empty but THIS computer has data — send it up rather than
+        // wiping local work (seeds a fresh server; repairs an empty seed).
+        _ver = version; meta.dirty = true; meta.uid = uid(); saveMeta();
+        doPush();
+      } else {
+        _ver = version; setBase(server || {}); meta.dirty = false; meta.uid = uid(); saveMeta();
+      }
     } catch (e) {
-      emit('error', { message: (e && e.message) || 'Could not reach the server' });
+      emit(e && e.offline ? 'offline' : 'error', { message: (e && e.message) || 'Could not reach the server' });
     } finally { _resyncing = false; }
   }
 
+  /* Retry with backoff for failures that may clear by themselves. */
+  var RETRY_DELAYS = [2, 5, 10, 20, 30, 60];
+  var _retryTimer = null, _retryN = 0;
+  function scheduleRetry() {
+    if (_retryTimer) return;
+    var d = RETRY_DELAYS[Math.min(_retryN++, RETRY_DELAYS.length - 1)] * 1000;
+    _retryTimer = setTimeout(function () { _retryTimer = null; if (meta.dirty) doPush(); }, d);
+  }
+  window.addEventListener('online', function () {
+    if (_retryTimer) { clearTimeout(_retryTimer); _retryTimer = null; }
+    if (meta.dirty && session) doPush();
+  });
+
   /* _pushingPromise, not a boolean flag: a caller that finds a push already in
-     flight must be able to await its actual completion (not just fire another
-     one to run "later" and return immediately) — logout() depends on this to
-     guarantee the last edit really reached the server before the session it
-     would ride in on is revoked. */
-  var _pushTimer = null, _pushingPromise = null, _pendingForce = false;
-  function doPush(force) {
-    if (_pushingPromise) { _pendingForce = _pendingForce || force; return _pushingPromise; }
+     flight must be able to await its actual completion — logout() depends on
+     this. A save requested meanwhile is NOT dropped: _again re-runs the push
+     as soon as the current one settles. */
+  var _pushTimer = null, _pushingPromise = null, _again = false;
+  function doPush() {
+    if (_pushingPromise) { _again = true; return _pushingPromise; }
+    if (_retryTimer) { clearTimeout(_retryTimer); _retryTimer = null; }
     var db = currentDB();
-    if (!db) return Promise.resolve();
+    if (!db || !session || !meta.dirty) return Promise.resolve();
     emit('saving');
+    var startSeq = _editSeq;
+    // Fingerprinted synchronously, before the request body is serialised, so
+    // both describe exactly the same snapshot.
+    var fp = M ? M.fingerprint(db) : null;
+    var rejected = false;
     _pushingPromise = (async () => {
       try {
-        var body = { data: db };
-        if (!force) body.baseVersion = _ver;             // omit on force = seed / accept-server
-        var r = await api.request('PUT', '/app-state', body);
+        var r = await api.request('PUT', '/app-state', { data: db, baseVersion: _ver });
         _ver = (r && r.version) || (_ver + 1);
-        emit('saved');
+        if (fp) writeJSON(BASE_KEY, fp);
+        meta.dirty = _editSeq !== startSeq;          // edited while the request was out?
+        saveMeta();
+        _retryN = 0; _conflictStreak = 0;
+        emit(meta.dirty ? 'pending' : 'saved');
       } catch (e) {
-        if (e && (e.status === 409 || e.code === 'CONFLICT')) {
-          // Someone else saved first. Take the server copy so nothing is lost.
-          var sv = e.details && e.details.state;
-          if (sv) { _ver = (e.details.serverVersion) || _ver; adoptDB(sv); }
-          else { await resync(); }
-          emit('conflict', e);
+        if (e && (e.status === 409 || e.code === 'CONFLICT') && e.details && e.details.state) {
+          reconcile(e.details.state, e.details.serverVersion || 0);
+        } else if (e && e.status === 401) {
+          // Kept as unsent; pushed again after the next sign-in.
+          emit('signed-out', e);
         } else if (e && e.status && e.status >= 400 && e.status < 500) {
+          // The server's considered refusal (e.g. no edit right): retrying
+          // cannot succeed. Keep the user's version for recovery and return
+          // to the server's copy so the screen shows what is really stored.
+          stashRecovery(M ? M.changes(readJSON(BASE_KEY), db) : [], 'rejected');
+          meta.dirty = false; saveMeta();
           emit('rejected', e);
+          rejected = true;
         } else {
-          emit('error', { message: (e && e.message) || 'Could not reach the server' });
+          emit(e && e.offline ? 'offline' : 'error', { message: (e && e.message) || 'Could not reach the server' });
+          scheduleRetry();
         }
       } finally {
         _pushingPromise = null;
-        if (_pendingForce) { _pendingForce = false; await doPush(true); }
+        if (rejected) resync();
+        else if (_again) { _again = false; if (meta.dirty) doPush(); }
       }
     })();
     return _pushingPromise;
   }
-  function push(force) {
-    // debounce rapid saveDB() bursts into one network write
-    if (force) { if (_pushTimer) { clearTimeout(_pushTimer); _pushTimer = null; } return doPush(true); }
+  function push() {
+    // Called by the app's saveDB() after every change: remember the change
+    // durably first, then debounce bursts into one network write.
+    _editSeq++;
+    if (!meta.dirty || (uid() && meta.uid !== uid())) { meta.dirty = true; meta.uid = uid() || meta.uid; saveMeta(); }
     emit('pending');
     if (_pushTimer) clearTimeout(_pushTimer);
-    _pushTimer = setTimeout(function () { _pushTimer = null; doPush(false); }, 800);
+    _pushTimer = setTimeout(function () { _pushTimer = null; doPush(); }, 800);
   }
-  function flushNow() { if (_pushTimer) { clearTimeout(_pushTimer); _pushTimer = null; } return doPush(true); }
+  /* Send everything now and wait for it (logout). A bounded loop, because a
+     merge after a conflict queues one more push. */
+  async function flushNow() {
+    if (_pushTimer) { clearTimeout(_pushTimer); _pushTimer = null; }
+    for (var i = 0; i < 4; i++) {
+      if (_pushingPromise) await _pushingPromise;
+      else if (meta.dirty && session) await doPush();
+      else break;
+    }
+  }
+
+  /* Closing the tab with changes not yet on the server: the browser copy is
+     kept and sent on the next sign-in, but warn — another computer will not
+     see them until then. */
+  window.addEventListener('beforeunload', function (e) {
+    if (session && (meta.dirty || _pushTimer || _pushingPromise)) { e.preventDefault(); e.returnValue = ''; }
+  });
 
   /* ═══ the public TSApi surface the HTML expects ═══ */
   window.TSApi = {
@@ -274,6 +410,11 @@
     withheld: function () { return _withheld.slice(); },
     flushNow: flushNow,
     push: push,
+    /* True while some change has not yet been confirmed by the server. */
+    hasUnsent: function () { return !!(meta.dirty || _pushTimer || _pushingPromise); },
+    /* Versions of records that could not be saved (conflict / refusal). */
+    recovery: function () { return readJSON(RECOVERY_KEY) || []; },
+    downloadRecovery: function () { var r = readJSON(RECOVERY_KEY) || []; if (r.length) downloadJSON(r); return r.length; },
   };
 
   /* Trigger a single resync shortly after a session is confirmed (covers the

@@ -874,10 +874,133 @@
   /* comparative / bid */
   .qm-scrollx{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
   .qm-scrollx .qm-tbl{border:none;border-radius:0}
+
+  /* ═══ ENQUIRY LIST REDESIGN ═══ */
+  .qm-list-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+  .qm-list-header .qm-h{margin-bottom:0}
+  .qm-list-header .qm-sub{margin-bottom:0}
+  .qm-list-hdr-left{flex:1;min-width:200px}
+  .qm-list-hdr-right{display:flex;align-items:center;gap:10px;flex-shrink:0;padding-top:4px}
+  .qm-filter-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px 18px;margin-bottom:20px}
+  .qm-filter-card .qm-filter-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--faint);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .qm-filter-card .qm-filter-title svg{width:14px;height:14px;stroke:var(--faint);stroke-width:2;fill:none}
+  .qm-filter-row1{margin-bottom:14px}
+  .qm-filter-row1 .srch{width:100%}
+  .qm-filter-row1 .srch input{height:46px;font-size:14px;padding:0 14px 0 40px}
+  .qm-filter-row1 .srch svg{left:12px;width:18px;height:18px}
+  .qm-filter-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}
+  .qm-filter-grid .qm-fld{display:flex;flex-direction:column;gap:5px}
+  .qm-filter-grid .qm-fld label{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--dim)}
+  .qm-filter-grid .qm-fld select,.qm-filter-grid .qm-fld input{height:46px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:0 12px;color:var(--ink);font-size:13px;font-family:inherit;width:100%;appearance:auto;-webkit-appearance:auto}
+  .qm-filter-grid .qm-fld select:focus,.qm-filter-grid .qm-fld input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,106,44,.1)}
+  .qm-filter-row3{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+  .qm-filter-row3 .qm-fld{display:flex;flex-direction:column;gap:5px;min-width:140px;flex:1}
+  .qm-filter-row3 .qm-fld label{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--dim)}
+  .qm-filter-row3 .qm-fld input,.qm-filter-row3 .qm-fld select{height:46px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:0 12px;color:var(--ink);font-size:13px;font-family:inherit;width:100%}
+  .qm-filter-row3 .qm-fld input:focus,.qm-filter-row3 .qm-fld select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,106,44,.1)}
+  .qm-filter-actions{display:flex;gap:8px;align-items:flex-end;flex-shrink:0;padding-bottom:1px}
+  .qm-filter-actions .btn{height:46px;padding:0 18px;font-size:12.5px;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+  .qm-filter-actions .btn svg{width:15px;height:15px;stroke:currentColor;stroke-width:2;fill:none}
+  .qm-results-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .qm-results-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .qm-results-head .qm-results-count{font-size:13px;font-weight:700;color:var(--ink)}
+  .qm-results-head .qm-results-count span{color:var(--faint);font-weight:500}
+  .qm-results-body{overflow-x:auto}
+  .qm-results-body .qm-tbl{border:none;border-radius:0}
+  .qm-results-body .qm-tbl th{padding:12px 14px;background:var(--panel2);font-weight:700}
+  .qm-results-body .qm-tbl td{padding:13px 14px;border-bottom:1px solid var(--line)}
+  .qm-results-body .qm-tbl tbody tr:hover{background:var(--hi)}
+  .qm-results-foot{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--line);background:var(--panel);flex-wrap:wrap;gap:12px}
+  .qm-pagesize-ctrl{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim)}
+  .qm-pagesize-ctrl select{height:32px;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:0 8px;color:var(--ink);font-size:12px;font-weight:600}
+  .qm-pagesize-ctrl select:focus{outline:none;border-color:var(--accent)}
+  .qm-page-info{font-size:12px;color:var(--faint);margin-left:6px}
+  .qm-page-btns{display:flex;align-items:center;gap:4px}
+  .qm-page-btn{min-width:32px;height:32px;padding:0 8px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s}
+  .qm-page-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:var(--panel)}
+  .qm-page-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .qm-page-btn:disabled{opacity:0.35;cursor:not-allowed}
+  html[data-theme="light"] .qm-filter-card{background:#ffffff;border-color:#dce0e7;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  html[data-theme="light"] .qm-results-card{background:#ffffff;border-color:#dce0e7;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  html[data-theme="light"] .qm-results-foot{background:#ffffff;border-color:#dce0e7}
+  html[data-theme="light"] .qm-pagesize-ctrl select{background:#f8f9fb;border-color:#dce0e7;color:#1a1d24}
+  html[data-theme="light"] .qm-page-btn{background:#f8f9fb;border-color:#dce0e7;color:#1a1d24}
+  html[data-theme="light"] .qm-page-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  html[data-theme="light"] .qm-filter-grid .qm-fld select,html[data-theme="light"] .qm-filter-grid .qm-fld input,html[data-theme="light"] .qm-filter-row3 .qm-fld input,html[data-theme="light"] .qm-filter-row3 .qm-fld select,html[data-theme="light"] .qm-filter-row1 .srch input{background:#f8f9fb;border-color:#dce0e7;color:#1a1d24}
+  html[data-theme="light"] .qm-filter-grid .qm-fld select:focus,html[data-theme="light"] .qm-filter-grid .qm-fld input:focus,html[data-theme="light"] .qm-filter-row3 .qm-fld input:focus,html[data-theme="light"] .qm-filter-row3 .qm-fld select:focus,html[data-theme="light"] .qm-filter-row1 .srch input:focus{background:#ffffff;border-color:var(--accent)}
+  /* Enhanced empty state */
+  .qm-empty-enhanced{text-align:center;padding:80px 24px 70px;color:var(--faint)}
+  .qm-empty-enhanced .qm-empty-icon{width:64px;height:64px;margin:0 auto 20px;border-radius:16px;background:var(--panel2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+  .qm-empty-enhanced .qm-empty-icon svg{width:30px;height:30px;stroke:var(--faint);stroke-width:1.5;fill:none}
+  .qm-empty-enhanced h4{font-size:17px;color:var(--dim);margin-bottom:8px;font-weight:700}
+  .qm-empty-enhanced p{font-size:13px;line-height:1.6;max-width:380px;margin:0 auto 22px;color:var(--faint)}
+  .qm-empty-enhanced .qm-empty-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .qm-empty-enhanced .qm-empty-actions .btn{height:42px;padding:0 22px;font-size:13px;font-weight:600}
+  /* Responsive: 2-col filters on medium screens */
+  @media(max-width:1024px){
+    .qm-filter-grid{grid-template-columns:repeat(2,1fr)}
+  }
+  /* Responsive: 1-col filters on small screens */
+  @media(max-width:640px){
+    .qm-filter-grid{grid-template-columns:1fr}
+    .qm-filter-row3{flex-direction:column}
+    .qm-filter-row3 .qm-fld{width:100%}
+    .qm-filter-actions{width:100%;flex-wrap:wrap}
+    .qm-filter-actions .btn{flex:1;min-width:120px}
+    .qm-list-header{flex-direction:column}
+    .qm-list-hdr-right{width:100%}
+    .qm-list-hdr-right .btn{flex:1}
+  }
   .csbest{background:rgba(52,211,153,.08)}
   .qm-deviation.up{color:var(--red)} .qm-deviation.down{color:var(--green)}
   .qm-rec{background:linear-gradient(135deg,rgba(52,211,153,.12),rgba(52,211,153,.04));border:1px solid rgba(52,211,153,.3);border-radius:14px;padding:22px}
   .qm-rec h2{font-size:24px;font-weight:800;color:var(--green);margin:6px 0 4px}
+
+  /* ═══ ENQUIRY DETAIL REDESIGN ═══ */
+  .qm-detail-top{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
+  .qm-detail-breadcrumb{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--accent);background:none;border:none;cursor:pointer;padding:0;width:fit-content}
+  .qm-detail-breadcrumb:hover{text-decoration:underline}
+  .qm-detail-breadcrumb svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
+  .qm-detail-title-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .qm-detail-title-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .qm-detail-title-left h2{font-size:23px;font-weight:800;letter-spacing:-.4px;margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .qm-detail-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .qm-detail-actions .btn{height:38px;padding:0 14px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+  .qm-detail-actions .btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
+  
+  .qm-detail-meta-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .qm-meta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+  .qm-meta-item{display:flex;flex-direction:column;gap:4px}
+  .qm-meta-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--faint)}
+  .qm-meta-val{font-size:13.5px;font-weight:600;color:var(--ink);word-break:break-word}
+  
+  .qm-sec-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .qm-sec-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .qm-sec-title{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:8px;margin:0}
+  .qm-sec-title svg{width:16px;height:16px;stroke:var(--accent);stroke-width:2;fill:none}
+  .qm-sec-body{padding:18px 20px}
+  
+  .qm-vendor-list{display:flex;flex-direction:column;gap:12px}
+  .qm-vcard-new{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;transition:border-color .15s,box-shadow .15s}
+  .qm-vcard-new:hover{border-color:var(--line2);box-shadow:0 2px 6px rgba(0,0,0,.06)}
+  .qm-vcard-row1{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+  .qm-vcard-vno{font-family:'Spline Sans Mono',monospace;font-size:11px;font-weight:700;color:#fff;background:var(--accent);padding:3px 8px;border-radius:6px}
+  .qm-vcard-name{font-size:14px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
+  .qm-vcard-id{font-family:'Spline Sans Mono',monospace;font-size:11px;color:var(--faint)}
+  .qm-vcard-quote{text-align:right;margin-left:auto;margin-right:8px}
+  .qm-vcard-quote .base{font-family:'Spline Sans Mono',monospace;font-size:15px;font-weight:700;color:var(--green)}
+  .qm-vcard-quote .sub{font-size:10px;color:var(--faint)}
+  .qm-vcard-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .qm-vcard-actions .btn{height:32px;padding:0 10px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+  .qm-vcard-meta-foot{font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:var(--faint);padding-top:8px;border-top:1px dashed var(--line);margin-top:8px}
+  .qm-vcard-cloud-foot{font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:var(--blue);margin-top:4px}
+
+  html[data-theme="light"] .qm-detail-meta-card{background:#ffffff;border-color:#dce0e7}
+  html[data-theme="light"] .qm-sec-card{background:#ffffff;border-color:#dce0e7}
+  html[data-theme="light"] .qm-sec-head{background:#f8f9fb;border-color:#dce0e7}
+  html[data-theme="light"] .qm-vcard-new{background:#f8f9fb;border-color:#dce0e7}
+  html[data-theme="light"] .qm-vcard-new:hover{background:#ffffff;border-color:#c8ceda;box-shadow:0 3px 8px rgba(0,0,0,.05)}
+
 
   /* tabs inside detail */
   .qm-tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;flex-wrap:wrap}
@@ -1411,19 +1534,36 @@ html[data-theme="light"]{ --sb-bg:#132135; --sb-bg2:#0d1829; --sb-line:#243754; 
 .sb-min #pSidebar button.sb-i{ justify-content:center; padding:9px 0 }
 .sb-min #pSidebar .sb-foot{ justify-content:center }
 
-/* ── workspace header: breadcrumb + title + actions ───────────────────── */
+/* ── workspace header: compact single-row breadcrumb + title + description ─── */
 .pws-head{
-  flex-shrink:0; padding:14px 20px 12px; border-bottom:1px solid var(--line);
-  background:var(--panel); display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap;
+  flex-shrink:0; padding:0 20px; border-bottom:1px solid var(--line);
+  background:var(--panel); display:flex; align-items:center; justify-content:space-between;
+  gap:12px; height:38px; min-height:38px; box-sizing:border-box;
+  font-family:'Archivo',system-ui,sans-serif;
 }
-.pws-head .pws-l{ min-width:0; flex:1 }
-.pws-crumb{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--faint); margin-bottom:5px; flex-wrap:wrap }
+.pws-head .pws-l{ min-width:0; flex:1; display:flex; align-items:center; gap:8px; overflow:hidden }
+.pws-nav{ display:inline-flex; align-items:center; gap:5px; flex-shrink:0 }
+.pws-crumb{ display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--faint); line-height:1 }
 .pws-crumb span{ white-space:nowrap }
-.pws-crumb i{ font-style:normal; opacity:.5 }
-.pws-crumb b{ color:var(--dim); font-weight:600 }
-.pws-head h2{ margin:0; font-size:var(--fs-page-title,21px); font-weight:800; color:var(--ink); letter-spacing:-.3px; line-height:1.15 }
-.pws-head .pws-desc{ margin:4px 0 0; font-size:var(--fs-secondary,12px); color:var(--dim); max-width:72ch; line-height:1.45 }
-.pws-head .pws-r{ display:flex; align-items:center; gap:8px; flex-shrink:0 }
+.pws-crumb .pws-c-brand{ color:var(--faint); font-weight:600; letter-spacing:.3px; text-transform:uppercase; font-size:10px }
+.pws-crumb .pws-c-sep, .pws-crumb-sep{ font-style:normal; opacity:.35; font-size:10px; color:var(--faint); margin:0 1px; user-select:none }
+.pws-crumb .pws-c-grp{ color:var(--dim); font-weight:500; font-size:11px }
+.pws-head h2, .pws-title{ margin:0; font-size:13px; font-weight:700; color:var(--ink); letter-spacing:-.15px; line-height:1; white-space:nowrap }
+.pws-desc-sep{ color:var(--faint); opacity:.35; font-size:10px; user-select:none; line-height:1; flex-shrink:0 }
+.pws-head .pws-desc{ margin:0; font-size:11.5px; color:var(--dim); line-height:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:85ch; font-weight:400 }
+.pws-head .pws-r{ display:flex; align-items:center; gap:6px; flex-shrink:0 }
+
+/* Compact subheader button / badge utilities if used in pwsActions */
+.pws-btn{ height:26px; padding:0 9px; font-size:11.5px; font-weight:600; border-radius:6px; border:1px solid var(--line); background:var(--panel2); color:var(--ink); display:inline-flex; align-items:center; gap:5px; cursor:pointer; transition:all .12s ease }
+.pws-btn:hover{ border-color:var(--accent); color:var(--accent) }
+.pws-badge{ display:inline-flex; align-items:center; padding:1px 6px; font-size:10px; font-weight:700; border-radius:10px; background:var(--hi); color:var(--dim); font-variant-numeric:tabular-nums }
+
+html[data-theme="light"] .pws-head{ background:#ffffff; border-bottom-color:#e2e6ed }
+html[data-theme="light"] .pws-crumb .pws-c-brand{ color:#64748b }
+html[data-theme="light"] .pws-crumb .pws-c-grp{ color:#475569 }
+html[data-theme="light"] .pws-head h2, html[data-theme="light"] .pws-title{ color:#0f172a }
+html[data-theme="light"] .pws-head .pws-desc{ color:#64748b }
+html[data-theme="light"] .pws-desc-sep, html[data-theme="light"] .pws-crumb-sep{ color:#94a3b8 }
 
 /* ── responsive ───────────────────────────────────────────────────────── */
 @media (max-width:1180px){ .app.has-sb{ --sb-w:var(--sb-w-min) } .app.has-sb .sb-grp,
@@ -1452,7 +1592,9 @@ html[data-theme="light"]{ --sb-bg:#132135; --sb-bg2:#0d1829; --sb-line:#243754; 
   .app.has-sb > .topbar{ grid-column:1 }
   .app.has-sb > #pwsHead{ grid-column:1 }
   .app.has-sb > .view{ grid-column:1 }
-  .pws-head{ padding:11px 13px 10px }
+  .pws-head{ padding:6px 14px 6px; min-height:42px }
+  .pws-head .pws-desc{ display:none }
+  .pws-desc-sep{ display:none }
 }
 #sbScrim{ display:none }
 @media (max-width:860px){
@@ -2433,6 +2575,7 @@ window.__authCover=(function(){
 <script src="api-url.js"></script>
 <script src="cloudflare-api.js"></script>
 <script src="cloudflare-migration.js"></script>
+<script src="sync-merge.js"></script>
 <script src="api-store.js"></script>
 <script>
 /* Legacy save pill, kept for the static/offline build. The Cloudflare connection
@@ -2468,12 +2611,33 @@ window.__authCover=(function(){
         showToast('Hidden by your role: '+list);
       }
     }
-    else if(state==='conflict')set('var(--accent)','Reloaded','Someone else changed this record — the server copy was loaded');
-    else if(state==='signed-out')set('var(--red)','Signed out','Your session expired');
+    else if(state==='merged'){ set('var(--accent2)','Merging…','Combined with changes saved from another computer');
+      renumberNote(detail); }
+    else if(state==='conflict'){
+      /* The other computer's version of these records was kept; ours is in
+         the recovery list — never silently discarded. */
+      var c=(detail&&detail.conflicts)||[];
+      var names=c.slice(0,3).map(function(x){return x.label;}).join(', ')+(c.length>3?' +'+(c.length-3)+' more':'');
+      set('var(--accent)','Conflict','Also edited on another computer: '+names+'. Their version was kept; yours is saved for recovery.');
+      recoveryToast('⚠ '+(names||'A record')+' was also changed on another computer. Their version was kept — download yours to compare.');
+      renumberNote(detail);
+    }
+    else if(state==='signed-out')set('var(--red)','Signed out','Your session expired — changes stay on this computer and are sent after you sign in');
     else if(state==='rejected'){ set('var(--red)','Not saved',(detail&&detail.message)||'The server refused this change');
-      if(typeof showToast==='function')showToast('⚠ '+((detail&&detail.message)||'That change was not saved')); }
-    else if(state==='error')   set('var(--red)','Retrying…',(detail&&detail.message)||'Could not reach the server');
+      recoveryToast('⚠ '+((detail&&detail.message)||'That change was not saved')+' — your version is kept for download.'); }
+    else if(state==='offline') set('var(--red)','Offline','No connection — changes are kept on this computer and sent automatically when back online');
+    else if(state==='error')   set('var(--red)','Retrying…',(detail&&detail.message)||'Could not reach the server — retrying automatically');
   });
+  function recoveryToast(msg){
+    if(typeof showToastUndo!=='function'){ if(typeof showToast==='function')showToast(msg); return; }
+    showToastUndo(msg,function(){ window.TSApi.downloadRecovery(); },12000);
+    var b=document.querySelector('#toastEl button'); if(b)b.textContent='Download mine';
+  }
+  function renumberNote(detail){
+    var r=(detail&&detail.renumbered)||[];
+    if(r.length&&typeof showToast==='function')
+      showToast('Enquiry number already taken on another computer — '+r.map(function(x){return x.from+' → '+x.to;}).join(', '),9000);
+  }
 })();
 </script>
 <script src="vendor-master.js"></script>
@@ -3081,9 +3245,16 @@ const BTYPES={
 const QUOTABLE=new Set(Object.keys(BTYPES).filter(k=>BTYPES[k].quotable));
 function nodeKind(n){ return QUOTABLE.has(n.type) ? ((n.level||0)>0?'sub':'line') : 'parent'; }
 function syncKinds(){ boq.forEach(n=>{ n.kind=nodeKind(n); }); }
+/* Numbers as people type or paste them: 1,23,456.50 · ₹500 · Rs. 1,200/- · " 12 ".
+   parseFloat alone stops at the first comma, so "1,250" used to price as 1. NaN when not a number. */
+function bNum(v){ if(typeof v==='number')return v; const s=String(v==null?'':v).replace(/rs\.?|inr|₹|,|\s|\/-$/gi,''); if(s==='')return NaN; const n=parseFloat(s); return isFinite(n)?n:NaN; }
+/* One CSV cell: quoted, and a leading = + - @ neutralised so a description like
+   =HYPERLINK(...) cannot run as a formula when the file is opened in Excel. Plain
+   negative numbers are left alone. */
+function csvCell(s){ s=s==null?'':String(s); if(/^[=+\-@\t\r]/.test(s)&&isNaN(+s))s="'"+s; return '"'+s.replace(/"/g,'""')+'"'; }
 function nodeAmount(n){
   if(!QUOTABLE.has(n.type) || BTYPES[n.type].excludeTotal) return 0;
-  let q=parseFloat(n.qty), r=parseFloat(n.rate);
+  let q=bNum(n.qty), r=bNum(n.rate);
   if(BTYPES[n.type].fixedQty) q=1;
   if(isNaN(q)||isNaN(r)) return 0;
   return q*r;
@@ -3451,8 +3622,7 @@ function mkNode(o){
 function _impNorm(s){ return (s==null?'':String(s)).replace(/[₹]/g,' ').replace(/\(.*?\)/g,' ').replace(/[^a-z0-9 ]/gi,' ').replace(/\s+/g,' ').trim().toLowerCase(); }
 function _impNum(v){
   if(v==null||v==='')return '';
-  if(typeof v==='number')return isFinite(v)?v:'';
-  const n=parseFloat(String(v).replace(/[₹,\s]/g,''));
+  const n=bNum(v);            // also strips "Rs." — the app's own PDF export writes rates that way
   return isFinite(n)?n:'';
 }
 // Build {key:columnIndex} from a header row of cell strings.
@@ -3492,7 +3662,7 @@ function _impRowToNode(row,map){
   let gst=_impNum(g('gst')); if(gst==='')gst=18;
   const label=name||desc;
   if(!label && qty==='' && rate==='') return null;                       // blank row
-  if(/^(base total|gst total|grand total|total|sub ?total|section subtotal|bill of quantities|project|contractor)\b/i.test(label)) return null; // summary/meta
+  if(qty===''&&!uom&&(/^(base total|gst total|grand total|total|sub ?total|section subtotal)\b[^a-z]*$/i.test(label)||/^(bill of quantities|project\s*:|contractor\s*:)/i.test(label))) return null; // summary/meta rows only
   const amtCell=_impNorm(g('amount'));
   const isSection = amtCell==='section' || amtCell==='section subtotal' || (label && qty==='' && rate==='' && !uom);
   if(isSection) return mkNode({type:'header',level:0,name:label,desc:(name?desc:'')});
@@ -3533,12 +3703,15 @@ function loadBoqJson(f){
   r.onload=ev=>{ try{
     const d=JSON.parse(ev.target.result);
     if(!d.boq||!Array.isArray(d.boq)){ alert('Invalid BOQ file — missing "boq" array.'); return; }
-    if(!confirm('Load BOQ from file? This will replace your current BOQ.')) return;
-    boq=d.boq; seq=boq.length?Math.max(...boq.map(b=>b.sid||0)):0;
+    const nodes=d.boq.filter(n=>n&&typeof n==='object'&&!Array.isArray(n));
+    if(!confirm('Load BOQ from file? This will replace your current BOQ.'+(nodes.length<d.boq.length?'\n\n'+(d.boq.length-nodes.length)+' unreadable row(s) will be skipped.':''))) return;
+    /* sid is written into HTML attributes and used as a number everywhere — never trust the file's. */
+    nodes.forEach((n,i)=>{ n.sid=i+1; });
+    boq=nodes; seq=boq.length;
     migrateBOQ(); bArmedParent=null;
     if(d.meta){ if(d.meta.proj!=null)$('#bProj').value=d.meta.proj; if(d.meta.ref!=null&&$('#bRef'))$('#bRef').value=d.meta.ref; if(d.meta.client!=null)$('#bClient').value=d.meta.client; if(d.meta.wo!=null&&$('#bWO'))$('#bWO').value=d.meta.wo; }
     if(d.notes&&Array.isArray(d.notes)){ bNotes.length=0; d.notes.forEach(n=>bNotes.push(n)); renderNotes('b',bNotes); }
-    renderBOQ(); cRender(); bArmBanner();
+    renderBOQ(); cRender(); bArmBanner(); scheduleAutosave();
     alert('BOQ loaded: '+boq.length+' items.');
   }catch(err){ alert('Could not read file: '+err.message); } };
   r.readAsText(f);
@@ -3675,7 +3848,7 @@ function bAddCatalog(id){
     const node=mkNode({cid:id,type:'item',name:it[1],desc:it[2],uom:it[3]>=0?UOMS[it[3]]:'',qty:'',rate:it[5]!=null?it[5]:'',cat:it[4]>=0?CATS[it[4]]:''});
     bInsert(node, g?g.sid:null);
   }
-  cRender(); renderBOQ(); bArmBanner();
+  cRender(); renderBOQ(); bArmBanner(); scheduleAutosave();
 }
 function bArmBanner(){
   let b=$('#bArmBanner');
@@ -4105,28 +4278,28 @@ $('#btAddHeader')?.addEventListener('click',()=>{
   const g=bArmGroup();
   const node=mkNode({type:'header'});
   bInsert(node, g?g.sid:null); bArmedParent=node.sid;
-  renderBOQ(); bArmBanner();
+  renderBOQ(); bArmBanner(); scheduleAutosave();
   const inp=boqScroll.querySelector('tr[data-sid="'+node.sid+'"] .pnamein'); if(inp)inp.focus();
 });
 $('#btAddItem')?.addEventListener('click',()=>{
   const g=bArmGroup();
   const node=mkNode({type:'item'});
   bInsert(node, g?g.sid:null);
-  renderBOQ();
+  renderBOQ(); scheduleAutosave();
   const inp=boqScroll.querySelector('tr[data-sid="'+node.sid+'"] .namein'); if(inp)inp.focus();
 });
 $('#btAddNote')?.addEventListener('click',()=>{
   const g=bArmGroup();
   const node=mkNode({type:'note'});
   bInsert(node, g?g.sid:null);
-  renderBOQ();
+  renderBOQ(); scheduleAutosave();
   const inp=boqScroll.querySelector('tr[data-sid="'+node.sid+'"] .descin'); if(inp)inp.focus();
 });
 $('#btExpandAll')?.addEventListener('click',()=>{ boq.forEach(n=>n.collapsed=false); renderBOQ(); });
 $('#btCollapseAll')?.addEventListener('click',()=>{ boq.forEach(n=>{ if(BTYPES[n.type]&&BTYPES[n.type].group) n.collapsed=true; }); renderBOQ(); });
 $('#bTreeFind')?.addEventListener('input',function(){ bTreeFilter=this.value; renderBOQ(); });
 
-$('#bClear').addEventListener('click',()=>{if(boq.length&&confirm('Clear all '+boq.length+' rows?')){boq=[];bArmedParent=null;bArmBanner();renderBOQ();cRender();clearDraft()}});
+$('#bClear').addEventListener('click',()=>{if(boq.length&&confirm('Clear all '+boq.length+' rows?')){_undoCapture();boq=[];bArmedParent=null;bArmBanner();renderBOQ();cRender();clearDraft();_undoCapture();}});
 
 /* ---- BOQ export helpers ---- */
 function boqMeta(){return {proj:$('#bProj').value||'BOQ',client:$('#bClient').value||''};}
@@ -4149,7 +4322,10 @@ function boqRows(){
     const a=nodeAmount(b); grand+=a;
     const g=parseFloat(b.gst)||0; const ga=Math.round(a*g/100*100)/100;
     const tlabel=(b.type!=='item')?'['+t.abbr+'] ':'';
-    rows.push({kind:'line',sl:nums[b.sid],wbs:wbs[b.sid]||'',level:lv,name:pad+tlabel+(b.name||''),desc:b.desc||'',uom:b.uom||'',qty:t.fixedQty?1:b.qty,rate:b.rate,amt:a||'',gst:g,gstAmt:ga||'',remarks:b.remarks||'',wo:b.wo||''});
+    const nq=bNum(b.qty), nr=bNum(b.rate);
+    rows.push({kind:'line',sl:nums[b.sid],wbs:wbs[b.sid]||'',level:lv,name:pad+tlabel+(b.name||''),desc:b.desc||'',uom:b.uom||'',
+      qty:t.fixedQty?1:(isNaN(nq)?(b.qty==null?'':b.qty):nq),rate:isNaN(nr)?(b.rate==null?'':b.rate):nr,
+      amt:a||'',gst:g,gstAmt:ga||'',remarks:b.remarks||'',wo:b.wo||'',excl:!!t.excludeTotal});
   });
   return {rows,grand};
 }
@@ -4174,7 +4350,7 @@ function boqTransferItems(){
     out.push({
       short:(b.name||'').trim(),
       desc:(b.desc||b.name||'').trim(),
-      qty:t.fixedQty?1:(parseFloat(b.qty)||1),
+      qty:t.fixedQty?1:(bNum(b.qty)||1),
       uom:b.uom||'', cat:b.cat||'',
       wbs:wbs[b.sid]||'', section:segs.join(' › '), sectionDescs:segDescs, sl:nums[b.sid]
     });
@@ -4346,14 +4522,14 @@ $('#bToQuote').addEventListener('click',openTransferDialog);
 
 $('#bExpCsv').addEventListener('click',()=>{
   if(!boq.length){alert('Add some items first.');return;}
-  const m=boqMeta(),e2=s=>'"'+(s==null?'':s.toString().replace(/"/g,'""'))+'"';
+  const m=boqMeta(),e2=csvCell;
   const {rows,grand}=boqRows();
   let csv=e2('Project:')+','+e2(m.proj)+'\n'+e2('Contractor:')+','+e2(m.client)+'\n\n';
   csv+=['WBS','Sl No','Item / Section','Description','Unit','Quantity','Rate','Amount','GST %','GST Amt','Remarks','WO No.'].map(e2).join(',')+'\n';
   rows.forEach(r=>{
     if(r.kind==='note') csv+=[r.wbs||'',r.sl,r.name,r.desc,'','','','','','','',''].map(e2).join(',')+'\n';
-    else if(r.kind==='parent') csv+=[r.wbs||'',r.sl,r.name,r.desc,'','','','SECTION SUBTOTAL',r.amt,'','','',''].map(e2).join(',')+'\n';
-    else csv+=[r.wbs||'',r.sl,r.name,r.desc,r.uom,r.qty,r.rate,r.amt,r.gst||18,r.gstAmt||'',r.remarks||'',r.wo||''].map(e2).join(',')+'\n';
+    else if(r.kind==='parent') csv+=[r.wbs||'',r.sl,r.name,r.desc,'','','SECTION SUBTOTAL',r.amt,'','','',''].map(e2).join(',')+'\n';
+    else csv+=[r.wbs||'',r.sl,r.name,r.desc,r.uom,r.qty,r.rate,r.amt,r.gst,r.gstAmt||'',r.remarks||'',r.wo||''].map(e2).join(',')+'\n';
   });
   const gstSum=rows.filter(r=>r.kind==='line').reduce((s,r)=>s+(parseFloat(r.gstAmt)||0),0);
   csv+=['','','','','','','BASE TOTAL',grand,'','','',''].map(e2).join(',')+'\n';
@@ -4384,15 +4560,20 @@ $('#bExpXls').addEventListener('click',()=>{
       aoa.push([r.sl,r.name,r.desc,r.uom,
                 r.qty===''?'':Number(r.qty),
                 r.rate===''?'':Number(r.rate),
-                '',r.gst||18,'',r.remarks||'',r.wo||'']);
+                '',r.gst,'',r.remarks||'',r.wo||'']);
   });
   const ws=XLSX.utils.aoa_to_sheet(aoa);
   // ── Live formulas ────────────────────────────────────────────────────────
-  const amtRowsAbs=[]; let hasData=false;
+  /* Each formula also carries its computed value: Excel recalculates on open, but previewers
+     (mail, WhatsApp, Drive) and other readers show a formula with no stored value as blank. */
+  const amtRowsAbs=[]; let hasData=false, xBase=0, xGst=0;
+  const fc=(f,v)=>isFinite(v)?{t:'n',f,v}:{t:'s',f,v:''};
   rows.forEach((r,k)=>{
     const xlRow=headerRows+k+1;
-    if(r.kind==='line'){
-      ws['G'+xlRow]={t:'n',f:'IF(AND(E'+xlRow+'<>"",F'+xlRow+'<>""),E'+xlRow+'*F'+xlRow+',"")'};ws['I'+xlRow]={t:'n',f:'IF(G'+xlRow+'<>"",G'+xlRow+'*H'+xlRow+'/100,"")'};hasData=true; 
+    if(r.kind==='line'&&!r.excl){
+      const _a=(r.qty!==''&&r.rate!=='')?Number(r.qty)*Number(r.rate):NaN, _g=isFinite(_a)?_a*(Number(r.gst)||0)/100:NaN;
+      if(isFinite(_a)){xBase+=_a;xGst+=_g;}
+      ws['G'+xlRow]=fc('IF(AND(E'+xlRow+'<>"",F'+xlRow+'<>""),E'+xlRow+'*F'+xlRow+',"")',_a);ws['I'+xlRow]=fc('IF(G'+xlRow+'<>"",G'+xlRow+'*H'+xlRow+'/100,"")',_g);hasData=true; 
       amtRowsAbs.push(xlRow);
     }
   });
@@ -4405,11 +4586,13 @@ $('#bExpXls').addEventListener('click',()=>{
   XLSX.utils.sheet_add_aoa(ws,[['','','','','','GRAND TOTAL (incl. GST)','','','','','']],{origin:'A'+totRow});
   if(hasData){
     const r1=headerRows+1,r2=headerRows+rows.length;
-    ws['G'+gRow]={t:'n',f:'SUM(G'+r1+':G'+r2+')'};
-    ws['I'+gRow]={t:'n',f:'SUM(I'+r1+':I'+r2+')'};
+    /* Column G also shows each section's subtotal (marked SECTION in F) — a plain SUM counted
+       every item twice (three times when nested). Sum the item rows only. */
+    ws['G'+gRow]={t:'n',f:'SUMIF(F'+r1+':F'+r2+',"<>SECTION",G'+r1+':G'+r2+')',v:xBase};
+    ws['I'+gRow]={t:'n',f:'SUM(I'+r1+':I'+r2+')',v:xGst};
     ws['G'+gstRow]={t:'s',v:''};
-    ws['I'+gstRow]={t:'n',f:'SUM(I'+r1+':I'+r2+')'};
-    ws['G'+totRow]={t:'n',f:'G'+gRow+'+I'+gstRow};
+    ws['I'+gstRow]={t:'n',f:'SUM(I'+r1+':I'+r2+')',v:xGst};
+    ws['G'+totRow]={t:'n',f:'G'+gRow+'+I'+gstRow,v:xBase+xGst};
   }
   // ── Notes ────────────────────────────────────────────────────────────────
   let cursor=totRow+2;
@@ -4476,7 +4659,7 @@ $('#bExpPdf').addEventListener('click',()=>{
         {content:(r.name||'')+(r.desc?'  —  '+r.desc:''),colSpan:7,styles:{fontStyle:'bold',fillColor:B.SEC,textColor:B.BLUE}},
         {content:r.amt?pdfRs(r.amt):'',styles:{fontStyle:'bold',halign:'right',fillColor:B.SEC}}];
     }
-    const gPct=r.gst||18; const gAmt=r.gstAmt?pdfRs(r.gstAmt):''; const woPart=r.wo?'\nWO: '+r.wo:''; return [r.sl,(r.name?r.name+'\n':'')+(r.desc||'')+woPart,r.uom,r.qty===''?'':inr(parseFloat(r.qty)),r.rate===''?'':pdfRs(parseFloat(r.rate)),r.amt?pdfRs(r.amt):'',gPct+'%',gAmt,r.remarks||''];
+    const gPct=r.gst; const gAmt=r.gstAmt?pdfRs(r.gstAmt):''; const woPart=r.wo?'\nWO: '+r.wo:''; return [r.sl,(r.name?r.name+'\n':'')+(r.desc||'')+woPart,r.uom,r.qty===''?'':inr(parseFloat(r.qty)),r.rate===''?'':pdfRs(parseFloat(r.rate)),r.amt?pdfRs(r.amt):'',gPct+'%',gAmt,r.remarks||''];
   });
   const gstSum=Math.round(rows.filter(r=>r.kind==='line').reduce((s,r)=>s+(parseFloat(r.gstAmt)||0),0)*100)/100;
   doc.autoTable(Object.assign(pdfTableBase(chrome,M),{
@@ -4781,7 +4964,7 @@ function dl(data,fname,mime){
 
 function exportCmpCsv(){
   if(!mFiltered.length){alert('No items to export.');return;}
-  const q='"',e2=s=>q+(s==null?'':s.toString().replace(/"/g,'""'))+q;
+  const e2=csvCell;
   let csv=cmpHeaders().map(e2).join(',')+'\n';
   mFiltered.forEach((it,i)=>{csv+=cmpRowArr(it,i+1).map(e2).join(',')+'\n';});
   dl(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),'BOQ_Cost_Comparison_'+cmpStamp()+'.csv');
@@ -4980,7 +5163,7 @@ function cbAddVendor(){
   if(cbVendors.some(v=>v.name.toLowerCase()===name.toLowerCase())){ alert('"'+name+'" is already in this comparison.'); inp.value=''; return; }
   if(cbVendors.length>=6){ alert('You can compare up to 6 vendors at once.'); return; }
   cbVendors.push({name, isNew});
-  cbRows.forEach(r=>{ while(r.rates.length<cbVendors.length) r.rates.push(''); });
+  cbRows.forEach(r=>{ if(!r.rates)return; while(r.rates.length<cbVendors.length) r.rates.push(''); });
   // auto-fill historical rates for newly-added vendor
   const _newVi=cbVendors.length-1, _vLow=name.toLowerCase().trim();
   cbRows.forEach(r=>{
@@ -5006,7 +5189,7 @@ function renderCbVendors(){
   wrap.querySelectorAll('.vc-x').forEach(b=>b.addEventListener('click',()=>{
     cbVendors.splice(+b.dataset.i,1);
     // drop that vendor's rates from rows
-    cbRows.forEach(r=>{ r.rates.splice(+b.dataset.i,1); });
+    cbRows.forEach(r=>{ if(r.rates) r.rates.splice(+b.dataset.i,1); });
     renderCbVendors(); renderCbTable(); cbSearch();
   }));
 }
@@ -5053,7 +5236,7 @@ function cbArmBanner(){
 
 function cbRowRanks(rates){
   // returns array of rank (1=lowest) per vendor index; '' rates ignored
-  const vals=rates.map((r,i)=>({i,v:parseFloat(r)})).filter(x=>!isNaN(x.v)&&x.v>0);
+  const vals=rates.map((r,i)=>({i,v:bNum(r)})).filter(x=>!isNaN(x.v)&&x.v>0);
   vals.sort((a,b)=>a.v-b.v);
   const rank={}; let last=null,r=0;
   vals.forEach((x,k)=>{ if(last===null||x.v>last){r=k+1;last=x.v;} rank[x.i]=r; });
@@ -5089,23 +5272,23 @@ function renderCbTable(){
       return;
     }
     const rank=cbRowRanks(row.rates);
-    const qty=parseFloat(row.qty)||0;
+    const qty=bNum(row.qty)||0;
     let cells='';
     cbVendors.forEach((v,vi)=>{
       const rate=row.rates[vi]==null?'':row.rates[vi];
-      const rnum=parseFloat(rate);
+      const rnum=bNum(rate);
       const amt=(!isNaN(rnum)&&rnum>0)?qty*rnum:null;
       if(amt!=null) vtot[vi]+=amt; else vfilled[vi]=false;
       const rk=rank[vi];
       const rankBadge=rk?`<span class="lrank r${rk}">L${rk}</span>`:'';
-      cells+=`<td class="vcell${rk===1?' l1':''}">${rankBadge}<br><input data-sid="${row.sid}" data-vi="${vi}" value="${rate}" placeholder="rate" inputmode="decimal"><div class="vc-amt">${amt!=null?'₹'+inr(amt):''}</div></td>`;
+      cells+=`<td class="vcell${rk===1?' l1':''}">${rankBadge}<br><input data-sid="${row.sid}" data-vi="${vi}" value="${esc(String(rate))}" placeholder="rate" inputmode="decimal"><div class="vc-amt">${amt!=null?'₹'+inr(amt):''}</div></td>`;
     });
     const isSub=row.kind==='sub';
     rows+=`<tr data-sid="${row.sid}" class="${isSub?'cb-sub':''}">
       <td class="cb-sl">${nums[row.sid]}</td>
       <td style="max-width:200px"><input class="cbnamein" data-f="name" value="${esc(row.name)}" placeholder="Item name…" style="${isSub?'font-size:11px;opacity:.9':''}">${descField('cbdescin', row.desc)}</td>
       <td class="cb-uom"><input class="cbuomin" data-f="uom" value="${esc(row.uom)}" placeholder="Unit"></td>
-      <td><input class="cbq" data-sid="${row.sid}" value="${row.qty}" inputmode="decimal"></td>
+      <td><input class="cbq" data-sid="${row.sid}" value="${esc(String(row.qty??''))}" inputmode="decimal"></td>
       ${cells}
       <td><button class="cb-del" title="Remove">×</button></td>
     </tr>`;
@@ -5178,17 +5361,17 @@ function cbBuildRef(){
       body.push({kind:'parent',cells:c});
       return;
     }
-    const qty=parseFloat(row.qty)||0;
+    const qty=bNum(row.qty)||0;
     const rank=cbRowRanks(row.rates);
     const c=[nums[row.sid], (row.kind==='sub'?'':row.name), row.desc, row.uom, row.qty];
-    let bestV='';
+    const bestV=[];
     cbVendors.forEach((v,vi)=>{
-      const rn=parseFloat(row.rates[vi]); const ok=!isNaN(rn)&&rn>0;
+      const rn=bNum(row.rates[vi]); const ok=!isNaN(rn)&&rn>0;
       const amt=ok?qty*rn:'';
       c.push(ok?rn:''); c.push(amt===''?'':amt);
-      if(ok){vtot[vi]+=amt; if(rank[vi]===1)bestV=v.name;} else vfilled[vi]=false;
+      if(ok){vtot[vi]+=amt; if(rank[vi]===1)bestV.push(v.name);} else vfilled[vi]=false;
     });
-    c.push(bestV);
+    c.push(bestV.join(' / '));
     body.push({kind:row.kind,cells:c});
   });
   let minTot=Infinity,minIx=-1; vtot.forEach((t,i)=>{if(vfilled[i]&&t>0&&t<minTot){minTot=t;minIx=i;}});
@@ -5201,7 +5384,7 @@ function cbBuildRef(){
 function cbExportCsv(){
   if(!cbCanExport())return;
   const m=cbMeta(); const {body,tot}=cbBuildRef();
-  const e2=s=>'"'+(s==null?'':s.toString().replace(/"/g,'""'))+'"';
+  const e2=csvCell;
   let csv=e2('Project Name:')+','+e2(m.proj)+'\n'+e2(m.ref)+'\n'+(m.wo?e2('WO No:')+','+e2(m.wo)+'\n':'')+'\n';
   // two header rows
   const h1=['SL No.','Item name','Description','Unit','Qty'];
@@ -5250,7 +5433,7 @@ function cbExportXls(){
   const totalCols=5+V*2+1;
   const merges=[{s:{r:0,c:1},e:{r:0,c:Math.min(4,totalCols-1)}}, {s:{r:1,c:0},e:{r:1,c:totalCols-1}}];
   // vendor name merges on row index hdrTop-1 (0-based = 3)
-  const hr=3;
+  const hr=hdrTop;
   for(let i=0;i<V;i++){ const c=5+i*2; merges.push({s:{r:hr,c},e:{r:hr,c:c+1}}); }
   // merge SL/Item/Desc/Unit/Qty/L1 across the 2 header rows
   [0,1,2,3,4,totalCols-1].forEach(c=>merges.push({s:{r:hr,c},e:{r:hr+1,c}}));
@@ -6384,7 +6567,9 @@ function safeSetItem(key,value){
 }
 window.safeSetItem=safeSetItem;
 
+var _draftDirty=false;   // var: scheduleAutosave() may run during start-up, before this line
 function scheduleAutosave(){
+  _draftDirty=true;
   clearTimeout(_asTimer);
   _asTimer=setTimeout(doAutosave,20000);
   _undoCapture();
@@ -6398,7 +6583,8 @@ function scheduleAutosave(){
 function doAutosave(){
   try{
     if(window.CloudflareAPI && window.CloudflareAPI.draft && (boq.length || bNotes.length)){
-      window.CloudflareAPI.draft.save(_revSnapshot()).then(r=>{
+      _draftDirty=false;
+      window.CloudflareAPI.draft.save(Object.assign(_revSnapshot(),{revHistory,currentRevision})).then(r=>{
         const ind=$('#autosaveInd'); if(!ind) return;
         ind.textContent=(r&&r.ok)?'✓ Draft saved':'⏳ Saved locally — syncing…';
         ind.classList.add('show');
@@ -6409,17 +6595,28 @@ function doAutosave(){
   }catch(e){ console.error('[autosave]',e); }   /* never fail silently */
 }
 function clearDraft(){
+  _draftDirty=false; clearTimeout(_asTimer);
   try{ if(window.CloudflareAPI && window.CloudflareAPI.draft) window.CloudflareAPI.draft.clear(); }catch(e){}
   try{ localStorage.removeItem(AS_KEY); }catch(e){}
 }
 function checkRestoreDraft(){
   try{ localStorage.removeItem(AS_KEY); }catch(e){}   /* retire the old local-only key */
   if(!(window.CloudflareAPI && window.CloudflareAPI.draft) || boq.length) return;
-  window.CloudflareAPI.draft.get().then(r=>{
-    const d=r&&r.draft;
+  /* A copy queued while offline (cf_pending_boq_draft) can be NEWER than the server's: send it
+     first, and if the server is unreachable offer the local copy rather than nothing. */
+  const api=window.CloudflareAPI.draft;
+  let queued=null; try{ queued=JSON.parse(localStorage.getItem('cf_pending_boq_draft')); }catch(e){}
+  Promise.resolve(api.flush?api.flush():null)
+    .then(()=>api.get())
+    .then(r=>{ const at=r&&r.updatedAt?Date.parse(r.updatedAt):0;
+      return (queued&&queued.draft&&(queued.at||0)>at)?{d:queued.draft,at:queued.at}:{d:r&&r.draft,at}; })
+    .catch(()=>queued&&queued.draft?{d:queued.draft,at:queued.at}:null)
+    .then(x=>{
+    const d=x&&x.d;
     if(!d||!Array.isArray(d.boq)||!d.boq.length||boq.length) return;   // user may have started typing
-    const when=r.updatedAt?new Date(r.updatedAt).toLocaleString():'earlier';
-    if(confirm(`Resume your unsaved BOQ draft?\n\n${d.boq.length} item${d.boq.length===1?'':'s'} — saved ${when}\n\nCancel to start fresh (the draft is kept either way).`)){
+    const when=x.at?new Date(x.at).toLocaleString():'earlier';
+    if(confirm(`Resume your unsaved BOQ draft?\n\n${d.boq.length} item${d.boq.length===1?'':'s'} — saved ${when}\n\nCancel to start fresh — the draft is replaced once you add to a new BOQ.`)){
+      if(Array.isArray(d.revHistory)){ revHistory=d.revHistory; currentRevision=d.currentRevision||revHistory.length; }
       _applyRevSnapshot(d);
       showToast('↩ Draft restored');
     }
@@ -6439,8 +6636,9 @@ function _revSnapshot(){
 function bumpRevision(){
   const note=prompt('Revision note (optional):')||'';
   // store the snapshot AS-IS so this exact state can be rolled back to later
+  currentRevision++;
   revHistory.push({rev:currentRevision,ts:Date.now(),items:boq.length,note,snap:_revSnapshot()});
-  currentRevision++;updateRevBadge();doAutosave();
+  updateRevBadge();doAutosave();
   showToast('Saved as Rev-'+currentRevision);
 }
 /* Apply a stored snapshot to the live BOQ (used by Roll Back). */
@@ -6714,11 +6912,13 @@ function renderTenderAnalysis(){
   const lineRows=cbRows.filter(r=>r.kind!=='parent');
   // Vendor totals
   const vTotals=cbVendors.map((v,vi)=>{
-    let tot=0;
-    lineRows.forEach(row=>{const rt=parseFloat(row.rates?.[vi])||0,qty=parseFloat(row.qty)||1;tot+=rt*qty;});
-    return{name:v.name,total:tot};
-  }).sort((a,b)=>a.total-b.total);
-  const l1=vTotals[0]||{name:'—',total:0},lN=vTotals[vTotals.length-1]||{name:'—',total:0};
+    let tot=0,filled=true;
+    lineRows.forEach(row=>{const rt=bNum(row.rates?.[vi]),qty=bNum(row.qty)||0;if(rt>0)tot+=rt*qty;else filled=false;});
+    return{name:v.name,total:tot,filled};
+  }).sort((a,b)=>(b.filled-a.filled)||(a.total-b.total));
+  /* A vendor who left lines blank is not comparable on total (same rule as the Builder). */
+  const _pool=vTotals.some(v=>v.filled)?vTotals.filter(v=>v.filled):vTotals;
+  const l1=_pool[0]||{name:'—',total:0},lN=_pool.reduce((a,b)=>b.total>a.total?b:a,_pool[0]||{name:'—',total:0});
   const savings=lN.total-l1.total,savPct=lN.total>0?((savings/lN.total)*100).toFixed(1):0;
   const itemCount=lineRows.length;
   // Category breakdown from section parents
@@ -6833,8 +7033,8 @@ function importBOQExcel(file){
         boq.push({sid:++seq,cid:0,kind:'line',name,
           desc:dc?String(row[dc]||'').trim():'',
           uom:uc?String(row[uc]||'').trim():'',
-          qty:qc?parseFloat(row[qc])||'':'',
-          rate:rc?parseFloat(row[rc])||'':'',
+          qty:qc?_impNum(row[qc]):'',
+          rate:rc?_impNum(row[rc]):'',
           remarks:'',gst:18,
           cat:cc?String(row[cc]||'').trim():'',wo:''});
         added++;
@@ -6848,6 +7048,9 @@ function importBOQExcel(file){
 function importQuoteExcel(file){
   if(!file)return;
   if(typeof XLSX==='undefined'){alert('Excel library not loaded.');return;}
+  /* The Comparison Sheet Builder screen this fed is no longer in the page; initCbuild() would throw
+     on its missing elements and the import would fail silently. */
+  if(!document.getElementById('cbuild')){alert('Vendor quotes are entered per enquiry: open the enquiry in Enquiry Management, then use that vendor portal (Open Portal) or the cloud form.');return;}
   if(!cbInit){initCbuild();cbInit=true;}
   const reader=new FileReader();
   reader.onload=e=>{
@@ -6865,7 +7068,7 @@ function importQuoteExcel(file){
       rows.forEach(row=>{
         const name=String(row[nc]||'').trim();if(!name)return;
         const rates=cbVendors.map(()=>'');
-        if(vi>=0&&rc)rates[vi]=String(parseFloat(row[rc])||'');
+        if(vi>=0&&rc)rates[vi]=String(_impNum(row[rc]));
         cbRows.push({sid:++cbSeq,cid:0,kind:'line',name,
           desc:dc?String(row[dc]||'').trim():'',
           uom:uc?String(row[uc]||'').trim():'',
@@ -6977,6 +7180,8 @@ function bindImportModal(){
   $('#topImportBtn')?.addEventListener('click',()=>overlay.classList.add('on'));
   ['#importClose','#importClose2'].forEach(id=>$(id)?.addEventListener('click',()=>overlay.classList.remove('on')));
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('on');});
+  /* "Import Vendor Enquiry" fed the Comparison Sheet Builder, whose screen is not in the page. */
+  if(!document.getElementById('cbuild')){const qt=overlay.querySelector('.import-tab[data-itype="quote"]');if(qt)qt.style.display='none';}
   overlay.querySelectorAll('.import-tab').forEach(tab=>{
     tab.addEventListener('click',()=>{
       overlay.querySelectorAll('.import-tab').forEach(t=>t.classList.remove('on'));
@@ -7104,7 +7309,9 @@ function ensureItemCodes(){
 /* ── Schedule auto-save whenever BOQ changes ──────────── */
 // Use setInterval — safer than wrapping renderBOQ (function-declaration hoisting
 // would cause infinite recursion). Also save on certain explicit triggers.
-setInterval(()=>{ if(typeof cInit!=='undefined'&&cInit&&typeof boq!=='undefined'&&boq.length) doAutosave(); }, 25000);
+/* Only when something changed: an unconditional save every 25 s let a stale tab keep overwriting
+   newer work saved from another computer, and re-created a draft just cleared by Transfer/Clear. */
+setInterval(()=>{ if(_draftDirty&&typeof cInit!=='undefined'&&cInit&&typeof boq!=='undefined'&&boq.length) doAutosave(); }, 25000);
 
 /* ─────────── INIT ALL ENHANCEMENTS ─────────────────── */
 (function initAll(){
@@ -8149,7 +8356,9 @@ else if(MASTER_CUSTOM.length){ DB.masterCustom=MASTER_CUSTOM; saveDB(); }
    has mutated DB.masterCustom via getDB(). */
 window.__tsHooks={ getDB:function(){return DB;}, setDB:function(v){ DB=v; if(!Array.isArray(DB.masterCustom))DB.masterCustom=[]; MASTER_CUSTOM=DB.masterCustom; try{localStorage.setItem(QKEY,JSON.stringify(DB));}catch(e){} try{if(typeof render==='function')render();}catch(e){} }, push:function(){ saveDB(); } };
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-const tok=()=>(Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)).slice(0,22);
+/* Vendor portal tokens are the only thing guarding a vendor's quote form: cryptographic randomness
+   (Math.random is predictable). Same 22-character [0-9a-z] shape as before. */
+const tok=()=>{const a=new Uint8Array(22);crypto.getRandomValues(a);return Array.from(a,b=>'0123456789abcdefghijklmnopqrstuvwxyz'[b%36]).join('');};
 const pad=(n,l=3)=>String(n).padStart(l,'0');
 const now=()=>Date.now();
 const money=n=>'₹'+inr(n);
@@ -8177,7 +8386,8 @@ function qStatus(q){
   if(s.some(x=>x==='sent'))return 'sent';
   return 'draft';
 }
-function audit(q,action,detail){q.audit=q.audit||[];q.audit.push({action,by:detail&&detail.by||'Admin',ts:now(),detail:detail&&detail.txt||''});}
+function curUser(){try{const s=window.TSApi&&window.TSApi.session;return (s&&(s.name||s.username))||'Admin';}catch(e){return 'Admin';}}
+function audit(q,action,detail){q.audit=q.audit||[];q.audit.push({action,by:detail&&detail.by||curUser(),ts:now(),detail:detail&&detail.txt||''});}
 function notify(type,msg,qid){DB.notifications.unshift({id:uid(),type,msg,qid,ts:now(),read:false});DB.notifications=DB.notifications.slice(0,80);}
 
 /* ---------- vendor factory ---------- */
@@ -8199,6 +8409,17 @@ function newVendor(q,name){
     attachments:[],revisions:[]};
 }
 function syncLines(q){q.vendors.forEach(v=>{while(v.lines.length<q.items.length)v.lines.push(lineFor());v.lines.length=q.items.length;});}
+/* Vendor rates are stored by position: v.lines[i] belongs to q.items[i]. Whenever the item list is
+   replaced, each vendor's line must be carried across BY ITEM ID — otherwise deleting, inserting or
+   reordering an item silently moves every rate below it onto the wrong item. Items without an id
+   (legacy data) fall back to their old position. qItemId is a hoisted declaration on purpose:
+   uid() is a const that does not exist yet while loadDB() runs. */
+function qItemId(){return 'it'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function qEnsureIds(q){((q&&q.items)||[]).forEach(it=>{if(it&&(it.id==null||it.id===''))it.id=qItemId();});}
+function remapLines(q,newItems){
+  const oldIdx={};(q.items||[]).forEach((it,i)=>{if(it&&it.id!=null&&it.id!=='')oldIdx[it.id]=i;});
+  (q.vendors||[]).forEach(v=>{const old=v.lines||[];v.lines=newItems.map((it,i)=>{const k=(it&&it.id!=null&&it.id!=='')?oldIdx[it.id]:i;return (k!=null&&old[k])?old[k]:lineFor();});});
+}
 
 /* ---------- hierarchy helpers (enquiry items reuse the global BTYPES/QUOTABLE) ---------- */
 function qType(it){return it&&it.type?it.type:'item';}
@@ -8225,9 +8446,19 @@ function itemRank(q,i){
   const arr=q.vendors.map((v,vi)=>({vi,amt:lineAmt(q,v,i),withGst:lineAmt(q,v,i)+lineGst(q,v,i),rate:num(v.lines[i]&&v.lines[i].rate)})).filter(x=>x.rate>0);
   arr.sort((a,b)=>csGst?(a.withGst-b.withGst):(a.amt-b.amt));return arr;
 }
+/* Quotable items that count toward a bid total (Rate-Only rows are excluded, as in lineAmt). */
+function qNeeded(q){return q.items.map((it,i)=>i).filter(i=>{const it=q.items[i];const bt=BTYPES[qType(it)];return qQuotable(it)&&!(bt&&bt.excludeTotal);});}
+/* Vendor ranking. val = the commercial basis (base, or incl. GST when the CS toggle is on) — every
+   figure derived from the ranking must use val so L1/highest/savings/deviation agree.
+   A partial bid (quotable items left unpriced) ranks after every complete bid: a vendor who prices
+   one item of ten must not come out L1 on a lower partial total. missing = unpriced items.
+   Equal totals keep vendor order and are flagged tie:true so the screen can say so. */
 function vendorRank(q){
-  const arr=q.vendors.map((v,vi)=>({vi,total:vendorBase(q,v),withGst:vendorTotal(q,v)})).filter(x=>hasQuote(q.vendors[x.vi]));
-  arr.sort((a,b)=>csGst?(a.withGst-b.withGst):(a.total-b.total));return arr;
+  const need=qNeeded(q);
+  const arr=q.vendors.map((v,vi)=>{const total=vendorBase(q,v),withGst=vendorTotal(q,v);return {vi,total,withGst,val:csGst?withGst:total,missing:need.filter(i=>!(num(v.lines[i]&&v.lines[i].rate)>0)).length};}).filter(x=>hasQuote(q.vendors[x.vi]));
+  arr.sort((a,b)=>((a.missing>0)-(b.missing>0))||(a.val-b.val)||(a.vi-b.vi));
+  arr.forEach((x,k)=>{x.tie=arr.some((y,j)=>j!==k&&(y.missing>0)===(x.missing>0)&&Math.abs(y.val-x.val)<0.005);});
+  return arr;
 }
 
 /* ════════════ SHELL / ROUTING ════════════ */
@@ -8314,48 +8545,345 @@ function renderDash(m){
 function emptyBox(t,d){return `<div class="qm-empty"><svg viewBox="0 0 24 24" fill="none"><path d="M14 3v4a1 1 0 0 0 1 1h4M7 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg><h4>${esc(t)}</h4><div>${esc(d)}</div></div>`;}
 
 /* ════════════ QUOTATION LIST ════════════ */
-let listFilter={q:'',ref:'',status:''};
+let listFilter={q:'',ref:'',status:'',type:'',vendor:'',dateFrom:'',dateTo:'',createdBy:'',page:1,pageSize:10};
+let listSort={key:'createdTs',dir:'desc'};
+function sortList(key){
+  if(listSort.key===key){
+    listSort.dir=listSort.dir==='asc'?'desc':'asc';
+  } else {
+    listSort.key=key;
+    listSort.dir=(key==='createdTs'||key==='dueDate'||key==='vendors')?'desc':'asc';
+  }
+  listFilter.page=1;
+  const m=$('#qmMain');
+  if(m) renderList(m);
+}
+function setListPage(p){
+  listFilter.page=Math.max(1,parseInt(p,10)||1);
+  const m=$('#qmMain');
+  if(m) renderList(m);
+}
+function setPageSize(sz){
+  listFilter.pageSize=sz==='all'?'all':(parseInt(sz,10)||10);
+  listFilter.page=1;
+  const m=$('#qmMain');
+  if(m) renderList(m);
+}
+function paginationFooter(page,totalPages,total,startIdx,endIdx,pageSize){
+  if(total<=0) return '';
+  const isAll=pageSize==='all';
+  let pageButtons='';
+  if(!isAll && totalPages>1){
+    const prevDis=page<=1?'disabled':'';
+    const nextDis=page>=totalPages?'disabled':'';
+    pageButtons+=`<button class="qm-page-btn" ${prevDis} onclick="QM._setListPage(1)" title="First Page">«</button>`;
+    pageButtons+=`<button class="qm-page-btn" ${prevDis} onclick="QM._setListPage(${page-1})" title="Previous Page">‹</button>`;
+    let pages=[];
+    if(totalPages<=7){
+      for(let i=1;i<=totalPages;i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if(page>3) pages.push('...');
+      const start=Math.max(2,page-1);
+      const end=Math.min(totalPages-1,page+1);
+      for(let i=start;i<=end;i++){
+        if(!pages.includes(i)) pages.push(i);
+      }
+      if(page<totalPages-2) pages.push('...');
+      if(!pages.includes(totalPages)) pages.push(totalPages);
+    }
+    pages.forEach(p=>{
+      if(p==='...'){
+        pageButtons+=`<span style="padding:0 4px;color:var(--faint);font-size:12px;user-select:none">…</span>`;
+      } else {
+        const act=p===page?'active':'';
+        pageButtons+=`<button class="qm-page-btn ${act}" onclick="QM._setListPage(${p})">${p}</button>`;
+      }
+    });
+    pageButtons+=`<button class="qm-page-btn" ${nextDis} onclick="QM._setListPage(${page+1})" title="Next Page">›</button>`;
+    pageButtons+=`<button class="qm-page-btn" ${nextDis} onclick="QM._setListPage(${totalPages})" title="Last Page">»</button>`;
+  }
+  return `<div class="qm-results-foot">
+    <div class="qm-pagesize-ctrl">
+      <span>Rows per page:</span>
+      <select onchange="QM._setPageSize(this.value)">
+        <option value="10" ${pageSize===10?'selected':''}>10</option>
+        <option value="25" ${pageSize===25?'selected':''}>25</option>
+        <option value="50" ${pageSize===50?'selected':''}>50</option>
+        <option value="all" ${isAll?'selected':''}>All</option>
+      </select>
+      <span class="qm-page-info">Showing ${startIdx+1}–${endIdx} of ${total}</span>
+    </div>
+    <div class="qm-page-btns">
+      ${pageButtons}
+    </div>
+  </div>`;
+}
+function getFilteredQuotations(){
+  let qs=DB.quotations.slice();
+  const f=listFilter;
+  if(f.q){
+    const t=f.q.toLowerCase().trim();
+    qs=qs.filter(q=>(q.base+' '+q.projectName+' '+q.subject+' '+q.client+' '+(q.ref||'')+' '+q.vendors.map(v=>v.name).join(' ')).toLowerCase().includes(t));
+  }
+  if(f.ref) qs=qs.filter(q=>q.ref===f.ref);
+  if(f.status==='pending') qs=qs.filter(q=>['sent','opened'].includes(qStatus(q)));
+  else if(f.status) qs=qs.filter(q=>qStatus(q)===f.status);
+  if(f.type) qs=qs.filter(q=>(q.enqType||q.type||'').toLowerCase()===f.type.toLowerCase());
+  if(f.vendor){
+    const vt=f.vendor.toLowerCase().trim();
+    qs=qs.filter(q=>q.vendors.some(v=>(v.name||'').toLowerCase().includes(vt)));
+  }
+  if(f.dateFrom){
+    const df=new Date(f.dateFrom+'T00:00:00').getTime();
+    qs=qs.filter(q=>{
+      const qt=q.createdTs||(q.date?new Date(q.date+'T00:00:00').getTime():0);
+      return qt>=df;
+    });
+  }
+  if(f.dateTo){
+    const dt2=new Date(f.dateTo+'T23:59:59').getTime();
+    qs=qs.filter(q=>{
+      const qt=q.createdTs||(q.date?new Date(q.date+'T00:00:00').getTime():0);
+      return qt<=dt2;
+    });
+  }
+  if(f.createdBy){
+    qs=qs.filter(q=>(q.createdBy||'Admin').toLowerCase()===f.createdBy.toLowerCase());
+  }
+  qs.sort((a,b)=>{
+    let va,vb;
+    switch(listSort.key){
+      case 'base':
+        va=a.base||''; vb=b.base||'';
+        return listSort.dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
+      case 'projectName':
+        va=a.projectName||''; vb=b.projectName||'';
+        return listSort.dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
+      case 'subject':
+        va=a.subject||''; vb=b.subject||'';
+        return listSort.dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
+      case 'vendors':
+        va=a.vendors.length; vb=b.vendors.length;
+        return listSort.dir==='asc'?va-vb:vb-va;
+      case 'dueDate':
+        va=a.dueDate?new Date(a.dueDate).getTime():0;
+        vb=b.dueDate?new Date(b.dueDate).getTime():0;
+        return listSort.dir==='asc'?va-vb:vb-va;
+      case 'status':
+        va=qStatus(a); vb=qStatus(b);
+        return listSort.dir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
+      case 'createdTs':
+      default:
+        va=a.createdTs||(a.date?new Date(a.date+'T00:00:00').getTime():0);
+        vb=b.createdTs||(b.date?new Date(b.date+'T00:00:00').getTime():0);
+        return listSort.dir==='asc'?va-vb:vb-va;
+    }
+  });
+  return qs;
+}
 function listTable(rows){
-  let h=`<table class="qm-tbl"><thead><tr><th>Enquiry No.</th><th>Project</th><th>Subject</th><th>Vendors</th><th>L1 Vendor</th><th>Due</th><th>Status</th><th></th></tr></thead><tbody>`;
+  const sortInd=(col)=>{
+    if(listSort.key!==col) return '<span style="color:var(--faint);font-size:10px;margin-left:4px;opacity:0.4">↕</span>';
+    return `<span style="color:var(--accent);font-weight:700;font-size:11px;margin-left:4px">${listSort.dir==='asc'?'↑':'↓'}</span>`;
+  };
+  let h=`<table class="qm-tbl"><thead><tr>
+    <th onclick="QM._sortList('base')" style="cursor:pointer;user-select:none">Enquiry No. ${sortInd('base')}</th>
+    <th onclick="QM._sortList('projectName')" style="cursor:pointer;user-select:none">Project ${sortInd('projectName')}</th>
+    <th onclick="QM._sortList('subject')" style="cursor:pointer;user-select:none">Subject ${sortInd('subject')}</th>
+    <th onclick="QM._sortList('vendors')" style="cursor:pointer;user-select:none;text-align:center">Vendors ${sortInd('vendors')}</th>
+    <th>L1 Vendor</th>
+    <th onclick="QM._sortList('dueDate')" style="cursor:pointer;user-select:none">Due Date ${sortInd('dueDate')}</th>
+    <th onclick="QM._sortList('status')" style="cursor:pointer;user-select:none">Status ${sortInd('status')}</th>
+    <th style="width:40px"></th>
+  </tr></thead><tbody>`;
   rows.forEach(q=>{
     const r=vendorRank(q);const l1=r.length?q.vendors[r[0].vi]:null;
     h+=`<tr onclick="QM.openQ('${q.id}')">
-      <td class="num">${esc(q.base)}</td>
-      <td>${esc(q.projectName)}<div style="font-size:10.5px;color:var(--faint)">${esc(PROJREF[q.ref]||q.ref)}</div></td>
-      <td style="max-width:220px">${esc((q.subject||'').slice(0,60))}</td>
-      <td class="mono">${q.vendors.length}</td>
-      <td>${l1?esc(l1.name)+' · <span class="mono" style="color:var(--green)">'+money(vendorBase(q,l1))+'</span>':'<span style="color:var(--faint)">—</span>'}</td>
-      <td class="mono">${dt(q.dueDate?new Date(q.dueDate).getTime():0)}</td>
+      <td class="num" style="white-space:nowrap;font-weight:700">${esc(q.base)}</td>
+      <td><strong>${esc(q.projectName)}</strong><div style="font-size:11px;color:var(--faint);margin-top:2px">${esc(PROJREF[q.ref]||q.ref)}</div></td>
+      <td style="max-width:240px;line-height:1.4"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(q.subject||'')}">${esc(q.subject||'—')}</div></td>
+      <td class="mono" style="text-align:center"><span style="background:var(--panel2);border:1px solid var(--line);padding:2px 8px;border-radius:12px;font-size:11.5px">${q.vendors.length}</span></td>
+      <td>${l1?`<strong>${esc(l1.name)}</strong> · <span class="mono" style="color:var(--green);font-weight:600">${money(vendorBase(q,l1))}</span>`:'<span style="color:var(--faint)">—</span>'}</td>
+      <td class="mono" style="white-space:nowrap">${dt(q.dueDate?new Date(q.dueDate).getTime():0)}</td>
       <td>${stPill(qStatus(q))}</td>
-      <td><button class="qm-irow-del" title="Delete enquiry" onclick="event.stopPropagation();QM.deleteQ('${q.id}')">×</button></td>
+      <td style="text-align:center"><button class="qm-irow-del" title="Delete enquiry" onclick="event.stopPropagation();QM.deleteQ('${q.id}')">×</button></td>
     </tr>`;
   });
   h+=`</tbody></table>`;return h;
 }
 function stPill(s){return `<span class="qm-st ${s}">${s}</span>`;}
 function renderList(m){
-  let qs=DB.quotations.slice().sort((a,b)=>b.createdTs-a.createdTs);
+  let allFiltered=getFilteredQuotations();
   const f=listFilter;
-  if(f.q){const t=f.q.toLowerCase();qs=qs.filter(q=>(q.base+' '+q.projectName+' '+q.subject+' '+q.client+' '+q.vendors.map(v=>v.name).join(' ')).toLowerCase().includes(t));}
-  if(f.ref)qs=qs.filter(q=>q.ref===f.ref);
-  if(f.status==='pending')qs=qs.filter(q=>['sent','opened'].includes(qStatus(q)));
-  else if(f.status)qs=qs.filter(q=>qStatus(q)===f.status);
-  let h=`<div class="qm-wrap"><div class="qm-h">Enquiries <span style="font-size:12px;color:var(--faint);font-weight:500">${qs.length} of ${DB.quotations.length}</span></div>
-    <div class="qm-sub">Search & retrieve by number, vendor, project, reference, subject, status or date.</div>
-    <div class="qm-row">
-      <div class="srch" style="flex:1;min-width:220px"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="qmSearch" placeholder="Search enquiry no, vendor, project, subject…" value="${esc(f.q)}"></div>
-      <select class="flt" id="qmFref"><option value="">All projects</option>${Object.keys(PROJREF).map(r=>`<option value="${r}" ${f.ref===r?'selected':''}>${r} · ${esc(PROJREF[r])}</option>`).join('')}</select>
-      <select class="flt" id="qmFst"><option value="">Any status</option>${['draft','sent','opened','submitted','approved','rejected','expired','closed'].map(s=>`<option value="${s}" ${f.status===s?'selected':''}>${s}</option>`).join('')}</select>
-      <button class="btn xbtn green" onclick="QM.exportList('xls')">Excel</button>
-      <button class="btn xbtn" onclick="QM.exportList('csv')">CSV</button>
+  const total=allFiltered.length;
+  const isAll=f.pageSize==='all';
+  const pageSize=isAll?total:(parseInt(f.pageSize,10)||10);
+  const totalPages=isAll||pageSize<=0?1:Math.max(1,Math.ceil(total/pageSize));
+  if(f.page>totalPages) f.page=totalPages;
+  if(f.page<1) f.page=1;
+  const curPage=f.page;
+  const startIdx=isAll?0:(curPage-1)*pageSize;
+  const endIdx=isAll?total:Math.min(startIdx+pageSize,total);
+  const pagedQs=isAll?allFiltered:allFiltered.slice(startIdx,endIdx);
+
+  /* collect unique vendor names for vendor dropdown */
+  const allVendors=new Set();DB.quotations.forEach(q=>q.vendors.forEach(v=>{if(v.name)allVendors.add(v.name);}));
+  if(DB.vendorMaster) DB.vendorMaster.forEach(v=>{if(v.name)allVendors.add(v.name);});
+  if(window.VENDORS) window.VENDORS.forEach(v=>{if(v)allVendors.add(v);});
+  const vendorArr=[...allVendors].sort((a,b)=>a.localeCompare(b));
+
+  /* collect unique creators */
+  const allCreators=new Set();DB.quotations.forEach(q=>allCreators.add(q.createdBy||'Admin'));
+  const creatorArr=[...allCreators].sort((a,b)=>a.localeCompare(b));
+
+  /* collect unique project refs */
+  const allRefs=new Set([...Object.keys(PROJREF),...DB.quotations.map(q=>q.ref).filter(Boolean)]);
+  const refArr=[...allRefs];
+
+  let h=`<div class="qm-wrap">
+    <div class="qm-list-header">
+      <div class="qm-list-hdr-left">
+        <div class="qm-h">Enquiries / Tenders</div>
+        <div class="qm-sub">Manage enquiries, invited vendors, responses, and submission deadlines.</div>
+      </div>
+      <div class="qm-list-hdr-right">
+        <button class="btn primary" onclick="QM.openEditor(null)" style="height:44px;padding:0 22px;font-size:13.5px;font-weight:700;display:inline-flex;align-items:center;gap:8px">
+          <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;stroke:currentColor;stroke-width:2.5"><path d="M12 5v14M5 12h14"/></svg>+ New Enquiry
+        </button>
+      </div>
+    </div>
+    <div class="qm-filter-card">
+      <div class="qm-filter-title"><svg viewBox="0 0 24 24" fill="none"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>Search &amp; Filters</div>
+      <div class="qm-filter-row1">
+        <div class="srch"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="qmSearch" placeholder="Search by enquiry number, vendor name, project, subject, reference…" value="${esc(f.q)}"></div>
+      </div>
+      <div class="qm-filter-grid">
+        <div class="qm-fld"><label>Project</label><select id="qmFref"><option value="">All Projects</option>${refArr.map(r=>'<option value="'+r+'" '+(f.ref===r?'selected':'')+'>'+r+' · '+esc(PROJREF[r]||r)+'</option>').join('')}</select></div>
+        <div class="qm-fld"><label>Status</label><select id="qmFst"><option value="">Any Status</option>${['draft','sent','opened','submitted','approved','rejected','expired','closed'].map(s=>'<option value="'+s+'" '+(f.status===s?'selected':'')+'>'+s.charAt(0).toUpperCase()+s.slice(1)+'</option>').join('')}</select></div>
+        <div class="qm-fld"><label>Enquiry Type</label><select id="qmFtype"><option value="">All Types</option><option value="material" ${f.type==='material'?'selected':''}>Material</option><option value="labour" ${f.type==='labour'?'selected':''}>Labour</option><option value="subcontract" ${f.type==='subcontract'?'selected':''}>Sub-Contract</option><option value="service" ${f.type==='service'?'selected':''}>Service</option></select></div>
+        <div class="qm-fld"><label>Vendor</label><select id="qmFvendor"><option value="">All Vendors</option>${vendorArr.map(v=>'<option value="'+esc(v)+'" '+(f.vendor===v?'selected':'')+'>'+esc(v)+'</option>').join('')}</select></div>
+      </div>
+      <div class="qm-filter-row3">
+        <div class="qm-fld"><label>Date From</label><input type="date" id="qmFdateFrom" value="${esc(f.dateFrom)}"></div>
+        <div class="qm-fld"><label>Date To</label><input type="date" id="qmFdateTo" value="${esc(f.dateTo)}"></div>
+        <div class="qm-fld"><label>Created By</label><select id="qmFcreator"><option value="">All Creators</option>${creatorArr.map(c=>'<option value="'+esc(c)+'" '+(f.createdBy===c?'selected':'')+'>'+esc(c)+'</option>').join('')}</select></div>
+        <div class="qm-filter-actions">
+          <button class="btn primary" onclick="QM._applyListFilters()" style="gap:6px"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Search</button>
+          <button class="btn" onclick="QM._resetListFilters()" style="gap:6px"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 1 0 9-9 5 5 0 0 0-3.5 1.5"/><path d="M3 3v6h6"/></svg>Reset</button>
+          <button class="btn xbtn green" onclick="QM.exportList('xls')" style="gap:5px"><svg viewBox="0 0 24 24" fill="none"><path d="M14 3v4a1 1 0 0 0 1 1h4M7 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>Excel</button>
+          <button class="btn xbtn" onclick="QM.exportList('csv')" style="gap:5px"><svg viewBox="0 0 24 24" fill="none"><path d="M14 3v4a1 1 0 0 0 1 1h4M7 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>CSV</button>
+        </div>
+      </div>
     </div>`;
-  if(!qs.length)h+=emptyBox('No matching enquiries','Adjust your filters, or create a new enquiry.');
-  else h+=`<div class="qm-scrollx">${listTable(qs)}</div>`;
+  /* Results section */
+  if(!total){
+    if(!DB.quotations.length){
+      h+=`<div class="qm-results-card"><div class="qm-empty-enhanced">
+        <div class="qm-empty-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M14 3v4a1 1 0 0 0 1 1h4M7 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M12 11v6M9 14h6"/></svg></div>
+        <h4>No enquiries yet</h4>
+        <p>Get started by creating your first construction enquiry and inviting vendors to bid.</p>
+        <div class="qm-empty-actions">
+          <button class="btn primary" onclick="QM.openEditor(null)"><svg viewBox="0 0 24 24" fill="none" style="width:15px;height:15px;stroke:currentColor;stroke-width:2"><path d="M12 5v14M5 12h14"/></svg>+ Create First Enquiry</button>
+        </div>
+      </div></div>`;
+    } else {
+      h+=`<div class="qm-results-card"><div class="qm-empty-enhanced">
+        <div class="qm-empty-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M14 3v4a1 1 0 0 0 1 1h4M7 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 15l2 2 4-4"/></svg></div>
+        <h4>No matching enquiries found</h4>
+        <p>Try adjusting your search or filters, or create a new enquiry.</p>
+        <div class="qm-empty-actions">
+          <button class="btn primary" onclick="QM.openEditor(null)"><svg viewBox="0 0 24 24" fill="none" style="width:15px;height:15px;stroke:currentColor;stroke-width:2"><path d="M12 5v14M5 12h14"/></svg>Create New Enquiry</button>
+          <button class="btn" onclick="QM._resetListFilters()">Clear Filters</button>
+        </div>
+      </div></div>`;
+    }
+  } else {
+    h+=`<div class="qm-results-card">
+      <div class="qm-results-head">
+        <div class="qm-results-count">Showing <strong>${startIdx+1}–${endIdx}</strong> <span>of ${total} enquiries${total!==DB.quotations.length ? ' (filtered from ' + DB.quotations.length + ')' : ''}</span></div>
+      </div>
+      <div class="qm-results-body">${listTable(pagedQs)}</div>
+      ${paginationFooter(curPage,totalPages,total,startIdx,endIdx,f.pageSize)}
+    </div>`;
+  }
   h+=`</div>`;
   m.innerHTML=h;
-  const si=$('#qmSearch');if(si){let d;si.addEventListener('input',()=>{clearTimeout(d);d=setTimeout(()=>{listFilter.q=si.value;const p=si.selectionStart;renderList(m);const n=$('#qmSearch');n.focus();n.setSelectionRange(p,p);},200);});}
-  $('#qmFref').addEventListener('change',e=>{listFilter.ref=e.target.value;renderList(m);});
-  $('#qmFst').addEventListener('change',e=>{listFilter.status=e.target.value;renderList(m);});
+  /* Bind event listeners */
+  const si=$('#qmSearch');
+  if(si){
+    let d;
+    si.addEventListener('input',()=>{
+      clearTimeout(d);
+      d=setTimeout(()=>{
+        listFilter.q=si.value;
+        listFilter.page=1;
+        const p=si.selectionStart;
+        renderList(m);
+        const n=$('#qmSearch');
+        if(n){n.focus();n.setSelectionRange(p,p);}
+      },250);
+    });
+    si.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){
+        e.preventDefault();
+        clearTimeout(d);
+        listFilter.q=si.value;
+        listFilter.page=1;
+        renderList(m);
+      }
+    });
+  }
+  const bindSel=(id,key)=>{const el=$(id);if(el)el.addEventListener('change',e=>{listFilter[key]=e.target.value;listFilter.page=1;renderList(m);});};
+  bindSel('#qmFref','ref');
+  bindSel('#qmFst','status');
+  bindSel('#qmFtype','type');
+  bindSel('#qmFvendor','vendor');
+  bindSel('#qmFdateFrom','dateFrom');
+  bindSel('#qmFdateTo','dateTo');
+  bindSel('#qmFcreator','createdBy');
+}
+function applyListFilters(){
+  const s=$('#qmSearch'); if(s) listFilter.q=s.value;
+  const rf=$('#qmFref'); if(rf) listFilter.ref=rf.value;
+  const st=$('#qmFst'); if(st) listFilter.status=st.value;
+  const tp=$('#qmFtype'); if(tp) listFilter.type=tp.value;
+  const vn=$('#qmFvendor'); if(vn) listFilter.vendor=vn.value;
+  const df=$('#qmFdateFrom'); if(df) listFilter.dateFrom=df.value;
+  const dt=$('#qmFdateTo'); if(dt) listFilter.dateTo=dt.value;
+  const cr=$('#qmFcreator'); if(cr) listFilter.createdBy=cr.value;
+  listFilter.page=1;
+  const m=$('#qmMain'); if(m) renderList(m);
+}
+function resetListFilters(){
+  listFilter={q:'',ref:'',status:'',type:'',vendor:'',dateFrom:'',dateTo:'',createdBy:'',page:1,pageSize:listFilter.pageSize||10};
+  const m=$('#qmMain'); if(m) renderList(m);
+}
+function exportList(fmt){
+  const qs=getFilteredQuotations();
+  if(!qs.length){showToast('No enquiries to export');return;}
+  const head=['Enquiry No','Project','Project Ref','Subject','Type','Vendors','L1 Vendor','L1 Amount','Due Date','Status','Created By','Created Date'];
+  const rows=qs.map(q=>{
+    const r=vendorRank(q);
+    const l1=r.length?q.vendors[r[0].vi]:null;
+    const l1Amt=l1?vendorBase(q,l1):'';
+    return [
+      q.base||'',
+      q.projectName||'',
+      q.ref||'',
+      q.subject||'',
+      q.enqType||q.type||'material',
+      q.vendors.length,
+      l1?l1.name:'—',
+      l1Amt,
+      q.dueDate||'',
+      qStatus(q),
+      q.createdBy||'Admin',
+      q.date||''
+    ];
+  });
+  exportTable(fmt,head,rows,'Enquiries_Export_'+(new Date().toISOString().slice(0,10)));
+  showToast('📄 Enquiries exported ('+fmt.toUpperCase()+')');
 }
 
 /* ════════════ DETAIL ════════════ */
@@ -8364,72 +8892,121 @@ function renderDetail(m){
   const q=DB.quotations.find(x=>x.id===curId);if(!q){curId=null;return renderList(m);}
   syncLines(q);
   const r=vendorRank(q);
+  const l1Info = r.length > 0 ? `${esc(q.vendors[r[0].vi].name)} (${money(r[0].total)})` : '<span style="color:var(--faint)">Pending quotes</span>';
+  const respCount = `${q.vendors.filter(v=>hasQuote(v)).length} / ${q.vendors.length}`;
+
   let h=`<div class="qm-wrap">
-    <button class="qm-back" onclick="QM.go('list')">← All enquiries</button>
-    <div class="qm-h">${esc(q.base)} ${stPill(qStatus(q))}</div>
-    <div class="qm-sub">${esc(q.projectName)} · ${esc(PROJREF[q.ref]||q.ref)} — ${esc(q.subject||'No subject')}</div>
-    <div class="qm-row">
-      <button class="btn" onclick="QM.editQ('${q.id}')"><svg viewBox="0 0 24 24" fill="none"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Edit</button>
-      <button class="btn xbtn red" onclick="QM.exportQ('${q.id}')">RFQ PDF</button>
-      <button class="btn" style="color:var(--red);border-color:rgba(248,113,113,.3)" onclick="QM.deleteQ('${q.id}')"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>Delete</button>
-      <div style="flex:1"></div>
-      <button class="btn" style="border-color:rgba(94,155,240,.4)" onclick="QM.${q.cloud&&q.cloud.published?"openCloudLinks":"cloudPublish"}('${q.id}')"><svg viewBox="0 0 24 24" fill="none"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A4.5 4.5 0 0 1 17 18z"/><path d="M12 11v6m0-6 2.5 2.5M12 11 9.5 13.5"/></svg>${q.cloud&&q.cloud.published?'Contractor Links':'Send RFQ ☁'}</button>
-      ${q.cloud&&q.cloud.published?`<button class="btn" onclick="QM.cloudPull('${q.id}')"><svg viewBox="0 0 24 24" fill="none"><path d="M21 12a9 9 0 1 1-3-6.7L21 8m0-5v5h-5"/></svg>Pull</button>`:''}
-      ${q.cloud&&q.cloud.published?`<button class="btn" title="Recall RFQ — revoke contractor links and return to Draft" style="color:var(--accent2);border-color:rgba(217,154,6,.4)" onclick="QM.cloudRecall('${q.id}')"><svg viewBox="0 0 24 24" fill="none"><path d="M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-1"/></svg>Recall</button>`:''}
-      <button class="btn" title="Cloud Sync settings" onclick="QM.openCloudSettings()"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19.4 13a7.6 7.6 0 0 0 .1-1 7.6 7.6 0 0 0-.1-1l2-1.5-2-3.5-2.4 1a7 7 0 0 0-1.7-1L14.5 2h-5l-.3 2.5a7 7 0 0 0-1.7 1l-2.4-1-2 3.5L4.6 11a7.6 7.6 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a7 7 0 0 0 1.7 1l.3 2.5h5l.3-2.5a7 7 0 0 0 1.7-1l2.4 1 2-3.5zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg></button>
-      <button class="btn" onclick="QM.bulkInvite('${q.id}')"><svg viewBox="0 0 24 24" fill="none"><path d="M16 11h6m-3-3v6M2 21v-1a6 6 0 0 1 12 0v1M8 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/></svg>Bulk Invite</button>
-      ${q.vendors.some(v=>v.status==='draft')?`<button class="btn" onclick="QM.sendAll('${q.id}')">Send All</button>`:''}
-      <button class="btn primary" onclick="QM.addVendorPrompt('${q.id}')"><svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14"/></svg>Add Vendor</button>
+    <div class="qm-detail-top">
+      <button class="qm-detail-breadcrumb" onclick="QM.go('list')">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to all enquiries
+      </button>
+
+      <div class="qm-detail-title-bar">
+        <div class="qm-detail-title-left">
+          <h2>${esc(q.base)} ${stPill(qStatus(q))}</h2>
+          <div class="qm-sub" style="margin:2px 0 0">${esc(q.projectName)} · <span class="mono">${esc(PROJREF[q.ref]||q.ref)}</span> — ${esc(q.subject||'No subject')}</div>
+        </div>
+        <div class="qm-detail-actions">
+          <button class="btn" onclick="QM.editQ('${q.id}')"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Edit</button>
+          <button class="btn xbtn red" onclick="QM.exportQ('${q.id}')"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>RFQ PDF</button>
+          <button class="btn" style="color:var(--red);border-color:rgba(248,113,113,.3)" onclick="QM.deleteQ('${q.id}')"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>Delete</button>
+          <div style="width:1px;height:24px;background:var(--line);margin:0 4px"></div>
+          <button class="btn" style="border-color:rgba(94,155,240,.4)" onclick="QM.${q.cloud&&q.cloud.published?"openCloudLinks":"cloudPublish"}('${q.id}')"><svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A4.5 4.5 0 0 1 17 18z"/><path d="M12 11v6m0-6 2.5 2.5M12 11 9.5 13.5"/></svg>${q.cloud&&q.cloud.published?'Contractor Links':'Send RFQ ☁'}</button>
+          ${q.cloud&&q.cloud.published?`<button class="btn" onclick="QM.cloudPull('${q.id}')"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8m0-5v5h-5"/></svg>Pull</button>`:''}
+          ${q.cloud&&q.cloud.published?`<button class="btn" title="Recall RFQ — revoke contractor links and return to Draft" style="color:var(--accent2);border-color:rgba(217,154,6,.4)" onclick="QM.cloudRecall('${q.id}')"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-1"/></svg>Recall</button>`:''}
+          <button class="btn" title="Cloud Sync settings" onclick="QM.openCloudSettings()"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19.4 13a7.6 7.6 0 0 0 .1-1 7.6 7.6 0 0 0-.1-1l2-1.5-2-3.5-2.4 1a7 7 0 0 0-1.7-1L14.5 2h-5l-.3 2.5a7 7 0 0 0-1.7 1l-2.4-1-2 3.5L4.6 11a7.6 7.6 0 0 0 0 2l-2 1.5 2 3.5 2.4-1a7 7 0 0 0 1.7 1l.3 2.5h5l.3-2.5a7 7 0 0 0 1.7-1l2.4 1 2-3.5zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg></button>
+          <button class="btn" onclick="QM.bulkInvite('${q.id}')"><svg viewBox="0 0 24 24"><path d="M16 11h6m-3-3v6M2 21v-1a6 6 0 0 1 12 0v1M8 3a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/></svg>Bulk Invite</button>
+          ${q.vendors.some(v=>v.status==='draft')?`<button class="btn" onclick="QM.sendAll('${q.id}')">Send All</button>`:''}
+          <button class="btn primary" onclick="QM.addVendorPrompt('${q.id}')"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add Vendor</button>
+        </div>
+      </div>
     </div>`;
+
   /* cloud status banner */
   if(q.cloud&&q.cloud.published){
     const subN=q.vendors.filter(v=>v.cloud&&v.cloud.lastSubTs).length;
-    h+=`<div class="qm-cloud-bar green" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span>☁ Published to cloud — ${q.vendors.length} contractor link(s) live · <b>${subN}</b> submitted online so far.${q.dueDate?' Deadline <b>'+esc(q.dueDate)+'</b>.':''}</span><div style="flex:1"></div><button class="btn" style="font-size:11px" onclick="QM.openCloudLinks('${q.id}')">View / Share links</button><button class="btn" style="font-size:11px" onclick="QM.cloudPull('${q.id}')">⟳ Pull now</button></div>`;
+    h+=`<div class="qm-cloud-bar green" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px"><span>☁ Published to cloud — ${q.vendors.length} contractor link(s) live · <b>${subN}</b> submitted online so far.${q.dueDate?' Deadline <b>'+esc(q.dueDate)+'</b>.':''}</span><div style="flex:1"></div><button class="btn" style="font-size:11px" onclick="QM.openCloudLinks('${q.id}')">View / Share links</button><button class="btn" style="font-size:11px" onclick="QM.cloudPull('${q.id}')">⟳ Pull now</button></div>`;
   } else if(!cloudReady()){
-    h+=`<div class="qm-cloud-bar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span>💡 Want contractors to fill enquiries online (like Microsoft Forms) and auto-sync here? Set up free Cloud Sync once.</span><div style="flex:1"></div><button class="btn" style="font-size:11px" onclick="QM.openCloudSettings()">Set up Cloud Sync</button></div>`;
+    h+=`<div class="qm-cloud-bar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px"><span>💡 Want contractors to fill enquiries online (like Microsoft Forms) and auto-sync here? Set up free Cloud Sync once.</span><div style="flex:1"></div><button class="btn" style="font-size:11px" onclick="QM.openCloudSettings()">Set up Cloud Sync</button></div>`;
   }
-  /* header meta */
-  h+=`<div class="qm-panel"><h3>Header</h3><div class="vp-meta">
-    ${meta('Project Ref',q.ref)}${meta('Project',q.projectName)}${meta('Client',q.client||'—')}${meta('Subject',q.subject||'—')}
-    ${meta('Enquiry Date',dt(new Date(q.date).getTime()))}${meta('Due Date',q.dueDate?dt(new Date(q.dueDate).getTime()):'—')}${meta('Validity',q.validity||'—')}${meta('BOQ Items',q.items.length)}
+
+  /* header meta card */
+  h+=`<div class="qm-detail-meta-card"><div class="qm-meta-grid">
+    <div class="qm-meta-item"><span class="qm-meta-label">Project Ref</span><span class="qm-meta-val mono">${esc(q.ref)}</span></div>
+    <div class="qm-meta-item"><span class="qm-meta-label">Project Name</span><span class="qm-meta-val">${esc(q.projectName)}</span></div>
+    <div class="qm-meta-item"><span class="qm-meta-label">Client</span><span class="qm-meta-val">${esc(q.client||'—')}</span></div>
+    <div class="qm-meta-item"><span class="qm-meta-label">Subject</span><span class="qm-meta-val">${esc(q.subject||'—')}</span></div>
+    <div class="qm-meta-item"><span class="qm-meta-label">Enquiry Date</span><span class="qm-meta-val">${esc(dt(new Date(q.date).getTime()))}</span></div>
+    <div class="qm-meta-item"><span class="qm-meta-label">Due Date</span><span class="qm-meta-val">${q.dueDate?esc(dt(new Date(q.dueDate).getTime())):'—'}</span></div>
+    <div class="qm-meta-item"><span class="qm-meta-label">Validity</span><span class="qm-meta-val">${esc(q.validity||'—')}</span></div>
+    <div class="qm-meta-item"><span class="qm-meta-label">BOQ Items</span><span class="qm-meta-val mono">${qCountItems(q)} items</span></div>
+    <div class="qm-meta-item"><span class="qm-meta-label">Quotes Received</span><span class="qm-meta-val mono">${respCount}</span></div>
+    <div class="qm-meta-item"><span class="qm-meta-label">Evaluated L1</span><span class="qm-meta-val" style="color:var(--green)">${l1Info}</span></div>
   </div></div>`;
+
   /* vendors */
-  h+=`<div class="qm-panel"><h3>Vendors (${q.vendors.length})</h3>`;
-  if(!q.vendors.length)h+=`<div style="color:var(--faint);font-size:13px;padding:8px 0">No vendors yet — add a vendor to generate their enquiry ID and secure link.</div>`;
-  q.vendors.forEach((v,vi)=>{
-    const rk=r.findIndex(x=>x.vi===vi);
-    const lch=hasQuote(v)&&rk>=0?`<span class="lchip l${Math.min(rk+1,5)}">L${rk+1}</span>`:'';
-    h+=`<div class="qm-vcard">
-      <span class="vno">${v.vno}</span>
-      <div><div class="vnm">${esc(v.name)} ${lch}</div><div class="vid">${esc(vendorId(q,v))}</div></div>
-      <div class="vsp"></div>
-      ${hasQuote(v)?`<div style="text-align:right;margin-right:6px"><div class="mono" style="color:var(--green);font-weight:600">${money(vendorBase(q,v))}</div><div style="font-size:9.5px;color:var(--faint)">base · incl GST ${money(vendorTotal(q,v))}</div></div>`:''}
-      ${stPill(v.status)}
-      ${q.cloud&&q.cloud.published?`<span class="qm-cloud-tag ${v.cloud&&v.cloud.lastSubTs?'live':''}">${v.cloud&&v.cloud.lastSubTs?'submitted online':'link live'}</span>`:''}
-      <button class="btn" style="font-size:11px" onclick="QM.openPortal('${q.id}','${v.vid}')">Open Portal</button>
-      ${q.cloud&&q.cloud.published?`<button class="btn green" style="font-size:11px" onclick="QM.openCloudLinks('${q.id}')">Share ☁</button>`:`<button class="btn" style="font-size:11px" onclick="QM.copyLink('${v.token}')">Copy Link</button>
-      <button class="btn green" style="font-size:11px" title="Share this vendor's secure link on WhatsApp" onclick="QM.shareWhatsAppPlain('${q.id}','${v.vid}')">WhatsApp</button>
-      <button class="btn" style="font-size:11px" title="Share this vendor's secure link by email" onclick="QM.shareEmailPlain('${q.id}','${v.vid}')">Email</button>`}
-      ${v.status==='draft'?`<button class="btn primary" style="font-size:11px" onclick="QM.sendVendor('${q.id}','${v.vid}')">Send</button>`:''}
-      ${hasQuote(v)&&v.status!=='approved'?`<button class="btn green" style="font-size:11px" onclick="QM.approve('${q.id}','${v.vid}')">Award L1</button>`:''}
-      <button class="btn" style="font-size:11px" title="OTP for the secure portal link" onclick="QM.editOtp('${q.id}','${v.vid}')">🔒 OTP${v.otpEnabled?' · '+v.otp:' off'}</button>
-      <button class="qm-irow-del" title="Remove vendor" onclick="QM.delVendor('${q.id}','${v.vid}')">×</button>
-    </div>`;
-    if(v.otpEnabled||v.pwEnabled||v.revisions.length){
-      h+=`<div style="font-size:10.5px;color:var(--faint);margin:2px 0 8px 6px;font-family:'Spline Sans Mono',monospace">
-        ${v.otpEnabled?'OTP: <b style="color:var(--accent2);cursor:pointer" title="Click to change" onclick="QM.editOtp(\''+q.id+'\',\''+v.vid+'\')">'+v.otp+'</b> · ':''}${v.pwEnabled?'Password protected · ':''}
-        ${v.sentTs?'sent '+dtt(v.sentTs)+' · ':''}${v.openedTs?'opened '+dtt(v.openedTs)+' · ':''}${v.submittedTs?'submitted '+dtt(v.submittedTs):''}
-        ${v.revisions.length?' · revs: '+v.revisions.length:''}${v.device?' · '+esc(v.device)+'/'+esc(v.browser):''}</div>`;
-    }
-    if(v.cloud&&(v.cloud.contractorName||v.cloud.mobile||v.cloud.quoteNo)){
-      const cl=v.cloud;
-      h+=`<div style="font-size:10.5px;color:var(--blue);margin:-4px 0 8px 6px;font-family:'Spline Sans Mono',monospace">
-        ☁ ${cl.contractorName?esc(cl.contractorName)+' · ':''}${cl.contact?esc(cl.contact)+' · ':''}${cl.mobile?esc(cl.mobile)+' · ':''}${cl.email?esc(cl.email)+' · ':''}${cl.gst?'GST '+esc(cl.gst)+' · ':''}${cl.quoteNo?'Quote# '+esc(cl.quoteNo):''}${cl.quoteDate?' ('+esc(cl.quoteDate)+')':''}</div>`;
-    }
-  });
-  h+=`</div>`;
+  h+=`<div class="qm-sec-card">
+    <div class="qm-sec-head">
+      <h3 class="qm-sec-title">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Invited Vendors (${q.vendors.length})
+      </h3>
+      <button class="btn primary" style="height:32px;font-size:11.5px" onclick="QM.addVendorPrompt('${q.id}')">+ Add Vendor</button>
+    </div>
+    <div class="qm-sec-body">`;
+  if(!q.vendors.length){
+    h+=`<div style="color:var(--faint);font-size:13px;padding:24px 0;text-align:center">No vendors invited yet — click "+ Add Vendor" to add contractors and generate secure portal links.</div>`;
+  } else {
+    h+=`<div class="qm-vendor-list">`;
+    q.vendors.forEach((v,vi)=>{
+      const rk=r.findIndex(x=>x.vi===vi);
+      const lch=hasQuote(v)&&rk>=0?`<span class="lchip l${Math.min(rk+1,5)}">L${rk+1}</span>`:'';
+      h+=`<div class="qm-vcard-new">
+        <div class="qm-vcard-row1">
+          <span class="qm-vcard-vno">${v.vno}</span>
+          <div class="qm-vcard-name">${esc(v.name)} ${lch} <span class="qm-vcard-id">(${esc(vendorId(q,v))})</span></div>
+          ${stPill(v.status)}
+          ${q.cloud&&q.cloud.published?`<span class="qm-cloud-tag ${v.cloud&&v.cloud.lastSubTs?'live':''}">${v.cloud&&v.cloud.lastSubTs?'submitted online':'link live'}</span>`:''}
+          ${hasQuote(v)?`<div class="qm-vcard-quote"><div class="base">${money(vendorBase(q,v))}</div><div class="sub">base · incl GST ${money(vendorTotal(q,v))}</div></div>`:''}
+        </div>
+        <div class="qm-vcard-actions">
+          <button class="btn" onclick="QM.openPortal('${q.id}','${v.vid}')"><svg viewBox="0 0 24 24" fill="none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>Open Portal</button>
+          ${q.cloud&&q.cloud.published?`<button class="btn green" onclick="QM.openCloudLinks('${q.id}')"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>Share ☁</button>`:`<button class="btn" onclick="QM.copyLink('${v.token}')"><svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy Link</button>
+          <button class="btn green" title="Share this vendor's secure link on WhatsApp" onclick="QM.shareWhatsAppPlain('${q.id}','${v.vid}')">WhatsApp</button>
+          <button class="btn" title="Share this vendor's secure link by email" onclick="QM.shareEmailPlain('${q.id}','${v.vid}')">Email</button>`}
+          ${v.status==='draft'?`<button class="btn primary" onclick="QM.sendVendor('${q.id}','${v.vid}')">Send</button>`:''}
+          ${hasQuote(v)&&v.status!=='approved'?`<button class="btn green" onclick="QM.approve('${q.id}','${v.vid}')"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5"/></svg>Award L1</button>`:''}
+          <button class="btn" title="OTP for the secure portal link" onclick="QM.editOtp('${q.id}','${v.vid}')">🔒 OTP${v.otpEnabled?' · '+v.otp:' off'}</button>
+          <div style="flex:1"></div>
+          <button class="qm-irow-del" title="Remove vendor" onclick="QM.delVendor('${q.id}','${v.vid}')">×</button>
+        </div>
+        ${(v.otpEnabled||v.pwEnabled||v.revisions.length||v.sentTs||v.openedTs||v.submittedTs)?`
+        <div class="qm-vcard-meta-foot">
+          ${v.otpEnabled?'OTP: <b style="color:var(--accent2);cursor:pointer" title="Click to change" onclick="QM.editOtp(\''+q.id+'\',\''+v.vid+'\')">'+v.otp+'</b> · ':''}${v.pwEnabled?'Password protected · ':''}
+          ${v.sentTs?'sent '+dtt(v.sentTs)+' · ':''}${v.openedTs?'opened '+dtt(v.openedTs)+' · ':''}${v.submittedTs?'submitted '+dtt(v.submittedTs):''}
+          ${v.revisions.length?' · revs: '+v.revisions.length:''}${v.device?' · '+esc(v.device)+'/'+esc(v.browser):''}
+        </div>`:''}
+        ${(v.cloud&&(v.cloud.contractorName||v.cloud.mobile||v.cloud.quoteNo))?`
+        <div class="qm-vcard-cloud-foot">
+          ☁ ${v.cloud.contractorName?esc(v.cloud.contractorName)+' · ':''}${v.cloud.contact?esc(v.cloud.contact)+' · ':''}${v.cloud.mobile?esc(v.cloud.mobile)+' · ':''}${v.cloud.email?esc(v.cloud.email)+' · ':''}${v.cloud.gst?'GST '+esc(v.cloud.gst)+' · ':''}${v.cloud.quoteNo?'Quote# '+esc(v.cloud.quoteNo):''}${v.cloud.quoteDate?' ('+esc(v.cloud.quoteDate)+')':''}
+        </div>`:''}
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  h+=`</div></div>`;
+
   /* items */
-  h+=`<div class="qm-panel"><h3>BOQ Items (${qCountItems(q)})</h3><div class="qm-scrollx"><table class="qm-tbl"><thead><tr><th>#</th><th>Description</th><th>Qty</th><th>UOM</th></tr></thead><tbody>`;
+  h+=`<div class="qm-sec-card">
+    <div class="qm-sec-head">
+      <h3 class="qm-sec-title">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+        BOQ Items (${qCountItems(q)})
+      </h3>
+    </div>
+    <div class="qm-scrollx" style="border:none;border-radius:0">
+      <table class="qm-tbl"><thead><tr><th style="width:60px">#</th><th>Description</th><th style="width:110px">Qty</th><th style="width:100px">UOM</th></tr></thead><tbody>`;
   const dNums=qNumbering(q.items);
   q.items.forEach((it,i)=>{
     const lv=it.level||0, indent=lv*14, num0=dNums[i]||'';
@@ -8442,7 +9019,21 @@ function renderDetail(m){
     }
   });
   h+=`</tbody></table></div></div>`;
-  if(q.versions&&q.versions.length){h+=`<div class="qm-panel"><h3>Version History (${q.versions.length})</h3><div class="qm-audit">`+q.versions.slice().reverse().map((vv,ri)=>{const idx=q.versions.length-1-ri;return `<div class="qm-aud"><b>v${vv.v}</b> — ${esc(vv.summary)} <span style="color:var(--faint)">by ${esc(vv.by)}</span> <button class="btn" style="font-size:10px;padding:2px 7px;margin-left:6px" onclick="QM.rollback('${q.id}',${idx})">Roll back</button><div class="at">${dtt(vv.ts)}</div></div>`;}).join('')+`</div></div>`;}
+
+  /* versions */
+  if(q.versions&&q.versions.length){
+    h+=`<div class="qm-sec-card">
+      <div class="qm-sec-head">
+        <h3 class="qm-sec-title">
+          <svg viewBox="0 0 24 24"><path d="M12 8v4l3 3M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg>
+          Version History (${q.versions.length})
+        </h3>
+      </div>
+      <div class="qm-sec-body">
+        <div class="qm-audit">`+q.versions.slice().reverse().map((vv,ri)=>{const idx=q.versions.length-1-ri;return `<div class="qm-aud"><b>v${vv.v}</b> — ${esc(vv.summary)} <span style="color:var(--faint)">by ${esc(vv.by)}</span> <button class="btn" style="font-size:10px;padding:2px 7px;margin-left:6px" onclick="QM.rollback('${q.id}',${idx})">Roll back</button><div class="at">${dtt(vv.ts)}</div></div>`;}).join('')+`</div>
+      </div>
+    </div>`;
+  }
   h+=`</div>`;
   m.innerHTML=h;
 }
@@ -8475,7 +9066,7 @@ function bindShortAutofill(ov){
   });
 }
 function openEditor(id){
-  if(id){const q=DB.quotations.find(x=>x.id===id);edit=JSON.parse(JSON.stringify(q));qMigrate(edit);}
+  if(id){const q=DB.quotations.find(x=>x.id===id);qEnsureIds(q);edit=JSON.parse(JSON.stringify(q));qMigrate(edit);}
   else edit={id:null,ref:'AAD',projectName:PROJREF.AAD,client:'',subject:'',date:today(),dueDate:'',validity:'30 days',terms:{},docs:[],items:[{id:uid(),short:'',desc:'',qty:1,uom:'',spec:'',drawing:'',type:'item',level:0}],vendors:[],notes:[]};
   let ov=$('#qmEditorOv');
   if(!ov){ov=document.createElement('div');ov.id='qmEditorOv';ov.className='modal-overlay';document.body.appendChild(ov);
@@ -8630,30 +9221,73 @@ function renderCS(m){
   const q=DB.quotations.find(x=>x.id===curId);syncLines(q);
   const vr=vendorRank(q);
   let h=`<div class="qm-wrap">
-    <div class="qm-sub">${esc(q.base)} · ${esc(q.projectName)} — item-wise L1–L5 ranking & rate analysis.</div>
-    <div class="qm-row">${pick}
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--dim)"><input type="checkbox" id="csGst" ${csGst?'checked':''}> Include GST in ranking</label>
-      <div style="flex:1"></div>
-      <button class="btn xbtn red" onclick="QM.exportCS('pdf')">PDF</button>
-      <button class="btn xbtn green" onclick="QM.exportCS('xls')">Excel</button>
-      <button class="btn xbtn" onclick="QM.exportCS('csv')">CSV</button>
-      <button class="btn" onclick="QM.exportCS('print')">Print</button>
+    <div class="qm-detail-top" style="margin-bottom:16px">
+      <div class="qm-detail-title-bar">
+        <div class="qm-detail-title-left">
+          <h2><svg viewBox="0 0 24 24" fill="none" style="width:24px;height:24px;stroke:var(--accent);stroke-width:2.2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Comparative Statement</h2>
+          <div class="qm-sub" style="margin:2px 0 0">${esc(q.base)} · ${esc(q.projectName)} — item-wise L1–L5 ranking &amp; rate variance analysis.</div>
+        </div>
+        <div class="qm-detail-actions">
+          <button class="btn xbtn red" onclick="QM.exportCS('pdf')"><svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>PDF</button>
+          <button class="btn xbtn green" onclick="QM.exportCS('xls')"><svg viewBox="0 0 24 24" fill="none"><path d="M14 3v4a1 1 0 0 0 1 1h4M7 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>Excel</button>
+          <button class="btn xbtn" onclick="QM.exportCS('csv')"><svg viewBox="0 0 24 24" fill="none"><path d="M14 3v4a1 1 0 0 0 1 1h4M7 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>CSV</button>
+          <button class="btn" onclick="QM.exportCS('print')"><svg viewBox="0 0 24 24" fill="none"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print</button>
+        </div>
+      </div>
+    </div>
+    <div class="qm-filter-card" style="padding:14px 18px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:260px">
+          <label style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--faint)">Select Enquiry</label>
+          ${pick}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding-top:18px">
+          <label style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer">
+            <input type="checkbox" id="csGst" ${csGst?'checked':''} style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer">
+            Include GST in ranking &amp; totals
+          </label>
+        </div>
+      </div>
     </div>`;
   if(!vr.length){h+=emptyBox('No quotes entered yet','Open a vendor portal to enter rates, then return here.');m.innerHTML=h+'</div>';bindCS(m);return;}
   /* savings summary (L1 · average · highest · savings ₹ / %) */
-  const _l1v=q.vendors[vr[0].vi],_l1t=vr[0].total,_hiT=vr[vr.length-1].total,_save=_hiT-_l1t,_savePct=_hiT?_save/_hiT*100:0,_avgT=vr.reduce((a,b)=>a+b.total,0)/vr.length;
-  const _tile=(lab,val,col)=>`<div style="flex:1;min-width:120px;padding:10px 14px;border-right:1px solid var(--line)"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:var(--faint);margin-bottom:3px">${lab}</div><div class="mono" style="font-size:15px;font-weight:600;color:${col||'var(--ink)'}">${val}</div></div>`;
-  h+=`<div class="qm-scrollx" style="margin:14px 0 4px;display:flex;flex-wrap:wrap;align-items:stretch">
-    ${_tile('L1 Vendor',esc(_l1v.name),'var(--green)')}
-    ${_tile('Lowest (L1)',money(_l1t),'var(--green)')}
-    ${_tile('Average',money(Math.round(_avgT)))}
-    ${_tile('Highest',money(_hiT),'var(--red)')}
-    <div style="flex:1;min-width:140px;padding:10px 14px;background:rgba(52,211,153,.08)"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.6px;color:var(--faint);margin-bottom:3px">Savings vs Highest</div><div class="mono" style="font-size:15px;font-weight:700;color:var(--green)">${money(_save)} <span style="font-size:12px">(${_savePct.toFixed(1)}%)</span></div></div>
+  /* Every figure on the ranking's own basis, and over complete bids only — a partial bid's lower
+     total is not a comparable price (falls back to all bids when nobody priced everything). */
+  const _cmp=vr.some(x=>!x.missing)?vr.filter(x=>!x.missing):vr;
+  const _l1v=q.vendors[vr[0].vi],_l1t=vr[0].val,_hiX=_cmp.reduce((a,b)=>b.val>a.val?b:a,_cmp[0]),_hiT=_hiX.val,_save=_hiT-_l1t,_savePct=_hiT?_save/_hiT*100:0,_avgT=_cmp.reduce((a,b)=>a+b.val,0)/_cmp.length,_basis=csGst?'incl. GST':'base quote',_partial=vr.filter(x=>x.missing);
+  h+=`<div class="qm-cards" style="margin-bottom:20px">
+    <div class="qm-w g">
+      <div class="wl"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>L1 Evaluated Vendor</div>
+      <div class="wn" style="font-size:20px;line-height:1.2;margin-top:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(_l1v.name)}">${esc(_l1v.name)}</div>
+      <div class="ws">${money(_l1t)} ${_basis}${vr[0].tie?' · <b style="color:var(--accent)">tied</b>':''}${vr[0].missing?' · <b style="color:var(--red)">partial bid</b>':''}</div>
+    </div>
+    <div class="qm-w g">
+      <div class="wl"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Lowest Bid (L1)</div>
+      <div class="wn">${money(_l1t)}</div>
+      <div class="ws">Best evaluated rate</div>
+    </div>
+    <div class="qm-w b">
+      <div class="wl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Market Average</div>
+      <div class="wn">${money(Math.round(_avgT))}</div>
+      <div class="ws">Across ${_cmp.length} ${_cmp===vr?'':'complete '}bid${_cmp.length>1?'s':''}</div>
+    </div>
+    <div class="qm-w r">
+      <div class="wl"><svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>Highest Bid</div>
+      <div class="wn">${money(_hiT)}</div>
+      <div class="ws">${esc(q.vendors[_hiX.vi].name)}</div>
+    </div>
+    <div class="qm-w a">
+      <div class="wl"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Max Savings</div>
+      <div class="wn">${money(_save)}</div>
+      <div class="ws">${_savePct.toFixed(1)}% savings vs highest</div>
+    </div>
   </div>`;
   /* ── Tender Insights (deterministic — no AI key needed) ── */
   (function(){
     const ins=[];
-    ins.push(`<b style="color:var(--green)">Recommendation:</b> Award to <b>${esc(_l1v.name)}</b> (L1) at ${money(_l1t)} — ${money(_save)} (${_savePct.toFixed(1)}%) below the highest bid.`);
+    ins.push(`<b style="color:var(--green)">Recommendation:</b> Award to <b>${esc(_l1v.name)}</b> (L1) at ${money(_l1t)} ${_basis} — ${money(_save)} (${_savePct.toFixed(1)}%) below the highest bid.`);
+    if(_partial.length)ins.push(`<b style="color:var(--red)">⚠ Incomplete bid${_partial.length>1?'s':''}:</b> ${_partial.map(x=>esc(q.vendors[x.vi].name)+' ('+x.missing+' item'+(x.missing>1?'s':'')+' unpriced)').join(', ')} — ranked after complete bids${vr[0].missing?'. <b>No vendor priced every item, so L1 is not a like-for-like comparison.</b>':'.'}`);
+    if(vr[0].tie){const _t=vr.filter(x=>x.tie&&(x.missing>0)===(vr[0].missing>0)&&Math.abs(x.val-vr[0].val)<0.005);ins.push(`<b style="color:var(--accent)">⚠ Tie at L1:</b> ${_t.map(x=>esc(q.vendors[x.vi].name)).join(' and ')} quoted the same total — decide on commercial terms / technical merit.`);}
     // outliers + missing rates across the BOQ
     let outHi=0,outLo=0,missing=0,priced=0;
     q.items.forEach((it,i)=>{
@@ -8669,13 +9303,22 @@ function renderCS(m){
     if(missing)ins.push(`<b>${missing} item${missing>1?'s have':' has'} no rate</b> from any vendor — comparison covers ${priced} priced item${priced>1?'s':''}.`);
     const spread=vr.length>=2?((vr[vr.length-1].total-vr[0].total)/(vr[0].total||1)*100):0;
     if(vr.length>=2)ins.push(`Bid spread L1→highest is <b>${spread.toFixed(1)}%</b> across ${vr.length} vendors.`);
-    h+=`<div style="margin:4px 0 6px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--panel2);padding:12px 16px">
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);font-weight:700;margin-bottom:8px">⚡ Tender Insights</div>
-      <ul style="margin:0;padding-left:18px;font-size:12px;color:var(--dim);line-height:1.7">${ins.map(x=>`<li>${x}</li>`).join('')}</ul>
+    h+=`<div style="margin-bottom:20px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;background:var(--panel);padding:16px 20px;box-shadow:0 1px 3px rgba(0,0,0,.04)">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+        <svg viewBox="0 0 24 24" fill="none" style="width:15px;height:15px;stroke:currentColor;stroke-width:2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Tender Insights &amp; Rate Analysis
+      </div>
+      <ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--dim);line-height:1.75">${ins.map(x=>`<li>${x}</li>`).join('')}</ul>
     </div>`;
   })();
   /* item-wise table */
-  h+=`<div class="qm-scrollx"><table class="qm-tbl"><thead><tr><th>#</th><th style="min-width:200px">Description</th><th>Qty</th><th>UOM</th>`;
+  h+=`<div class="qm-sec-card">
+    <div class="qm-sec-head">
+      <h3 class="qm-sec-title">
+        <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+        Item-wise Comparative Matrix (${qCountItems(q)} items)
+      </h3>
+    </div>
+    <div class="qm-scrollx" style="border:none;border-radius:0"><table class="qm-tbl"><thead><tr><th style="width:50px">#</th><th style="min-width:220px">Description</th><th style="width:90px">Qty</th><th style="width:80px">UOM</th>`;
   q.vendors.forEach((v,vi)=>{h+=`<th style="text-align:right">${esc(v.name)}<div style="font-size:9px;color:var(--faint);font-weight:500">${v.vno}</div></th>`;});
   h+=`<th>Low</th><th>High</th><th>Avg</th></tr></thead><tbody>`;
   const csNums=qNumbering(q.items);
@@ -8718,11 +9361,18 @@ function renderCS(m){
   q.vendors.forEach((v,vi)=>{const rk=vr.findIndex(x=>x.vi===vi);h+=`<td style="text-align:right" class="mono ${rk===0?'csbest':''}">${hasQuote(v)?money(vendorBase(q,v)):'—'} ${rk>=0?`<span class="lchip l${Math.min(rk+1,5)}">L${rk+1}</span>`:''}</td>`;});
   h+=`<td colspan="3"></td></tr>`;
   if(csGst){h+=`<tr style="cursor:default;background:var(--panel2)"><td></td><td>TOTAL (incl GST)</td><td></td><td></td>`;q.vendors.forEach(v=>{h+=`<td style="text-align:right" class="mono">${hasQuote(v)?money(vendorTotal(q,v)):'—'}</td>`;});h+=`<td colspan="3"></td></tr>`;}
-  h+=`</tbody></table></div>`;
+  h+=`</tbody></table></div></div>`;
   /* deviation */
-  const l1=q.vendors[vr[0].vi],l1t=vendorBase(q,l1);
-  h+=`<div class="qm-panel" style="margin-top:16px"><h3>Rate Deviation vs L1 (${esc(l1.name)})</h3><div class="qm-scrollx"><table class="qm-tbl"><thead><tr><th>Vendor</th><th>Base Total</th><th>Deviation ₹</th><th>Deviation %</th><th>Rank</th></tr></thead><tbody>`;
-  vr.forEach((x,k)=>{const v=q.vendors[x.vi];const dev=x.total-l1t;const pct=l1t?dev/l1t*100:0;h+=`<tr style="cursor:default"><td>${esc(v.name)}</td><td class="mono">${money(x.total)}</td><td class="mono qm-deviation ${dev>0?'up':'down'}">${dev>0?'+':''}${money(dev)}</td><td class="mono qm-deviation ${dev>0?'up':'down'}">${dev>0?'+':''}${pct.toFixed(1)}%</td><td><span class="lchip l${Math.min(k+1,5)}">L${k+1}</span></td></tr>`;});
+  const l1=q.vendors[vr[0].vi],l1t=vr[0].val;
+  h+=`<div class="qm-sec-card">
+    <div class="qm-sec-head">
+      <h3 class="qm-sec-title">
+        <svg viewBox="0 0 24 24"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+        Rate Deviation vs L1 (${esc(l1.name)})
+      </h3>
+    </div>
+    <div class="qm-scrollx" style="border:none;border-radius:0"><table class="qm-tbl"><thead><tr><th>Vendor</th><th>${csGst?'Total incl. GST':'Base Total'}</th><th>Deviation ₹</th><th>Deviation %</th><th>Rank</th></tr></thead><tbody>`;
+  vr.forEach((x,k)=>{const v=q.vendors[x.vi];const dev=x.val-l1t;const pct=l1t?dev/l1t*100:0;h+=`<tr style="cursor:default"><td>${esc(v.name)}${x.missing?' <span style="color:var(--red);font-size:10px">partial · '+x.missing+' unpriced</span>':''}</td><td class="mono">${money(x.val)}</td><td class="mono qm-deviation ${dev>0?'up':'down'}">${dev>0?'+':''}${money(dev)}</td><td class="mono qm-deviation ${dev>0?'up':'down'}">${dev>0?'+':''}${pct.toFixed(1)}%</td><td><span class="lchip l${Math.min(k+1,5)}">L${k+1}</span></td></tr>`;});
   h+=`</tbody></table></div></div>`;
   /* commercial comparison */
   h+=techTable(q);
@@ -8733,7 +9383,7 @@ function renderCS(m){
 function techTable(q){
   const cov=v=>{const quoted=v.lines.filter(l=>num(l.rate)>0).length;const tot=qCountItems(q);return tot?Math.round(quoted/tot*100)+'%':'—';};
   const rows=[['Compliance (items quoted)',cov],['Warranty / DLP',v=>v.commercial.warranty||'—'],['Delivery Schedule',v=>v.commercial.deliverySchedule||'—'],['Deviations / Remarks',v=>v.commercial.other||'—']];
-  let h=`<div class="qm-panel"><h3>Technical Comparison</h3><div class="qm-scrollx"><table class="qm-tbl"><thead><tr><th>Parameter</th>${q.vendors.map(v=>`<th>${esc(v.name)}</th>`).join('')}</tr></thead><tbody>`;
+  let h=`<div class="qm-sec-card"><div class="qm-sec-head"><h3 class="qm-sec-title"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Technical Comparison</h3></div><div class="qm-scrollx" style="border:none;border-radius:0"><table class="qm-tbl"><thead><tr><th>Parameter</th>${q.vendors.map(v=>`<th>${esc(v.name)}</th>`).join('')}</tr></thead><tbody>`;
   rows.forEach(([l,fn])=>{h+=`<tr style="cursor:default"><td style="font-weight:600;color:var(--dim)">${l}</td>${q.vendors.map(v=>`<td style="font-size:12px">${esc(String(fn(v)))}</td>`).join('')}</tr>`;});
   h+=`</tbody></table></div></div>`;return h;
 }
@@ -8748,7 +9398,7 @@ function commercialTable(q){
     if(!Array.isArray(v.commercial.custom))v.commercial.custom=[];
   });
   const fields=[['paymentTerms','Payment Terms'],['creditPeriod','Credit Period'],['deliverySchedule','Delivery Schedule'],['materialBaseRate','Material Base Rate'],['warranty','Warranty / DLP'],['validity','Validity'],['escalation','Escalation Clause'],['gstInclusion','GST']];
-  let h=`<div class="qm-panel"><h3>Commercial Comparison</h3><div class="qm-scrollx"><table class="qm-tbl"><thead><tr><th>Term</th><th>Client Requirement</th>${q.vendors.map(v=>`<th>${esc(v.name)}</th>`).join('')}</tr></thead><tbody>`;
+  let h=`<div class="qm-sec-card"><div class="qm-sec-head"><h3 class="qm-sec-title"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>Commercial Comparison</h3></div><div class="qm-scrollx" style="border:none;border-radius:0"><table class="qm-tbl"><thead><tr><th>Term</th><th>Client Requirement</th>${q.vendors.map(v=>`<th>${esc(v.name)}</th>`).join('')}</tr></thead><tbody>`;
   const ct=q.terms||{};
   fields.forEach(([k,l])=>{
     const clientVal=(ct[k]||'').trim();
@@ -8925,7 +9575,9 @@ function renderPortal(token,admin){
   if(!found){el.style.display='block';el.innerHTML=`<div class="vp"><div class="vp-gate"><h2>Link not found</h2><p>This enquiry link is invalid or was created in another browser. Vendor links work within the same browser/device where the enquiry was issued (client-side demo).</p><button class="btn primary" onclick="QM._exitPortal()">Back to app</button></div></div>`;document.querySelector('.app').style.display='none';return;}
   const {q,v}=found;
   /* expiry */
-  const expired=v.expiryDays&&v.sentTs&&now()>v.sentTs+v.expiryDays*864e5;
+  const linkExpired=v.expiryDays&&v.sentTs&&now()>v.sentTs+v.expiryDays*864e5;
+  const pastDue=!admin&&isExpired(q);
+  const expired=linkExpired||pastDue;
   /* mark opened */
   if(!admin&&v.status==='sent'){v.status='opened';v.openedTs=now();const d=detectDevice();v.device=d.dev;v.browser=d.br;audit(q,'Opened by vendor',{by:v.name});notify('open',v.name+' opened enquiry '+vendorId(q,v),q.id);saveDB();refreshBell();}
   portalCtx={q,v,admin,openedAt:now()};
@@ -8933,7 +9585,7 @@ function renderPortal(token,admin){
   /* gate: OTP / password */
   const verified=admin||v.otpVerified||sessionStorage.getItem('qm_v_'+v.token)==='1';
   if((v.otpEnabled||v.pwEnabled)&&!verified){renderGate(el,q,v);return;}
-  if(expired&&v.status!=='submitted'){el.innerHTML=portalShell(q,v,`<div class="vp-card"><div class="vp-lock" style="color:var(--red);background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.35)">⛔ This enquiry link expired on ${dt(v.sentTs+v.expiryDays*864e5)}. Please contact the issuer for an extension.</div></div>`);bindPortalNav();return;}
+  if(expired&&v.status!=='submitted'){el.innerHTML=portalShell(q,v,`<div class="vp-card"><div class="vp-lock" style="color:var(--red);background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.35)">⛔ ${pastDue?'The submission deadline for this enquiry ('+esc(q.dueDate)+') has passed.':'This enquiry link expired on '+dt(v.sentTs+v.expiryDays*864e5)+'.'} Please contact the issuer for an extension.</div></div>`);bindPortalNav();return;}
   if(v.locked&&v.status!=='draft'){renderLocked(el,q,v);return;}
   renderForm(el,q,v,admin);
 }
@@ -9139,7 +9791,7 @@ function renderLocked(el,q,v){
     <div class="vp-card"><h3>Your submitted quote</h3><div class="vp-meta">
       ${meta('Enquiry ID',vendorId(q,v))}${meta('Base Value',money(vendorBase(q,v)))}${meta('Incl. GST',money(vendorTotal(q,v)))}${meta('Items quoted',v.lines.filter(l=>num(l.rate)>0).length+'/'+qCountItems(q))}
     </div>
-    <div style="margin-top:18px"><button class="btn" onclick="QM._reviseOpen('${v.token}')">Submit a revision (R${v.rev+1})</button></div></div>
+    ${(portalCtx&&portalCtx.admin)||(v.status!=='approved'&&!isExpired(q))?`<div style="margin-top:18px"><button class="btn" onclick="QM._reviseOpen('${v.token}')">Submit a revision (R${v.rev+1})</button></div>`:`<div style="margin-top:14px;font-size:12px;color:var(--faint)">${v.status==='approved'?'This bid has been awarded — revisions are closed.':'The submission deadline has passed — revisions are closed.'}</div>`}</div>
   </div>`);
 }
 function renderForm(el,q,v,admin){
@@ -9226,26 +9878,39 @@ let _dt;function debSave(q,v){clearTimeout(_dt);_dt=setTimeout(()=>savePortal(q,
 function savePortal(q,v,silent){if(q&&q.__remote){v.updatedTs=now();remoteSaveDraft(q,v);return;}v.updatedTs=now();saveDB();if(silent){const ind=$('#vpSaveInd');if(ind){ind.classList.add('show');clearTimeout(ind._t);ind._t=setTimeout(()=>ind.classList.remove('show'),1500);}}}
 
 /* ════════════ VENDOR MASTER (centralized directory + history) ════════════ */
-function vmStats(name){
-  const key=(name||'').toLowerCase().trim();
-  let quotes=0,submitted=0,l1=0,l2=0,l3=0,wins=0,sumBase=0,nBase=0;
+function vmKey(n){return (n||'').toLowerCase().trim();}
+/* Bid history for every vendor name in ONE pass. Calling vendorRank for every quotation once per
+   vendor row (≈950 vendors) on every keystroke in the search box froze the page. */
+function vmStatsIndex(){
+  const idx=new Map();
+  const get=k=>{let s=idx.get(k);if(!s){s={quotes:0,submitted:0,l1:0,l2:0,l3:0,wins:0,sumBase:0,nBase:0,wos:0,woValue:0};idx.set(k,s);}return s;};
   DB.quotations.forEach(q=>{
-    const vr=vendorRank(q);
+    const vr=vendorRank(q);const pos=new Map(vr.map((x,k)=>[x.vi,k]));
     q.vendors.forEach((v,vi)=>{
-      if((v.name||'').toLowerCase().trim()!==key)return;
-      quotes++;
-      if(v.status==='submitted'||v.status==='approved')submitted++;
-      if(v.status==='approved')wins++;
-      const rk=vr.findIndex(x=>x.vi===vi);
-      if(rk===0)l1++; else if(rk===1)l2++; else if(rk===2)l3++;
-      if(hasQuote(v)){sumBase+=vendorBase(q,v);nBase++;}
+      const s=get(vmKey(v.name));
+      s.quotes++;
+      if(v.status==='submitted'||v.status==='approved')s.submitted++;
+      if(v.status==='approved')s.wins++;
+      const rk=pos.has(vi)?pos.get(vi):-1;
+      if(rk===0)s.l1++; else if(rk===1)s.l2++; else if(rk===2)s.l3++;
+      if(hasQuote(v)){s.sumBase+=vendorBase(q,v);s.nBase++;}
     });
   });
-  const wos=(DB.workOrders||[]).filter(w=>(w.vendorName||'').toLowerCase().trim()===key);
-  return {quotes,submitted,l1,l2,l3,wins,avgBase:nBase?sumBase/nBase:0,wos:wos.length,woValue:wos.reduce((a,w)=>a+(w.total||0),0)};
+  (DB.workOrders||[]).forEach(w=>{const s=get(vmKey(w.vendorName));s.wos++;s.woValue+=(w.total||0);});
+  return idx;
 }
+/* Enquiries and WOs keep the vendor name as it was when issued (deliberate — history is a
+   snapshot), so a renamed vendor's history is found through its former names (aliases). */
+function vmStatsOf(idx,v){
+  const t={quotes:0,submitted:0,l1:0,l2:0,l3:0,wins:0,sumBase:0,nBase:0,wos:0,woValue:0};
+  new Set([vmKey(v.name)].concat((v.aliases||[]).map(vmKey))).forEach(k=>{const s=idx.get(k);if(s)Object.keys(t).forEach(f=>t[f]+=s[f]);});
+  return {quotes:t.quotes,submitted:t.submitted,l1:t.l1,l2:t.l2,l3:t.l3,wins:t.wins,avgBase:t.nBase?t.sumBase/t.nBase:0,wos:t.wos,woValue:t.woValue};
+}
+function vmStats(name){return vmStatsOf(vmStatsIndex(),{name});}
 function vmSeed(){
-  const have=new Set((DB.vendorMaster||[]).map(v=>(v.name||'').toLowerCase().trim()));
+  /* Names already present, former names of renamed vendors, and vendors the user deleted — none of
+     these may be re-created from enquiry history (they used to reappear the moment they were removed). */
+  const have=new Set((DB.vendorMaster||[]).flatMap(v=>[v.name].concat(v.aliases||[])).concat(DB.vmIgnored||[]).map(vmKey));
   let added=0;
   // One-time bulk import of the full contractor directory (from "Vendor list.xlsx").
   // Runs once; afterwards the user is free to add/edit/delete without it being re-seeded.
@@ -9458,11 +10123,12 @@ function renderVendorMaster(m){
   vmSeed();
   const list=(DB.vendorMaster||[]).slice().sort((a,b)=>(a.name||'').localeCompare(b.name||''));
   const f=vmFilter.toLowerCase().trim();
-  const shown=f?list.filter(v=>((v.name||'')+(v.code||'')+(v.category||'')+(v.gst||'')).toLowerCase().includes(f)):list;
+  const shown=f?list.filter(v=>[v.name,v.code,v.category,v.gst].concat(v.aliases||[]).join(' ').toLowerCase().includes(f)):list;
+  const _vmIdx=vmStatsIndex();
   const cats=['','Civil','Structural','Architectural','Finishing','Electrical','Plumbing','Fire Fighting','HVAC','Infrastructure','Landscaping','Supply'];
   const star=(n,id)=>{let s='';for(let i=1;i<=5;i++)s+=`<span class="vmStar" onclick="QM._vmRate('${id}',${i})" style="cursor:pointer;color:${i<=n?'var(--accent2)':'var(--line)'};font-size:14px">★</span>`;return s;};
   let rows=shown.map(v=>{
-    const st=vmStats(v.name);
+    const st=vmStatsOf(_vmIdx,v);
     return `<tr>
       <td><input class="vmF" data-id="${v.id}" data-k="name" value="${esc(v.name||'')}" style="font-weight:600;min-width:140px"></td>
       <td><input class="vmF" data-id="${v.id}" data-k="code" value="${esc(v.code||'')}" placeholder="—" style="width:80px"></td>
@@ -9496,7 +10162,7 @@ function renderVendorMaster(m){
       <th style="text-align:center">Quotes</th><th style="text-align:center" title="Times ranked lowest">L1</th><th style="text-align:center">L2</th><th style="text-align:center">L3</th><th style="text-align:center">WOs</th><th style="text-align:right">Avg Bid</th><th></th>
     </tr></thead><tbody>${rows||`<tr><td colspan="15" style="text-align:center;padding:30px;color:var(--faint)">No vendors yet — add one, or create a enquiry with vendors.</td></tr>`}</tbody></table></div>
   </div>`;
-  const s=$('#vmSearch');if(s)s.addEventListener('input',e=>{vmFilter=e.target.value;const p=e.target.selectionStart;renderVendorMaster(m);const s2=$('#vmSearch');if(s2){s2.focus();s2.setSelectionRange(p,p);}});
+  const s=$('#vmSearch');if(s)s.addEventListener('input',e=>{vmFilter=e.target.value;clearTimeout(window._vmSearchT);window._vmSearchT=setTimeout(()=>{const s1=$('#vmSearch');const p=s1?s1.selectionStart:0;renderVendorMaster(m);const s2=$('#vmSearch');if(s2){s2.focus();s2.setSelectionRange(p,p);}},150);});
   m.querySelectorAll('.vmF').forEach(el=>el.addEventListener('change',e=>{
     const v=DB.vendorMaster.find(x=>x.id===e.target.dataset.id);if(!v)return;
     const k=e.target.dataset.k;
@@ -9506,13 +10172,13 @@ function renderVendorMaster(m){
       const g=_vmNormGSTIN(e.target.value);
       e.target.value=g;
       if(g!==_vmNormGSTIN(v.gst)){
-        v.gst=g;
         const dup=g?(DB.vendorMaster||[]).find(x=>x.id!==v.id&&_vmNormGSTIN(x.gst)===g):null;
         if(dup){
-          e.target.value=v.gst='';
+          e.target.value=v.gst||'';
           showToast('✕ GSTIN already exists — '+(dup.name||'another vendor'));
           renderVendorMaster(m);return;
         }
+        v.gst=g;
         _vmClearGstMeta(v);
         const derived=_vmPanFromGSTIN(g);
         if(derived)v.pan=derived; else if(g)v.pan='';
@@ -9522,7 +10188,15 @@ function renderVendorMaster(m){
       }
       return;
     }
-    v[k]=e.target.value;saveDB();showToast('✓ Saved');
+    const nv=(e.target.value||'').trim();
+    if(k==='name'){
+      if(!nv||(DB.vendorMaster||[]).some(x=>x.id!==v.id&&vmKey(x.name)===vmKey(nv))){e.target.value=v.name||'';showToast(nv?'✕ "'+nv+'" already exists in the vendor master':'✕ Vendor name is required');return;}
+      if(vmKey(nv)!==vmKey(v.name)&&v.name)v.aliases=(v.aliases||[]).concat([v.name]).filter((x,i,a)=>a.indexOf(x)===i);
+      v.name=nv;saveDB();renderVendorMaster(m);showToast('✓ Saved');return;
+    }
+    const bad=nv&&((k==='mobile'&&!_vmValidMobile(nv))||(k==='email'&&!_vmValidEmail(nv))||(k==='pan'&&!_vmValidPAN(nv.toUpperCase())));
+    if(bad){e.target.value=v[k]||'';showToast(k==='mobile'?'✕ Mobile must be 10 digits starting with 6-9':k==='email'?'✕ Invalid email address':'✕ PAN must be like ABCDE1234F');return;}
+    v[k]=k==='pan'?nv.toUpperCase():e.target.value;saveDB();showToast('✓ Saved');
   }));
 }
 
@@ -9887,12 +10561,14 @@ function _vmSaveForm(editId){
   /* format validations */
   if(mobile&&!_vmValidMobile(mobile)){msg.textContent='Mobile must be 10 digits starting with 6-9.';$('#vmFMobile').classList.add('vm-field-err');$('#vmFMobile').focus();return;}
   if(email&&!_vmValidEmail(email)){msg.textContent='Invalid email address.';$('#vmFEmail').classList.add('vm-field-err');$('#vmFEmail').focus();return;}
-  if(gst&&!_vmValidGSTIN(gst)){msg.textContent='Enter a valid 15-character GSTIN.';$('#vmFGST').classList.add('vm-field-err');$('#vmFGST').focus();return;}
+  const _prev=editId?(DB.vendorMaster||[]).find(x=>x.id===editId)||{}:{};
+  const gstChanged=gst!==_vmNormGSTIN(_prev.gst), panChanged=pan!==String(_prev.pan||'').trim().toUpperCase();
+  if(gst&&gstChanged&&!_vmValidGSTIN(gst)){msg.textContent='Enter a valid 15-character GSTIN.';$('#vmFGST').classList.add('vm-field-err');$('#vmFGST').focus();return;}
   if(pan&&!_vmValidPAN(pan)){msg.textContent='PAN must be 10 characters (e.g. ABCDE1234F).';$('#vmFPAN').classList.add('vm-field-err');$('#vmFPAN').focus();return;}
 
   /* GSTIN must not already belong to a different vendor. Compared on the
      normalised value so spacing/case can't sneak a duplicate through. */
-  if(gst){
+  if(gst&&gstChanged){
     const clash=(DB.vendorMaster||[]).find(x=>x.id!==editId&&_vmNormGSTIN(x.gst)===gst);
     if(clash){
       msg.textContent='GSTIN already exists in Vendor Master — '+(clash.name||'unnamed vendor')+(clash.code?' ('+clash.code+')':'')+'.';
@@ -9901,7 +10577,7 @@ function _vmSaveForm(editId){
   }
   /* The PAN is embedded in the GSTIN, so a mismatch means one of the two is
      wrong — saving both would leave the record self-contradictory. */
-  if(gst&&pan){
+  if(gst&&pan&&(gstChanged||panChanged)){
     const derived=_vmPanFromGSTIN(gst);
     if(derived&&pan!==derived){
       msg.textContent='PAN does not match this GSTIN. The GSTIN contains PAN '+derived+'.';
@@ -9960,6 +10636,7 @@ function _vmSaveForm(editId){
   if(editId){
     /* update existing */
     const v=DB.vendorMaster.find(x=>x.id===editId);
+    if(v&&v.name&&vmKey(v.name)!==vmKey(vendorData.name))vendorData.aliases=(v.aliases||[]).concat([v.name]).filter((x,i,a)=>a.indexOf(x)===i);
     if(v)Object.assign(v,vendorData);
   }else{
     /* create new */
@@ -9975,7 +10652,19 @@ function _vmSaveForm(editId){
 
 /* ════════════ APPROVAL WORKFLOW (QS → Sr QS → PM → Commercial → Management) ════════════ */
 const APPR_STAGES=['QS Engineer','Senior QS','Project Manager','Commercial Head','Management'];
-function apprState(q){ if(!q.approval)q.approval={stage:0,status:'pending',history:[]}; return q.approval; }
+/* Fingerprint of what an approval signs off: quantities, rates, GST and the awarded vendor. */
+function apprBasis(q){try{return window.TSSyncMerge?TSSyncMerge.hash({i:q.items.map(it=>[it.id,it.type,num(it.qty)]),v:q.vendors.map(v=>[v.vid,v.status==='approved'?1:0,(v.lines||[]).map(l=>[num(l.rate),num(l.gst)])])}):'';}catch(e){return '';}}
+function apprState(q){ if(!q.approval)q.approval={stage:0,status:'pending',history:[]};
+  const a=q.approval;
+  /* Sign-off is given on specific figures. If quantities, rates or the award changed after approval
+     began, the earlier approvals no longer cover them: restart from stage 1, keeping the history. */
+  if(a.basis&&(a.stage>0||a.status!=='pending')&&a.basis!==apprBasis(q)){
+    a.history=(a.history||[]).concat([{stage:APPR_STAGES[a.stage]||'—',action:'reset',by:'System',comment:'Quantities, rates or award changed after approval began — re-approval required',ts:now()}]);
+    a.stage=0;a.status='pending';a.basis='';
+    audit(q,'Approval restarted',{by:'System',txt:'figures changed after approval began'});
+    setTimeout(saveDB,0);
+  }
+  return a; }
 function apprEligible(q){ return q.vendors&&q.vendors.some(v=>hasQuote(v)); }
 function renderApprovals(m){
   const qs=DB.quotations.filter(apprEligible).sort((a,b)=>b.createdTs-a.createdTs);
@@ -9988,7 +10677,7 @@ function renderApprovals(m){
   let cards=qs.map(q=>{
     const a=apprState(q);const vr=vendorRank(q);const l1=vr.length?q.vendors[vr[0].vi]:null;
     const statusTag=a.status==='approved'?'<span style="color:var(--green);font-weight:700">✓ Fully Approved</span>':a.status==='rejected'?'<span style="color:var(--red);font-weight:700">✕ Rejected at '+esc(APPR_STAGES[a.stage])+'</span>':'<span style="color:var(--accent)">Pending: '+esc(APPR_STAGES[a.stage])+'</span>';
-    const hist=(a.history||[]).map(h=>`<div style="font-size:11px;color:var(--dim);padding:3px 0;border-bottom:1px solid var(--line2)"><b style="color:${h.action==='approved'?'var(--green)':'var(--red)'}">${h.action==='approved'?'✓':'✕'} ${esc(h.stage)}</b> — ${esc(h.by)} · ${dtt(h.ts)}${h.comment?' · "'+esc(h.comment)+'"':''}</div>`).join('');
+    const hist=(a.history||[]).map(h=>`<div style="font-size:11px;color:var(--dim);padding:3px 0;border-bottom:1px solid var(--line2)"><b style="color:${h.action==='approved'?'var(--green)':h.action==='reset'?'var(--accent)':'var(--red)'}">${h.action==='approved'?'✓':h.action==='reset'?'↻':'✕'} ${esc(h.stage)}</b> — ${esc(h.by)} · ${dtt(h.ts)}${h.comment?' · "'+esc(h.comment)+'"':''}</div>`).join('');
     const canAct=a.status==='pending';
     const woExists=(DB.workOrders||[]).some(w=>w.qid===q.id);
     return `<div class="qm-vcard" style="display:block;padding:16px 18px;margin-bottom:14px">
@@ -10010,13 +10699,21 @@ function renderApprovals(m){
 function woNumber(q){
   const proj=(q.ref||'PRJ').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6)||'PRJ';
   const yr=new Date().getFullYear();
-  const n=(DB.workOrders||[]).filter(w=>(w.no||'').includes('/'+proj+'/'+yr+'/')).length+1;
-  return 'WO/'+proj+'/'+yr+'/'+String(n).padStart(3,'0');
+  /* Monotonic per project+year: counting existing WOs re-issued a number after any deletion. */
+  const key='WO/'+proj+'/'+yr;
+  const used=(DB.workOrders||[]).map(w=>w.no||'').filter(x=>x.indexOf(key+'/')===0).map(x=>parseInt(x.slice(key.length+1),10)||0);
+  DB.seq=DB.seq||{};const n=Math.max(DB.seq[key]||0,0,...used)+1;DB.seq[key]=n;
+  return key+'/'+String(n).padStart(3,'0');
 }
 function woGenerate(qid){
   const q=DB.quotations.find(x=>x.id===qid);if(!q)return;
+  if(apprState(q).status!=='approved'){alert('This enquiry is not fully approved — complete the approval workflow first.');return;}
+  if((DB.workOrders||[]).some(w=>w.qid===q.id)){alert('A Work Order has already been issued for this enquiry.');return;}
   const vr=vendorRank(q);if(!vr.length){alert('No vendor quotes to award.');return;}
-  const v=q.vendors[vr[0].vi];
+  /* The vendor management awarded, if any — not whoever happens to be L1 right now. */
+  const awarded=q.vendors.find(x=>x.status==='approved');
+  const v=awarded||q.vendors[vr[0].vi];
+  if(!awarded&&vr[0].missing&&!confirm(v.name+' left '+vr[0].missing+' item(s) unpriced and no vendor priced every item.\n\nIssue the Work Order to '+v.name+' anyway?'))return;
   const base=vendorBase(q,v),total=vendorTotal(q,v),gst=total-base;
   const wo={id:uid(),no:woNumber(q),qid:q.id,vendorName:v.name,project:q.projectName,ref:q.ref,
     base,gst,total,status:'Issued',ts:now(),
@@ -10090,11 +10787,11 @@ function woPdf(id){
   showToast('📄 '+w.no+' exported');
 }
 
-function filterStatus(s){listFilter={q:'',ref:'',status:s};section='list';curId=null;render();const mm=$('#qmMain');if(mm)mm.scrollTop=0;}
+function filterStatus(s){listFilter={q:'',ref:'',status:s,page:1,pageSize:listFilter.pageSize||10};section='list';curId=null;render();const mm=$('#qmMain');if(mm)mm.scrollTop=0;}
 function snapshot(q){return {ref:q.ref,projectName:q.projectName,client:q.client,subject:q.subject,date:q.date,dueDate:q.dueDate,validity:q.validity,items:JSON.parse(JSON.stringify(q.items))};}
 function diffSummary(o,q){const ch=[];[['projectName','Project'],['client','Client'],['subject','Subject'],['date','Date'],['dueDate','Due'],['validity','Validity']].forEach(([k,l])=>{if(o[k]!==q[k])ch.push(l);});if(o.items.length!==q.items.length)ch.push('items '+o.items.length+'→'+q.items.length);else{let n=0;q.items.forEach((it,i)=>{const oo=o.items[i];if(!oo||oo.desc!==it.desc||oo.qty!==it.qty||oo.uom!==it.uom)n++;});if(n)ch.push(n+' item(s) changed');}return ch.join(', ')||'minor edit';}
 function pushVersion(q,summary,snap){q.versions=q.versions||[];q.versions.push({v:q.versions.length+1,ts:now(),by:'Admin',summary,snapshot:snap});}
-function rollback(qid,idx){const q=DB.quotations.find(x=>x.id===qid);if(!q||!q.versions[idx])return;if(!confirm('Roll back to version '+(idx+1)+'? The current state is kept as a new version.'))return;const cur=snapshot(q);const snap=q.versions[idx].snapshot;Object.assign(q,{ref:snap.ref,projectName:snap.projectName,client:snap.client,subject:snap.subject,date:snap.date,dueDate:snap.dueDate,validity:snap.validity,items:JSON.parse(JSON.stringify(snap.items))});syncLines(q);pushVersion(q,'Rolled back to v'+(idx+1),cur);audit(q,'Rolled back to v'+(idx+1));saveDB();render();showToast('Rolled back to v'+(idx+1));}
+function rollback(qid,idx){const q=DB.quotations.find(x=>x.id===qid);if(!q||!q.versions[idx])return;if(!confirm('Roll back to version '+(idx+1)+'? The current state is kept as a new version.'))return;const cur=snapshot(q);const snap=q.versions[idx].snapshot;const items=JSON.parse(JSON.stringify(snap.items));remapLines(q,items);Object.assign(q,{ref:snap.ref,projectName:snap.projectName,client:snap.client,subject:snap.subject,date:snap.date,dueDate:snap.dueDate,validity:snap.validity,items});qEnsureIds(q);syncLines(q);pushVersion(q,'Rolled back to v'+(idx+1),cur);audit(q,'Rolled back to v'+(idx+1));saveDB();render();showToast('Rolled back to v'+(idx+1));}
 function deleteQ(id){const i=DB.quotations.findIndex(x=>x.id===id);if(i<0)return;const q=DB.quotations[i];if(!confirm('Are you sure you want to delete enquiry '+q.base+'?\n\nIt will be moved to Deleted Enquiries and can be restored.'))return;const reason=prompt('Reason for deletion (optional):')||'';q.delBy='Admin';q.delTs=now();q.delReason=reason;audit(q,'Enquiry deleted',{txt:reason||'no reason given'});DB.deleted.unshift(q);DB.quotations.splice(i,1);if(curId===id)curId=null;saveDB();render();showToast('Moved to Deleted Enquiries');}
 function restoreQ(id){const i=(DB.deleted||[]).findIndex(x=>x.id===id);if(i<0)return;const q=DB.deleted[i];delete q.delBy;delete q.delTs;delete q.delReason;audit(q,'Enquiry restored');DB.deleted.splice(i,1);DB.quotations.push(q);saveDB();render();showToast('Restored '+q.base);}
 function permDelete(id){const i=(DB.deleted||[]).findIndex(x=>x.id===id);if(i<0)return;if(!confirm('Permanently delete this enquiry? This cannot be undone.'))return;DB.deleted.splice(i,1);saveDB();render();showToast('Permanently deleted');}
@@ -10197,7 +10894,7 @@ async function cloudPublish(qid){
   if(!q.dueDate&&!confirm('No submission deadline is set for this RFQ.\nContractors will be able to submit any time.\n\nOK = publish anyway · Cancel = set a deadline first'))return;
   showToast('☁ Publishing…');
   const payload={action:'publish',qid:q.id,base:q.base,project:q.projectName,client:q.client||'',subject:q.subject||'',dueDate:q.dueDate||'',validity:q.validity||'',
-    items:q.items.map(it=>({desc:it.desc||'',short:it.short||'',qty:num(it.qty)||0,uom:it.uom||'',type:it.type||'item',level:it.level||0})),
+    items:q.items.map(it=>({id:it.id,desc:it.desc||'',short:it.short||'',qty:num(it.qty)||0,uom:it.uom||'',type:it.type||'item',level:it.level||0})),
     vendors:q.vendors.map(v=>({token:v.token,name:v.name,vno:v.vno}))};
   try{
     const r=await cloudPost(payload);
@@ -10243,7 +10940,10 @@ function mergeSubmission(s){
   if(!isChanged)return false;
   // map per-item rates (use net rate so discount is reflected in comparison)
   syncLines(q);
-  (s.items||[]).forEach((it,i)=>{if(!v.lines[i])v.lines[i]=lineFor();v.lines[i].rate=(it.net!=null?it.net:it.rate)||'';v.lines[i].gst=(it.tax!=null?it.tax:18);});
+  /* By item id when the form echoes it (items edited after publishing must not shift rates);
+     by position only for submissions that carry no id. An id no longer in the enquiry is skipped. */
+  const _pos={};q.items.forEach((x,k)=>{if(x&&x.id!=null)_pos[x.id]=k;});
+  (s.items||[]).forEach((it,i)=>{const k=(it&&it.id!=null)?(_pos[it.id]!=null?_pos[it.id]:-1):i;if(k<0)return;if(!v.lines[k])v.lines[k]=lineFor();v.lines[k].rate=(it.net!=null?it.net:it.rate)||'';v.lines[k].gst=(it.tax!=null?it.tax:18);});
   // commercial mapping
   const c=s.commercial||{};
   Object.keys(CLOUD_COMM_MAP).forEach(k=>{if(c[k])v.commercial[CLOUD_COMM_MAP[k]]=c[k];});
@@ -10439,7 +11139,8 @@ const api={
       }))
     };
   },
-  openQ,editQ(id){openEditor(id);},
+  openQ,openEditor,editQ(id){openEditor(id);},
+  _applyListFilters:applyListFilters,_resetListFilters:resetListFilters,_sortList:sortList,_setListPage:setListPage,_setPageSize:setPageSize,
   _closeEditor(){$('#qmEditorOv').classList.remove('on');},
   _addItem(){_collect();edit.items.push({id:uid(),type:'item',level:0,short:'',desc:'',qty:1,uom:'',spec:'',drawing:''});qNormalizeLevels(edit.items);renderEditor($('#qmEditorOv'));},
   _addHeader(){_collect();edit.items.push({id:uid(),type:'header',level:0,short:'',desc:'',qty:0,uom:'',spec:'',drawing:''});qNormalizeLevels(edit.items);renderEditor($('#qmEditorOv'));},
@@ -10499,7 +11200,7 @@ const api={
     edit.items=edit.items.filter(it=>qIsSection(it)?((it.short||'').trim()||(it.desc||'').trim()):(qIsNote(it)?(it.desc||'').trim():((it.desc||'').trim()||(it.short||'').trim())));
     qNormalizeLevels(edit.items);
     if(!edit.items.some(qQuotable)){alert('Add at least one line item (with a description).');return;}
-    if(edit.id){const q=DB.quotations.find(x=>x.id===edit.id);const oldS=snapshot(q);Object.assign(q,{ref:edit.ref,projectName:edit.projectName,client:edit.client,subject:edit.subject,date:edit.date,dueDate:edit.dueDate,validity:edit.validity,terms:edit.terms||{},docs:edit.docs||[],items:edit.items});syncLines(q);const summary=diffSummary(oldS,q);pushVersion(q,summary,oldS);audit(q,'Enquiry edited',{txt:summary});showToast('Saved · '+summary);}
+    if(edit.id){const q=DB.quotations.find(x=>x.id===edit.id);const oldS=snapshot(q);remapLines(q,edit.items);Object.assign(q,{ref:edit.ref,projectName:edit.projectName,client:edit.client,subject:edit.subject,date:edit.date,dueDate:edit.dueDate,validity:edit.validity,terms:edit.terms||{},docs:edit.docs||[],items:edit.items});syncLines(q);const summary=diffSummary(oldS,q);pushVersion(q,summary,oldS);audit(q,'Enquiry edited',{txt:summary});showToast('Saved · '+summary);}
     else{
       const dup=DB.quotations.find(x=>x.projectName.toLowerCase().trim()===edit.projectName.toLowerCase().trim()&&(x.subject||'').toLowerCase().trim()===(edit.subject||'').toLowerCase().trim()&&edit.subject);
       if(dup){if(confirm('⚠ A similar enquiry already exists:\n'+dup.base+' — '+dup.projectName+'\n\nOK = open the existing one  ·  Cancel = continue creating a new one')){$('#qmEditorOv').classList.remove('on');openQ(dup.id);return;}}
@@ -10541,7 +11242,7 @@ const api={
   _addCustom(){const l=$('#vpNewCustL').value.trim();const val=$('#vpNewCustV').value.trim();if(!l)return;portalCtx.v.commercial.custom.push({label:l,value:val});savePortal(portalCtx.q,portalCtx.v,true);renderForm($('#qmPortal'),portalCtx.q,portalCtx.v,portalCtx.admin);},
   _delCustom(ci){portalCtx.v.commercial.custom.splice(ci,1);savePortal(portalCtx.q,portalCtx.v,true);renderForm($('#qmPortal'),portalCtx.q,portalCtx.v,portalCtx.admin);},
   _delFile(ai){portalCtx.v.attachments.splice(ai,1);savePortal(portalCtx.q,portalCtx.v,true);renderForm($('#qmPortal'),portalCtx.q,portalCtx.v,portalCtx.admin);},
-  _reviseOpen(token){const f=findByToken(token);f.v.rev++;f.v.locked=false;f.v.status='opened';saveDB();renderPortal(token,portalCtx&&portalCtx.admin);},
+  _reviseOpen(token){const f=findByToken(token);if(!f)return;if(!(portalCtx&&portalCtx.admin)&&(f.v.status==='approved'||isExpired(f.q))){alert('Revisions are closed for this enquiry.');return;}f.v.rev++;f.v.locked=false;f.v.status='opened';saveDB();renderPortal(token,portalCtx&&portalCtx.admin);},
   _submitVendor(token){
     const f=findByToken(token);const {q,v}=f;
     if(!hasQuote(v)){alert('Enter at least one unit rate before submitting.');return;}
@@ -10561,8 +11262,7 @@ const api={
   },
   _markAllRead(){DB.notifications.forEach(n=>n.read=true);saveDB();refreshBell();render();},
   /* exports */
-  exportList(fmt){const rows=DB.quotations.map(q=>{const r=vendorRank(q);const l1=r.length?q.vendors[r[0].vi]:null;return [q.base,q.projectName,PROJREF[q.ref]||q.ref,q.subject,q.client,q.vendors.length,l1?l1.name:'',l1?vendorBase(q,l1):'',q.dueDate,qStatus(q)];});
-    const head=['Enquiry No','Project','Ref','Subject','Client','Vendors','L1 Vendor','L1 Base','Due','Status'];exportTable(fmt,head,rows,'Enquiries');},
+  exportList,
   exportCS(fmt){const q=DB.quotations.find(x=>x.id===curId);csExport(q,fmt);},
   exportBid(fmt){const q=DB.quotations.find(x=>x.id===curId);bidExport(q,fmt);},
   exportQ(qid){rfqPdf(DB.quotations.find(x=>x.id===qid));},
@@ -10570,14 +11270,14 @@ const api={
   /* vendor master / approvals / work orders */
   _vmAdd(){openVendorForm();},
   _vmEdit(id){openVendorForm(id);},
-  _vmDel(id){if(!confirm('Remove this vendor from the master directory? (Enquiry history is not affected.)'))return;DB.vendorMaster=DB.vendorMaster.filter(v=>v.id!==id);saveDB();render();showToast('Vendor removed');},
+  _vmDel(id){if(!confirm('Remove this vendor from the master directory? (Enquiry history is not affected.)'))return;const _d=DB.vendorMaster.find(v=>v.id===id);if(_d)DB.vmIgnored=(DB.vmIgnored||[]).concat([_d.name].concat(_d.aliases||[]).map(vmKey)).filter((x,i,a)=>x&&a.indexOf(x)===i);DB.vendorMaster=DB.vendorMaster.filter(v=>v.id!==id);saveDB();render();showToast('Vendor removed');},
   _vmRate(id,n){const v=DB.vendorMaster.find(x=>x.id===id);if(v){v.rating=(v.rating===n?n-1:n);saveDB();render();}},
   _vmTemplate(){vmtplDownload();},
   _vmImport(){vmtplUpload();},
   _vmVerifyGST(force){_vmVerifyGST(force);},
   _vmVerifyAllGst(){_vmVerifyAllGst();},
   _vmSaveForm(editId){_vmSaveForm(editId);},
-  _apprAct(qid,action){const q=DB.quotations.find(x=>x.id===qid);if(!q)return;const a=apprState(q);const comment=prompt((action==='approved'?'Approve':'Reject')+' at "'+APPR_STAGES[a.stage]+'" — comment (optional):')||'';a.history=a.history||[];a.history.push({stage:APPR_STAGES[a.stage],action,by:'Admin',comment,ts:now()});if(action==='rejected'){a.status='rejected';audit(q,'Approval rejected',{txt:APPR_STAGES[a.stage]+(comment?' — '+comment:'')});}else{audit(q,'Approved',{txt:APPR_STAGES[a.stage]});if(a.stage>=APPR_STAGES.length-1){a.status='approved';notify('approved','Enquiry '+q.base+' fully approved — ready for Work Order.',q.id);}else{a.stage++;}}saveDB();render();showToast(action==='approved'?'✓ Approved — '+(a.status==='approved'?'fully signed off':'advanced to '+APPR_STAGES[a.stage]):'✕ Rejected');},
+  _apprAct(qid,action){const q=DB.quotations.find(x=>x.id===qid);if(!q)return;const a=apprState(q);const comment=prompt((action==='approved'?'Approve':'Reject')+' at "'+APPR_STAGES[a.stage]+'" — comment (optional):')||'';a.history=a.history||[];a.history.push({stage:APPR_STAGES[a.stage],action,by:curUser(),comment,ts:now()});if(action==='approved')a.basis=apprBasis(q);if(action==='rejected'){a.status='rejected';audit(q,'Approval rejected',{txt:APPR_STAGES[a.stage]+(comment?' — '+comment:'')});}else{audit(q,'Approved',{txt:APPR_STAGES[a.stage]});if(a.stage>=APPR_STAGES.length-1){a.status='approved';notify('approved','Enquiry '+q.base+' fully approved — ready for Work Order.',q.id);}else{a.stage++;}}saveDB();render();showToast(action==='approved'?'✓ Approved — '+(a.status==='approved'?'fully signed off':'advanced to '+APPR_STAGES[a.stage]):'✕ Rejected');},
   _apprReset(qid){const q=DB.quotations.find(x=>x.id===qid);if(!q)return;if(!confirm('Restart the approval workflow from stage 1?'))return;q.approval={stage:0,status:'pending',history:(q.approval&&q.approval.history)||[]};saveDB();render();showToast('↻ Approval restarted');},
   _woGen(qid){woGenerate(qid);},
   _woPdf(id){woPdf(id);},
@@ -10633,8 +11333,9 @@ function csExport(q,fmt){
   const rs=n=>'Rs. '+inr(n);
   const V=q.vendors;
   /* summary metrics (same as screen) */
-  const l1v=V[vr[0].vi], l1t=vr[0].total, hiT=vr[vr.length-1].total,
-        save=hiT-l1t, savePct=hiT?save/hiT*100:0, avgT=vr.reduce((a,b)=>a+b.total,0)/vr.length;
+  const cmp=vr.some(x=>!x.missing)?vr.filter(x=>!x.missing):vr;
+  const l1v=V[vr[0].vi], l1t=vr[0].val, hiT=cmp.reduce((a,b)=>Math.max(a,b.val),0),
+        save=hiT-l1t, savePct=hiT?save/hiT*100:0, avgT=cmp.reduce((a,b)=>a+b.val,0)/cmp.length;
   /* page chrome (slim band on continuation pages + footer line) */
   const drawChrome=()=>{
     const pn=doc.internal.getCurrentPageInfo().pageNumber;
@@ -10731,11 +11432,11 @@ function csExport(q,fmt){
   T({startY:ty,head:itHead,body,styles:{fontSize:6.6,cellPadding:1.3,overflow:'linebreak',valign:'top',lineColor:LINE,lineWidth:0.1,textColor:[45,50,58]},
     headStyles:{fillColor:INK,textColor:255,fontStyle:'bold',fontSize:6.8,valign:'middle'},columnStyles:colStyles});
   /* 4 — rate deviation vs L1 */
-  const l1base=vendorBase(q,V[vr[0].vi]);
+  const l1base=vr[0].val;
   let dy=sec('Rate Deviation vs L1  ('+l1v.name+')');
-  T({startY:dy,head:[['Vendor','Base Total','Deviation Rs.','Deviation %','Rank']],
-    body:vr.map((x,k)=>{const v=V[x.vi];const dev=x.total-l1base;const pct=l1base?dev/l1base*100:0;
-      return [v.name,{content:rs(x.total),styles:{halign:'right'}},{content:(dev>0?'+':'')+rs(dev),styles:{halign:'right',textColor:dev>0?RED:GREEN}},{content:(dev>0?'+':'')+pct.toFixed(1)+'%',styles:{halign:'right',textColor:dev>0?RED:GREEN}},{content:'L'+(k+1),styles:{halign:'center',fontStyle:'bold'}}];}),
+  T({startY:dy,head:[['Vendor',csGst?'Total incl. GST':'Base Total','Deviation Rs.','Deviation %','Rank']],
+    body:vr.map((x,k)=>{const v=V[x.vi];const dev=x.val-l1base;const pct=l1base?dev/l1base*100:0;
+      return [v.name+(x.missing?'  (partial: '+x.missing+' unpriced)':''),{content:rs(x.val),styles:{halign:'right'}},{content:(dev>0?'+':'')+rs(dev),styles:{halign:'right',textColor:dev>0?RED:GREEN}},{content:(dev>0?'+':'')+pct.toFixed(1)+'%',styles:{halign:'right',textColor:dev>0?RED:GREEN}},{content:'L'+(k+1),styles:{halign:'center',fontStyle:'bold'}}];}),
     styles:{fontSize:7.6,cellPadding:1.8,lineColor:LINE,lineWidth:0.1},columnStyles:{0:{fontStyle:'bold'}}});
   /* 5 — technical comparison */
   const cov=v=>{const quoted=v.lines.filter(l=>num(l.rate)>0).length;const tot=qCountItems(q);return tot?Math.round(quoted/tot*100)+'%':'—';};
@@ -11952,9 +12653,12 @@ return api;
       if(b.dataset.sb===key) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
     });
     var head=el('pwsHead'); if(!head) return;
-    el('pwsCrumb').innerHTML='<span><b>Primarc</b></span><i>/</i><span>'+esc(meta.group)+'</span><i>/</i><span><b>'+esc(meta.label)+'</b></span>';
-    el('pwsTitle').textContent=meta.label||'';
-    el('pwsDesc').textContent=DESC[key]||'';
+    var crumb=el('pwsCrumb');
+    if(crumb) crumb.innerHTML='<span class="pws-c-brand">Primarc</span><i class="pws-c-sep">/</i><span class="pws-c-grp">'+esc(meta.group||'Workspace')+'</span>';
+    var t=el('pwsTitle'); if(t) t.textContent=meta.label||'';
+    var d=DESC[key]||'';
+    var descEl=el('pwsDesc'); if(descEl) descEl.textContent=d;
+    var dSep=el('pwsDescSep'); if(dSep) dSep.style.display=d?'':'none';
     /* The dashboard carries its own title block, so the shared header is
        hidden there rather than showing two titles. */
     var view=document.querySelector('.view.on');
@@ -11993,11 +12697,18 @@ return api;
     if(!app()) return;
     build();
 
-    /* Workspace header, moved into whichever view is active by paint(). */
+    /* Workspace header, positioned by grid row 2 under topbar. */
     var head=document.createElement('div');
     head.className='pws-head'; head.id='pwsHead';
-    head.innerHTML='<div class="pws-l"><div class="pws-crumb" id="pwsCrumb"></div>'
-      + '<h2 id="pwsTitle"></h2><p class="pws-desc" id="pwsDesc"></p></div>'
+    head.innerHTML='<div class="pws-l">'
+      + '<nav class="pws-nav" aria-label="Breadcrumb">'
+      + '<span class="pws-crumb" id="pwsCrumb"></span>'
+      + '<i class="pws-crumb-sep">/</i>'
+      + '<h2 class="pws-title" id="pwsTitle"></h2>'
+      + '</nav>'
+      + '<span class="pws-desc-sep" id="pwsDescSep">•</span>'
+      + '<p class="pws-desc" id="pwsDesc"></p>'
+      + '</div>'
       + '<div class="pws-r" id="pwsActions"></div>';
     /* Child of .app, positioned by grid. It must NOT live inside a view:
        a view that re-renders its innerHTML would delete it. */

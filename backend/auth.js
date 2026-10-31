@@ -185,11 +185,15 @@ export async function login(env, request, identifier, password) {
 
   const ok = await verifyPassword(password, row.password_hash);
   if (!ok) {
-    const failed = (row.failed_attempts || 0) + 1;
-    const lock = failed >= MAX_FAILED;
-    await env.DB.prepare('update users set failed_attempts = ?, locked_until = ? where id = ?')
-      .bind(lock ? 0 : failed, lock ? new Date(Date.now() + LOCK_MINUTES * 60000).toISOString() : null, row.id)
-      .run();
+    // Incremented in SQL, not read-modify-write in JS: parallel guesses each
+    // read the same counter, so the lock used to be reachable only far past
+    // MAX_FAILED attempts.
+    await env.DB.prepare(
+      `update users set
+         locked_until = case when coalesce(failed_attempts, 0) + 1 >= ? then ? else locked_until end,
+         failed_attempts = case when coalesce(failed_attempts, 0) + 1 >= ? then 0 else coalesce(failed_attempts, 0) + 1 end
+       where id = ?`
+    ).bind(MAX_FAILED, new Date(Date.now() + LOCK_MINUTES * 60000).toISOString(), MAX_FAILED, row.id).run();
     throw errors.unauthorized('Incorrect username or password.');
   }
 

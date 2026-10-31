@@ -79,6 +79,9 @@ export default function register(router) {
     requirePerm(ctx, MODULE.SETTINGS, 'edit');
     const { key, value } = ctx.body || {};
     if (!key) throw errors.validation('key is required.');
+    // The deny-list applies to writes too: app_state_v1 is the whole tender
+    // dataset, guarded by its own per-section ACL and version check.
+    if (NEVER.has(key)) throw errors.forbidden('That setting cannot be changed here.');
     await ctx.env.DB.prepare(
       `insert into system_settings (id, setting_key, setting_value, updated_by) values (?,?,?,?)
        on conflict(setting_key) do update set setting_value = excluded.setting_value, updated_by = excluded.updated_by`

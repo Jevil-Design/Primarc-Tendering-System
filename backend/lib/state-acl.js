@@ -144,11 +144,21 @@ export function mergeStateWrite(incoming, stored, acl) {
     out[k] = base[k];
   }
 
-  /* Vendor rates, nested one level down. */
+  /* Vendor rates, nested one level down — in live enquiries AND in the
+     deleted bin (stripped on read too; guarding only quotations let a
+     rate-blind save erase every binned enquiry's quotes for good). Prior
+     rates are looked up across both lists, so moving an enquiry into or
+     out of the bin keeps them. */
   if (!acl.editRates) {
-    const guarded = guardVendorLines(out.quotations, base.quotations, incoming.quotations, acl);
-    if (guarded.changed) restored.push('vendorQuotes');
-    out.quotations = guarded.list;
+    const stored = [].concat(base.quotations || [], base.deleted || []);
+    let changed = false;
+    for (const k of ['quotations', 'deleted']) {
+      if (!acl.view[k] || !Array.isArray(out[k])) continue;   // restored wholesale above
+      const guarded = guardVendorLines(out[k], stored, incoming[k], acl);
+      changed = changed || guarded.changed;
+      out[k] = guarded.list;
+    }
+    if (changed) restored.push('vendorQuotes');
   }
   return { data: out, restored };
 }
