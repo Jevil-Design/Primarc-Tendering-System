@@ -1,6 +1,7 @@
 /* End-to-end browser suite: starts the real backend on a throwaway SQLite
    database (scripts/local-server.mjs), drives Chrome through the tendering
-   workflow (workflow.mjs) and every screen (screens.mjs), then stops.
+   workflow (workflow.mjs), every screen (screens.mjs) and the BOQ Builder /
+   shell UI layer (ui.mjs), then stops.
 
      npm install --no-save puppeteer-core@23
      node tests/e2e/run.mjs            # CHROME_PATH=... if Chrome is elsewhere
@@ -29,7 +30,7 @@ try {
     await new Promise((r) => setTimeout(r, 500));
   }
   const run = (file) => new Promise((res) => spawn(process.execPath, [join(HERE, file)], { cwd: TMP, env, stdio: 'inherit' }).on('exit', res));
-  code = (await run('workflow.mjs')) || (await run('screens.mjs'));
+  code = (await run('workflow.mjs')) || (await run('screens.mjs')) || (await run('ui.mjs'));
 } finally {
   server.kill();
 }

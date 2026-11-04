@@ -1931,11 +1931,397 @@ html[data-theme="light"] #authGate.auth-v2{
 }
 
 </style>
+<style id="uiV3CSS">
+/* ═══════════════════════════════════════════════════════════════════════
+   DESIGN SYSTEM v3 — light-first enterprise skin
+   ───────────────────────────────────────────────────────────────────────
+   Loaded after every static sheet, so a rule here wins on source order at
+   equal specificity. It re-tokenises colour, type and component chrome; it
+   does not move nodes (the one structural change — the page title living
+   in the top bar — is done by the shell script, which keeps every id).
+
+   Colour roles
+     --accent   professional blue: primary actions, focus, active nav
+     --brand    Primarc orange: the logo mark only
+     --accent2  amber: "needs attention" (missing values, pending)
+     green/blue/red/violet: status and L-rank semantics, unchanged meaning
+   Calculated figures render in --ink on plain ground; editable fields get
+   a white field with a border, so the two never look alike.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  --accent:#5b93f5; --accent-deep:#467fe6; --accent-rgb:91,147,245;
+  --brand:#ff6a2c;
+  --focus-ring:0 0 0 3px rgba(var(--accent-rgb),.30);
+  --th-bg:#151922; --th-ink:#9aa3b2;
+  --field-bg:var(--panel2); --field-line:#363e4d;
+  --radius:10px; --radius-sm:7px;
+  --shadow-1:0 1px 2px rgba(0,0,0,.30);
+  --shadow-pop:0 14px 36px rgba(0,0,0,.50);
+  --scrim:rgba(5,8,14,.62);
+  --warn-bg:rgba(251,191,36,.10); --warn-line:rgba(251,191,36,.55);
+  --sb-active:rgba(108,156,255,.20); --sb-active2:rgba(108,156,255,.05);
+}
+html[data-theme="light"]{
+  --bg:#f3f5f8; --panel:#ffffff; --panel2:#f8fafc; --panel3:#eef2f7;
+  --line:#e1e6ee; --line2:#edf1f6; --hi:#f2f6fc;
+  --ink:#0f172a; --fg:#0f172a; --dim:#475569; --faint:#64748b;
+  --accent:#1d5fd1; --accent-deep:#174ea9; --accent-rgb:29,95,209;
+  --accent2:#a15c07; --green:#12805c; --blue:#0b6aa8; --red:#c62828; --violet:#6d4ed1;
+  --amber-soft:rgba(161,92,7,.10); --green-soft:rgba(18,128,92,.10);
+  --th-bg:#f6f8fb; --th-ink:#475569;
+  --field-bg:#ffffff; --field-line:#cbd3df;
+  --shadow-1:0 1px 2px rgba(15,23,42,.06);
+  --shadow-pop:0 14px 36px rgba(15,23,42,.16);
+  --scrim:rgba(15,23,42,.42);
+  --warn-bg:#fff8eb; --warn-line:#e7b45a;
+  --sb-active:rgba(108,156,255,.22); --sb-active2:rgba(108,156,255,.06);
+}
+
+/* ── base ─────────────────────────────────────────────────────────────── */
+body{font-size:13px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+html[data-theme="light"] ::-webkit-scrollbar-thumb{background:#cfd6e0;border-color:var(--bg)}
+html[data-theme="light"] ::-webkit-scrollbar-track{background:transparent}
+html[data-theme="light"] mark{background:rgba(250,204,21,.38);color:inherit}
+:where(button,a,summary,[role="button"],[tabindex]):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* calm motion: one short fade between views, no lifts */
+@keyframes uiFade{from{opacity:.4}to{opacity:1}}
+.view.on{animation:uiFade .14s ease-out}
+.qm-w:hover,button.pk:hover,.card:hover{transform:none}
+.qm-cards .qm-w{animation:none}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+
+/* ── buttons ──────────────────────────────────────────────────────────────
+   Icons inside .btn used to have no stroke colour (the markup only sets
+   fill="none"), so they rendered invisible but still took up space. */
+.btn svg:not([stroke]),.bt-add svg:not([stroke]),.xbtn svg:not([stroke]),.rev-btn svg:not([stroke]),
+.fclear svg:not([stroke]),.flt-tog svg:not([stroke]){stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+.btn{min-height:32px;padding:6px 12px;border-radius:var(--radius-sm);font-size:12.5px;font-weight:600;
+  background:var(--panel);border:1px solid var(--field-line);color:var(--ink);white-space:nowrap;
+  box-shadow:var(--shadow-1);transition:background-color .12s,border-color .12s,color .12s}
+.btn:hover{border-color:var(--accent);color:var(--accent);background:var(--panel)}
+.btn.primary,.btn.xfer{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover,.btn.xfer:hover{background:var(--accent-deep);border-color:var(--accent-deep);color:#fff}
+html[data-theme="light"] .btn.green{background:var(--green);border-color:var(--green);color:#fff}
+html[data-theme="light"] .btn.green:hover{background:#0e6b4d;color:#fff}
+html[data-theme="light"] .btn.danger{background:var(--red);border-color:var(--red);color:#fff}
+html[data-theme="light"] .btn.danger:hover{background:#a51f1f;color:#fff}
+/* Export buttons are secondary actions: neutral chrome, file-type colour on the icon only */
+.xbtn.green,.xbtn.red,html[data-theme="light"] .btn.xbtn.green{background:var(--panel);border-color:var(--field-line);color:var(--ink)}
+.xbtn.green svg{stroke:var(--green)} .xbtn.red svg{stroke:var(--red)}
+.xbtn.green:hover,.xbtn.red:hover{background:var(--hi);border-color:var(--accent);color:var(--accent)}
+.btn.ghost{background:transparent;border-color:transparent;box-shadow:none;color:var(--dim)}
+.btn.ghost:hover{background:var(--hi);color:var(--ink);border-color:transparent}
+.btn.sm{min-height:28px;padding:4px 10px;font-size:12px}
+.lib-new:hover,.fr-add:hover,.fr-addall:hover{background:var(--accent-deep);filter:none}
+.ais-act.pri:hover{background:var(--accent-deep)}
+.ni-ai,.ai-banner button.ai-link{background:var(--violet)}
+/* top-bar icon buttons: quiet until hovered */
+.theme-tog,.top-gear,.top-gear-imp{width:34px;height:34px;border-color:transparent;background:transparent;color:var(--dim);border-radius:8px}
+.theme-tog:hover,.top-gear:hover,.top-gear-imp:hover{background:var(--hi);border-color:transparent;color:var(--ink)}
+.top-gear.active{color:var(--green);border-color:transparent}
+
+/* ── form fields ──────────────────────────────────────────────────────── */
+.srch input,select.flt,.modal-body input,.modal-body select,.modal-body textarea,
+.qm-field input,.qm-field select,.qm-field textarea,.boq-filterbar input,.boq-filterbar select,
+.adv-filter-row input,.cb-ref,.gem-key-row input,.notes-add input,.bt-find,.qm-itbl input,.qm-itbl textarea,.qm-itbl select{
+  background:var(--field-bg);border-color:var(--field-line);color:var(--ink)}
+.srch input,select.flt{min-height:32px}
+.srch input:focus,select.flt:focus,.modal-body input:focus,.modal-body select:focus,.modal-body textarea:focus,
+.qm-field input:focus,.qm-field select:focus,.qm-field textarea:focus,.boq-filterbar input:focus,.boq-filterbar select:focus,
+.adv-filter-row input:focus,.cb-ref:focus,.gem-key-row input:focus,.notes-add input:focus,#create .bt-find:focus,
+.qm-itbl input:focus,.qm-itbl textarea:focus,.qm-itbl select:focus,.ais-inputrow textarea:focus,.ais-card-body textarea:focus,
+.vp-itbl input:focus,.qm-filter-grid .qm-fld select:focus,.qm-filter-grid .qm-fld input:focus,
+.qm-filter-row3 .qm-fld input:focus,.qm-filter-row3 .qm-fld select:focus,.qm-filter-row1 .srch input:focus{
+  outline:none;border-color:var(--accent);box-shadow:var(--focus-ring)}
+#authGate.auth-v2 .av2-field input:focus{border-color:var(--accent);box-shadow:var(--focus-ring)}
+.qm-field input:read-only{background:var(--panel2)}
+.modal-body label,.qm-field label{color:var(--dim)}
+.modal-body .req,.ui-req{color:var(--red)}
+
+/* ── tables: one header treatment everywhere ──────────────────────────── */
+table.boqt th,table.cmpt th,table.cmpt thead th,table.cbt th,.qm-tbl th,.qm-itbl th,.ptbl th,.vp-itbl th{
+  background:var(--th-bg);color:var(--th-ink);font-size:10.5px;font-weight:700;letter-spacing:.5px}
+table.cmpt thead th{box-shadow:inset 0 -1px 0 var(--line)}
+.cbt tfoot td{background:var(--th-bg);border-top:1px solid var(--line)}
+table.boqt tr:hover td,table.cmpt tr:hover td,table.cbt tr:hover td{background:var(--hi)}
+.qm-tbl .num,.vp-amt,.bq-amt,.fr-rate,.rs-val,.rs-quote-rate{font-variant-numeric:tabular-nums}
+
+/* ── surfaces ─────────────────────────────────────────────────────────── */
+.qm-main{padding:20px 22px}
+.qm-panel,.qm-filter-card,.qm-results-card,.qm-sec-card,.qm-detail-meta-card,.pcard,button.pk,.qm-w,.ta-section,.vp-card{border-radius:var(--radius)}
+.qm-w{background:var(--panel)}
+/* KPI figures: UI font with tabular digits at a working size, not 34px monospace */
+.qm-w .wn{font-family:'Archivo',sans-serif;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.3px;margin-top:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qm-w{padding:14px 16px}
+.qm-filter-card{padding:14px 16px 12px;margin-bottom:14px}
+.qm-filter-card .qm-filter-title{margin-bottom:10px}
+.qm-filter-row1{margin-bottom:10px}
+.qm-filter-grid{gap:10px;margin-bottom:10px}
+.qm-filter-row1 .srch input{height:38px}
+.qm-filter-grid .qm-fld select,.qm-filter-grid .qm-fld input,.qm-filter-row3 .qm-fld input,.qm-filter-row3 .qm-fld select{height:36px;border-radius:var(--radius-sm)}
+.qm-filter-actions .btn{height:36px;padding:0 14px}
+/* Excel export on filter bars is a secondary action, not a second primary */
+.qm-filter-actions .btn.green{background:var(--panel);border-color:var(--field-line);color:var(--ink)}
+.qm-filter-actions .btn.green svg{stroke:var(--green)}
+.qm-filter-actions .btn.green:hover{border-color:var(--accent);color:var(--accent)}
+.qm-list-hdr-right .btn{height:36px;padding:0 16px}
+.qm-empty-enhanced{padding:44px 24px 40px}
+.qm-empty-enhanced .qm-empty-actions .btn{height:36px}
+.qm-list-header{margin-bottom:16px}
+.pst-submitted{background:rgba(var(--accent-rgb),.12);color:var(--accent);border-color:rgba(var(--accent-rgb),.3)}
+
+/* ── modals ───────────────────────────────────────────────────────────── */
+.modal-overlay,.ais-overlay{background:var(--scrim);backdrop-filter:none}
+.modal,.ais{border-radius:12px;box-shadow:var(--shadow-pop)}
+.modal-head{padding:14px 18px}
+.modal-head h3{font-size:16px;font-weight:700}
+.modal-x{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border-radius:7px;font-size:22px}
+.modal-x:hover{background:var(--hi);color:var(--ink)}
+.modal-foot{padding:12px 18px;background:var(--panel2);border-radius:0 0 12px 12px}
+
+/* ── notifications ────────────────────────────────────────────────────────
+   Wraps instead of running off-screen; a coloured edge says what kind of
+   message it is (colour is never the only cue — the text says it too). */
+.toast{white-space:pre-line;max-width:min(560px,calc(100vw - 32px));text-align:left;line-height:1.45;
+  border-left:4px solid var(--accent);border-radius:8px;padding:10px 16px}
+/* .toast is pointer-events:none so it never blocks clicks underneath — but
+   that also made the Undo button in showToastUndo() unclickable. */
+.toast.show{pointer-events:auto}
+.toast.t-ok{border-left-color:#34d399}
+.toast.t-err{border-left-color:#f87171}
+.toast.t-warn{border-left-color:#fbbf24}
+
+/* ── sidebar: blue active state, brand mark stays orange ─────────────── */
+#pSidebar{background:#0f1b2e}
+html[data-theme="light"] #pSidebar{background:#10203a}
+#pSidebar .sb-mark{background:var(--brand);box-shadow:none}
+#pSidebar button.sb-i.on{box-shadow:inset 0 0 0 1px rgba(108,156,255,.30)}
+#pSidebar button.sb-i.on svg{color:#9dbdff}
+#pSidebar button.sb-i.on::before{background:#7aa7ff;box-shadow:none}
+#pSidebar button.sb-i .sb-ct.warn{background:#e8770f}
+#sbTip b{color:#9dbdff}
+#pSidebar button.sb-i:focus-visible,#pSidebar .sb-tog:focus-visible{outline:2px solid #9dbdff;outline-offset:-2px}
+
+/* ── top bar: one compact band carrying the page title ───────────────────
+   The shell script moves #pwsHead (breadcrumb, title, description, page
+   actions) in here; the logo row it replaces is already in the sidebar. */
+.topbar,html[data-theme="light"] .topbar{background:var(--panel);border-bottom:1px solid var(--line);height:52px;padding:0 14px 0 18px;gap:12px}
+.app.has-sb > .topbar .brand,.app.has-sb > .topbar .tstat{display:none}
+.topbar > .pws-head,html[data-theme="light"] .topbar > .pws-head{flex:1 1 auto;min-width:0;height:auto;min-height:0;padding:0;border:0;background:transparent}
+.topbar > .pws-head .pws-title{font-size:15px;font-weight:700}
+.topbar > .pws-head .pws-crumb .pws-c-brand{display:none}
+.topbar > .pws-head .pws-crumb .pws-c-brand + .pws-c-sep{display:none}
+.topbar > .pws-head .pws-desc{font-size:12px}
+.topbar > .pws-head .pws-r{gap:8px}
+.topbar > .pws-head .pws-r .btn{min-height:32px}
+.topbar > .pws-head .qm-bell{width:34px;height:34px;border-color:transparent;background:transparent;border-radius:8px}
+.topbar > .pws-head .qm-bell:hover{background:var(--hi)}
+.topbar .topspace{margin-left:0}
+@media (max-width:1280px){ .topbar > .pws-head .pws-desc,.topbar > .pws-head .pws-desc-sep{display:none} }
+@media (max-width:860px){ .topbar > .pws-head .pws-crumb,.topbar > .pws-head .pws-crumb-sep{display:none} .topbar{padding:0 10px;gap:8px} }
+/* With bell + New Enquiry in the top bar, Enquiry Management's own action
+   strip has nothing left to show. Its hidden tab buttons stay in the DOM:
+   QM's setNav() and the sidebar's active-state detection read them. */
+.app.has-sb #qmSubnav{display:none}
+/* closed off-canvas drawer: no shadow bleeding in at the left edge, and out of the tab order */
+@media (max-width:860px){ .app.has-sb:not(.sb-open) > #pSidebar{box-shadow:none;visibility:hidden} }
+/* phones: the page title keeps its room; secondary top-bar tools are reachable elsewhere
+   (Settings & Users in the sidebar, Open file in the BOQ File menu) */
+@media (max-width:600px){
+  .topbar{gap:6px;padding:0 8px}
+  #tsSync,#topImportBtn,#topGemBtn,#navAdminBtn{display:none!important}
+  #authChip > div:not(.av),#authChip > svg{display:none}
+  #authChip{padding:4px}
+  .topbar > .pws-head .pws-title{font-size:14px}
+}
+
+/* ═══ BOQ BUILDER ════════════════════════════════════════════════════════ */
+/* project details */
+#create .bq-head{flex-shrink:0;background:var(--panel);border-bottom:1px solid var(--line)}
+#create .bq-head .rev-row{background:var(--panel);border-bottom:0;padding:8px 12px 6px}
+/* One line above tablet width: the summary and project name shrink (with an
+   ellipsis) before any button is pushed onto a second line. In a wrapping
+   flex row items wrap at their full width instead of shrinking. */
+@media(min-width:901px){
+  #create .bq-head .rev-row{flex-wrap:nowrap}
+  #create .bq-head .rev-proj{flex:1 1 180px;min-width:110px}
+  #create .bq-head .bq-dsum{flex:0 1 auto;min-width:0}
+  #create .bq-head #autosaveInd{white-space:nowrap;flex-shrink:0}
+}
+#create .rev-proj{font-size:15px;font-weight:700;border-bottom:1px dashed var(--field-line);padding:3px 2px}
+#create .rev-proj:hover{border-bottom-color:var(--dim)}
+#create .rev-proj:focus{border-bottom:1px solid var(--accent)}
+#create .rev-proj.ui-invalid{border-bottom-color:var(--accent2)}
+#create #revBadge{background:rgba(var(--accent-rgb),.10);color:var(--accent);border-color:rgba(var(--accent-rgb),.35)}
+#create .rev-btn{padding:4px 9px;border-radius:6px;font-size:11.5px;font-weight:600;background:var(--panel);border-color:var(--field-line);color:var(--dim)}
+#create .rev-btn:hover{border-color:var(--accent);color:var(--accent)}
+.bq-dtog{display:inline-flex;align-items:center;gap:5px;background:transparent;border:1px solid transparent;color:var(--dim);font-size:11.5px;font-weight:600;padding:4px 8px;border-radius:6px}
+.bq-dtog:hover{background:var(--hi);color:var(--ink)}
+.bq-dtog svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.4;transition:transform .15s}
+.bq-head.details-open .bq-dtog svg{transform:rotate(180deg)}
+.bq-details{display:none;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 12px;padding:2px 12px 12px}
+.bq-head.details-open .bq-details{display:grid}
+.bq-fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.bq-fld label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--dim)}
+.bq-fld input{height:32px;background:var(--field-bg);border:1px solid var(--field-line);border-radius:var(--radius-sm);padding:0 10px;color:var(--ink);font:inherit;font-size:13px}
+.bq-fld input:focus{outline:none;border-color:var(--accent);box-shadow:var(--focus-ring)}
+.bq-fld small{font-size:10.5px;color:var(--faint)}
+.bq-dsum{font-size:11.5px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:40ch}
+.bq-dsum b{color:var(--dim);font-weight:600}
+.bq-head.details-open .bq-dsum{display:none}
+/* progress steps */
+.bq-steps{display:flex;align-items:stretch;gap:0;padding:0 12px;border-top:1px solid var(--line2);background:var(--panel);overflow-x:auto;scrollbar-width:none}
+.bq-steps::-webkit-scrollbar{display:none}
+.bq-step{flex:1 1 0;min-width:max-content;display:flex;align-items:center;gap:8px;background:none;border:0;border-bottom:2px solid transparent;
+  padding:7px 10px 6px;color:var(--dim);font:inherit;font-size:12px;font-weight:600;text-align:left;cursor:pointer}
+.bq-step:hover{color:var(--ink);background:var(--hi)}
+.bq-step .n{flex-shrink:0;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;border:1.5px solid var(--field-line);color:var(--dim);background:var(--panel)}
+.bq-step .s{display:block;font-size:10.5px;font-weight:500;color:var(--faint);margin-top:1px}
+.bq-step.done .n{background:var(--green);border-color:var(--green);color:#fff}
+.bq-step.warn .n{border-color:var(--warn-line);color:var(--accent2);background:var(--warn-bg)}
+.bq-step.warn .s{color:var(--accent2)}
+.bq-step.cur{border-bottom-color:var(--accent);color:var(--ink)}
+.bq-step.cur .n{border-color:var(--accent);color:var(--accent)}
+.bq-step.done.cur .n{color:#fff}
+.bq-step + .bq-step{border-left:1px solid var(--line2)}
+/* library panel: its own search + filters on top */
+#create .lib .ctrl{padding:8px 10px;gap:6px;border-bottom:1px solid var(--line);background:var(--panel)}
+#create .lib .ctrl .srch{flex:1 1 0;min-width:0}
+#create .lib-head > span:first-child{flex-shrink:0}
+#create .lib .ctrl-adv select.flt{flex:1 1 110px;max-width:none;min-width:0!important}
+#create .lib-head{font-family:'Archivo',sans-serif;font-size:11px;letter-spacing:.2px;white-space:nowrap;gap:8px;background:var(--panel2)}
+#create .lib-head > span{overflow:hidden;text-overflow:ellipsis}
+#create table.boqt th{white-space:nowrap}
+/* BOQ Master count bar: buttons keep the UI font, not the bar's monospace */
+.cmp-count .btn{font-family:'Archivo',sans-serif;font-size:12px;min-height:30px}
+.adv-filter-toggle{min-height:32px;background:var(--panel);border-color:var(--field-line);color:var(--ink);font-size:12px;font-weight:600;border-radius:var(--radius-sm)}
+/* toolbar: selection + missing-value filter */
+#create .boq-toolbar{background:var(--panel)}
+.bt-chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:14px;border:1px solid var(--field-line);background:var(--panel);
+  color:var(--dim);font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap}
+.bt-chip:hover{border-color:var(--accent);color:var(--accent)}
+.bt-chip b{font-weight:700;color:var(--accent2)}
+.bt-chip.on{background:var(--warn-bg);border-color:var(--warn-line);color:var(--accent2)}
+.bt-chip[disabled]{opacity:.5;cursor:default}
+.bq-bulk{display:none;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 12px;background:rgba(var(--accent-rgb),.07);border-bottom:1px solid rgba(var(--accent-rgb),.25);flex-shrink:0;font-size:12px}
+.bq-bulk.on{display:flex}
+.bq-bulk .cnt{font-weight:700;color:var(--accent);margin-right:6px}
+.bq-bulk select{height:28px;border-radius:6px;border:1px solid var(--field-line);background:var(--field-bg);color:var(--ink);font:inherit;font-size:12px;padding:0 6px}
+.bq-bulk .sp{flex:1}
+/* table */
+#create table.boqt th{background:var(--th-bg);color:var(--th-ink);border-bottom:1px solid var(--line);z-index:3}
+#create table.boqt th.bq-selh,#create table.boqt td.bq-sel{width:30px;padding-left:10px!important;padding-right:0!important;text-align:center}
+#create .bq-sel input,#create .bq-selh input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;vertical-align:middle}
+#create .boqt tr.ui-selected > td{background:rgba(var(--accent-rgb),.07)}
+#create td.bq-uom{padding-left:4px!important;padding-right:4px!important}
+/* 8px side padding (was 10px) so Amount clears the pinned Actions column at 1366px */
+#create table.boqt tbody td{padding-left:8px;padding-right:8px}
+@media(max-width:1440px){ #create .lib{width:280px;min-width:240px} }
+#create .uomin{font-size:11.5px}
+#create .qin,#create .rin{width:78px;height:28px;background:var(--field-bg);border:1px solid var(--field-line);border-radius:6px;font-variant-numeric:tabular-nums}
+#create .qin:focus,#create .rin:focus{border-color:var(--accent);box-shadow:var(--focus-ring);background:var(--field-bg)}
+#create .qin.ui-missing,#create .rin.ui-missing{border-color:var(--warn-line);background:var(--warn-bg)}
+#create .qin.ui-missing::placeholder,#create .rin.ui-missing::placeholder{color:var(--accent2)}
+#create .bq-amt{color:var(--ink);font-weight:600}
+#create .bq-rowtot{color:var(--ink)}
+/* Row tints are opaque so the pinned Actions column (below) can carry the
+   same colour without the scrolled-under cells showing through it. */
+#create{--grp-bg:#1a1f2d; --sel-bg:#1b2333}
+html[data-theme="light"] #create{--grp-bg:#f4f7fd; --sel-bg:#ecf2fc}
+#create .boqt tr.bq-grp.lv0 > td{background:var(--grp-bg)}
+#create .boqt tr.bq-grp.lv0 > td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+#create .boqt tr.bq-grp.lv1 > td{background:var(--panel2)}
+#create .boqt tr.ui-selected > td{background:var(--sel-bg)}
+/* the table is the work surface: panel colour, matching the pinned column */
+#create .boq-scroll{background:var(--panel)}
+/* Actions stay in view however far the table scrolls sideways */
+#create table.boqt th:last-child,#create table.boqt td:last-child{position:sticky;right:0;z-index:1;background-color:var(--panel);box-shadow:-1px 0 0 var(--line)}
+#create table.boqt th:last-child{z-index:4;background-color:var(--th-bg)}
+#create .boqt tr.bq-grp.lv0 > td:last-child{background-color:var(--grp-bg)}
+#create .boqt tr.bq-grp.lv1 > td:last-child{background-color:var(--panel2)}
+#create .boqt tr.ui-selected > td:last-child{background-color:var(--sel-bg)}
+#create .boqt tbody tr:hover > td:last-child{background-color:var(--hi)}
+/* File menu */
+.ui-menu{min-width:232px}
+.ui-menu hr{border:0;border-top:1px solid var(--line);margin:3px 2px}
+.exp-menu .btn.ghost{color:var(--ink);justify-content:flex-start;width:100%}
+.exp-menu .btn.ghost:hover,.exp-menu .btn.ghost:focus-visible{background:var(--hi)}
+#bFileMenuBtn .dd-chev{transition:transform .15s}
+.exp-dd.open #bFileMenuBtn .dd-chev{transform:rotate(180deg)}
+#create .bq-tag.t-header{background:rgba(var(--accent-rgb),.12);color:var(--accent)}
+#create .namein:focus,#create .pnamein:focus,#create .descin:focus,#create textarea.descin:focus{background:rgba(var(--accent-rgb),.05);border-bottom-color:var(--accent)}
+#create .namein:hover,#create .pnamein:hover{border-bottom-color:var(--line)}
+.bq-armbanner{background:rgba(var(--accent-rgb),.08)}
+.bq-addsub:hover{background:rgba(var(--accent-rgb),.10)}
+.bq-ac{max-width:min(620px,calc(100vw - 24px));box-shadow:var(--shadow-pop)}
+/* footer totals: calculated figures are ink, the grand total carries the accent */
+#create .boq-foot{border-top:1px solid var(--line);box-shadow:0 -1px 0 var(--line2)}
+#create .grand .amt{color:var(--ink);font-family:'Archivo',sans-serif;font-weight:700;font-variant-numeric:tabular-nums}
+#create .grand .amt.sub{color:var(--dim)}
+#create .grand .gcell.tot .amt{color:var(--accent)}
+/* empty state with real next steps */
+.boq-empty .ui-empty-acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.boq-empty svg{stroke:var(--faint)}
+/* the column-width tiers above were written for an 11-column table; the
+   selection column shifts Remarks / WO No. to the 10th / 11th positions */
+@media(max-width:1440px){
+  #create table.boqt th:nth-child(9),#create table.boqt th:nth-child(10){width:auto!important}
+  #create table.boqt th:nth-child(10),#create table.boqt th:nth-child(11){width:78px!important}
+}
+@media(max-width:1280px){
+  #create table.boqt tbody td:nth-child(9) input{min-width:0;font-size:inherit}
+  #create table.boqt tbody td:nth-child(10) input,#create table.boqt tbody td:nth-child(11) input{min-width:52px;font-size:10.5px}
+}
+@media(max-width:1100px){ .bq-details{grid-template-columns:repeat(2,minmax(0,1fr))} .bq-step .s{display:none} }
+@media(max-width:650px){ .bq-details{grid-template-columns:1fr} .bq-dsum{display:none} }
+
+/* review & preview */
+.modal.rv-modal{width:min(1100px,96vw);max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.rv-modal .modal-body{overflow:auto;flex:1;min-height:0;padding:16px 18px}
+.rv-meta{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px 16px;margin-bottom:14px}
+.rv-meta div span{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--faint)}
+.rv-meta div b{display:block;font-size:13px;font-weight:600;color:var(--ink);margin-top:2px;word-break:break-word}
+.rv-meta div b.none{color:var(--faint);font-weight:500}
+.rv-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+@media(max-width:800px){ .rv-grid{grid-template-columns:1fr} }
+.rv-card{border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;background:var(--panel)}
+.rv-card h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--dim);margin:0 0 8px}
+.rv-check{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:12.5px;color:var(--ink);line-height:1.4}
+.rv-check + .rv-check{border-top:1px solid var(--line2)}
+.rv-check i{flex-shrink:0;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:700;margin-top:1px}
+.rv-check.ok i{background:var(--green-soft);color:var(--green)}
+.rv-check.warn i{background:var(--warn-bg);color:var(--accent2);border:1px solid var(--warn-line)}
+.rv-check.info i{background:rgba(var(--accent-rgb),.10);color:var(--accent)}
+.rv-check button{margin-left:auto;flex-shrink:0;background:none;border:0;color:var(--accent);font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:0 2px}
+.rv-check button:hover{text-decoration:underline}
+.rv-sum{width:100%;border-collapse:collapse;font-size:12.5px}
+.rv-sum td{padding:5px 0;border-bottom:1px solid var(--line2)}
+.rv-sum td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:10px}
+.rv-sum tr.t td{border-bottom:0;padding-top:8px;font-weight:700}
+.rv-sum tr.g td{font-size:15px;color:var(--accent)}
+.rv-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.rv-tbl th{position:sticky;top:-16px;background:var(--th-bg);color:var(--th-ink);font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);z-index:1}
+.rv-tbl td{padding:6px 8px;border-bottom:1px solid var(--line2);vertical-align:top}
+.rv-tbl .n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rv-tbl tr.sec td{background:rgba(var(--accent-rgb),.05);font-weight:700}
+.rv-tbl tr.note td{color:var(--accent2);font-style:italic}
+.rv-tbl .d{color:var(--dim);font-size:11.5px;white-space:pre-wrap;margin-top:2px}
+.rv-tbl td.miss{color:var(--accent2);font-weight:600}
+.rv-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rv-foot .sp{flex:1}
+/* in-app confirm */
+.modal.ui-confirm{width:min(440px,92vw)}
+.ui-confirm .modal-body p{font-size:13px;line-height:1.55;color:var(--ink);margin:0}
+</style>
 </head>
 <body>
 <script>
-/* THEME: restore before paint to avoid flash. Dark default; light opt-in; OS-follow on first visit. */
-(function(){try{var saved=localStorage.getItem('ts_theme');if(!saved){saved=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';}if(saved==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();
+/* THEME: restore before paint to avoid flash. Light is the default working theme;
+   dark stays one click away (top-bar toggle) and a saved choice always wins. */
+(function(){try{var saved=localStorage.getItem('ts_theme');if(!saved){saved='light';}if(saved==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
 </script>
 <!-- ═══ SIGN-IN COVER ═══════════════════════════════════════════════
      The app shell is static markup, so it used to paint the dashboard
@@ -2104,40 +2490,54 @@ window.__authCover=(function(){
 
   <!-- CREATE BOQ -->
   <div class="view" id="create">
+    <div class="create-body">
+      <!-- library: its search + filters sit inside the panel they act on
+           (they used to span the whole view as a row of their own) -->
+      <div class="lib">
     <div class="ctrl" id="cCtrl">
       <div class="srch">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <input id="cSearch" placeholder="Search the item library — typo &amp; synonym tolerant · ↑↓ choose · Enter adds" autocomplete="off">
+        <input id="cSearch" placeholder="Search item library…" title="Typo- and synonym-tolerant search. ↑↓ to choose, Enter to add" aria-label="Search the item library" autocomplete="off">
       </div>
-      <button class="flt-tog" id="cFltTog" title="Show / hide library filters">Filters<b id="cFltCount">0</b><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+      <button class="flt-tog" id="cFltTog" title="Show / hide library filters" aria-controls="cAdv">Filters<b id="cFltCount">0</b><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
       <div class="ctrl-adv" id="cAdv">
-        <select class="flt" id="cWGroup" style="min-width:130px"><option value="">All Work Groups</option></select>
-        <select class="flt" id="cCat"><option value="">All Categories</option></select>
-        <select class="flt" id="cUom"><option value="">All Units</option></select>
+        <select class="flt" id="cWGroup" style="min-width:130px" aria-label="Work group"><option value="">All Work Groups</option></select>
+        <select class="flt" id="cCat" aria-label="Category"><option value="">All Categories</option></select>
+        <select class="flt" id="cUom" aria-label="Unit"><option value="">All Units</option></select>
         <div class="seg" id="cScope"><button data-s="name" class="on">Name</button><button data-s="all">All</button><button data-s="work">By Work</button></div>
         <button class="fclear" id="cFltClear" title="Reset library filters">Clear</button>
       </div>
     </div>
-    <div class="create-body">
-      <!-- library -->
-      <div class="lib">
         <div class="lib-head" id="cLibHead"><span>ITEM LIBRARY — <b id="cFound">0</b> matches</span><span>click ＋ to add</span></div>
         <div class="lib-list" id="cList"></div>
       </div>
       <!-- boq -->
       <div class="boq">
+        <section class="bq-head" id="bHead" aria-label="BOQ project details">
         <div class="rev-row">
-          <input class="rev-proj" id="bProj" placeholder="Untitled BOQ — project name…" autocomplete="off">
-          <span id="revBadge">Rev-0</span>
-          <button class="rev-btn" id="revSaveBtn" title="Save current state as a new revision">↑ Save Revision</button>
-          <button class="rev-btn" id="revHistBtn" title="View revision history">History</button>
-          <span id="autosaveInd">✓ Draft saved</span>
+          <input class="rev-proj" id="bProj" placeholder="Project name (required)…" aria-label="Project name" aria-required="true" autocomplete="off">
+          <span class="bq-dsum" id="bDetailsSum"></span>
+          <button type="button" class="bq-dtog" id="bDetailsTog" aria-expanded="false" aria-controls="bDetails" title="Project code, work order number and contractor">Details<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+          <span id="revBadge" title="Current revision — File › Save revision to bump it">Rev-0</span>
+          <span id="autosaveInd" role="status" aria-live="polite">✓ Draft saved</span>
           <span class="rev-sum" id="bHdrSum"></span>
           <div style="flex:1"></div>
           <span class="kbd-tip">Ctrl+S save · Ctrl+N add row</span>
-          <button class="btn" id="bSave" title="Save BOQ as JSON"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save</button>
-          <label class="btn" id="bLoadBtn" title="Load BOQ from JSON, Excel, CSV or PDF" style="cursor:pointer"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Load<input type="file" id="bLoadFile" accept=".json,.xlsx,.xls,.csv,.pdf" style="display:none"></label>
-          <button class="btn" id="bClear"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>Clear</button>
+          <button class="btn" id="bReviewBtn" title="Check quantities, rates and totals before exporting"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>Review</button>
+          <!-- Revision + file actions: same buttons and ids as before, grouped
+               in one menu so the header row stays on a single line. -->
+          <div class="exp-dd" id="bFileDd">
+            <button class="btn" id="bFileMenuBtn" title="Revisions, save / open file, clear" aria-haspopup="menu" aria-expanded="false" aria-controls="bFileMenu"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M14 3v4a1 1 0 0 0 1 1h4M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>File<svg class="dd-chev" viewBox="0 0 24 24" fill="none" width="12" height="12"><path d="M6 9l6 6 6-6"/></svg></button>
+            <div class="exp-menu ui-menu" id="bFileMenu" role="menu">
+              <button class="btn ghost" id="revSaveBtn" role="menuitem" title="Save current state as a new revision"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M12 19V5m0 0-5 5m5-5 5 5"/></svg>Save revision…</button>
+              <button class="btn ghost" id="revHistBtn" role="menuitem" title="View or roll back to an earlier revision"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Revision history</button>
+              <hr>
+              <button class="btn ghost" id="bSave" role="menuitem" title="Download this BOQ as a .boq.json file you can open again later"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Save as file (.boq.json)</button>
+              <label class="btn ghost" id="bLoadBtn" role="menuitem" tabindex="0" title="Open a BOQ from JSON, Excel, CSV or PDF — replaces the current BOQ" style="cursor:pointer"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Open file…<input type="file" id="bLoadFile" accept=".json,.xlsx,.xls,.csv,.pdf" style="display:none"></label>
+              <hr>
+              <button class="btn ghost" id="bClear" role="menuitem" title="Remove every row from this BOQ" style="color:var(--red)"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></svg>Clear BOQ…</button>
+            </div>
+          </div>
           <div class="exp-dd" id="bExpDd">
             <button class="btn xbtn" id="bExpMenuBtn" title="Export BOQ"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Export<svg class="dd-chev" viewBox="0 0 24 24" fill="none" width="12" height="12"><path d="M6 9l6 6 6-6"/></svg></button>
             <div class="exp-menu" id="bExpMenu">
@@ -2147,6 +2547,19 @@ window.__authCover=(function(){
             </div>
           </div>
         </div>
+        <div class="bq-details" id="bDetails">
+          <div class="bq-fld"><label for="bRef">Project code / BOQ ref.</label><input id="bRef" placeholder="e.g. PRJ-MBA-01" autocomplete="off"></div>
+          <div class="bq-fld"><label for="bWO">Work order no.</label><input id="bWO" placeholder="e.g. WO/MBA/CIV/12" autocomplete="off" list="woList"></div>
+          <div class="bq-fld"><label for="bClient">Contractor / vendor</label><input id="bClient" placeholder="Name as it should appear on exports" autocomplete="off" list="vendList"></div>
+        </div>
+        <nav class="bq-steps" id="bSteps" aria-label="BOQ preparation steps">
+          <button type="button" class="bq-step" data-step="1"><span class="n">1</span><span>Project details<span class="s" data-s></span></span></button>
+          <button type="button" class="bq-step" data-step="2"><span class="n">2</span><span>BOQ items<span class="s" data-s></span></span></button>
+          <button type="button" class="bq-step" data-step="3"><span class="n">3</span><span>Quantities &amp; rates<span class="s" data-s></span></span></button>
+          <button type="button" class="bq-step" data-step="4"><span class="n">4</span><span>Review &amp; preview<span class="s" data-s></span></span></button>
+          <button type="button" class="bq-step" data-step="5"><span class="n">5</span><span>Export &amp; save<span class="s" data-s></span></span></button>
+        </nav>
+        </section>
         <div class="boq-toolbar">
           <div class="add-dd" id="btAddDd">
             <button class="bt-add itm" id="btAddMenuBtn" title="Add to the BOQ"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add<svg class="dd-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
@@ -2162,8 +2575,20 @@ window.__authCover=(function(){
           <div class="bt-sep"></div>
           <div class="bt-srch">
             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <input class="bt-find" id="bTreeFind" placeholder="Search BOQ items, code, WBS or category…" autocomplete="off">
+            <input class="bt-find" id="bTreeFind" placeholder="Search BOQ items, code, WBS or category…" autocomplete="off" aria-label="Search this BOQ">
           </div>
+          <button type="button" class="bt-chip" id="bMissTog" aria-pressed="false" title="Show only items that still need a quantity or a rate">Missing qty / rate <b id="bMissCnt">0</b></button>
+        </div>
+        <div class="bq-bulk" id="bBulk" role="region" aria-label="Actions for selected rows">
+          <span class="cnt" id="bBulkCnt">0 selected</span>
+          <button type="button" class="btn sm" data-bulk="dup">Duplicate</button>
+          <button type="button" class="btn sm" data-bulk="indent">Indent</button>
+          <button type="button" class="btn sm" data-bulk="outdent">Outdent</button>
+          <label style="display:inline-flex;align-items:center;gap:5px;color:var(--dim)">GST
+            <select id="bBulkGst" aria-label="Set GST for selected items"><option value="">Set…</option><option>0</option><option>5</option><option>12</option><option>18</option><option>28</option></select></label>
+          <button type="button" class="btn sm" data-bulk="del" style="color:var(--red)">Delete</button>
+          <span class="sp"></span>
+          <button type="button" class="btn sm ghost" data-bulk="none">Clear selection</button>
         </div>
         <div class="boq-filterbar collapsed" id="boqFindBar">
           <button class="fb-fold" id="bFindToggle" title="Show / hide find-from-history"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></button>
@@ -2207,9 +2632,6 @@ window.__authCover=(function(){
             <div class="gcell tot"><span class="glbl">Grand Total</span><span class="amt" id="bGrand">₹0</span></div>
           </div>
           <button class="btn xfer" id="bToQuote" style="flex-shrink:0;white-space:nowrap" title="Send these BOQ items into the Enquiry module to issue an RFQ"><svg viewBox="0 0 24 24" fill="none"><path d="M14 3v4a1 1 0 0 0 1 1h4M5 3h7l7 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM9 14h6m0 0-2.5-2.5M15 14l-2.5 2.5"/></svg>Transfer to Enquiry</button>
-        </div>
-        <div class="boq-meta boq-actions" style="display:none">
-          <input id="bClient" placeholder="Contractor / Vendor">
         </div>
       </div>
     </div>
@@ -3292,6 +3714,17 @@ function nodeAmount(n){
   if(isNaN(q)||isNaN(r)) return 0;
   return q*r;
 }
+/* A quotable line still waiting for a quantity or a rate, or null when complete.
+   Rate-only lines never take a quantity; lump sums / provisional sums are fixed
+   at 1. A blank rate is legitimate in an enquiry BOQ (vendors quote it), so
+   callers present a missing rate as information, never as a blocking error. */
+function bMissing(n){
+  if(!QUOTABLE.has(n.type)) return null;
+  const t=BTYPES[n.type], q=bNum(n.qty), r=bNum(n.rate);
+  const qty=!t.fixedQty && n.type!=='rateonly' && !(q>0);
+  const rate=!(r>0);
+  return (qty||rate)?{qty,rate}:null;
+}
 // index of last descendant + 1 (subtree end)
 function subtreeEnd(i){ const lv=boq[i].level||0; let j=i+1; while(j<boq.length && (boq[j].level||0)>lv) j++; return j; }
 function hasChildren(i){ return i+1<boq.length && (boq[i+1].level||0)>(boq[i].level||0); }
@@ -3553,7 +3986,7 @@ function initCreate(){
   initNotes('b', bNotes, ()=>{}, {presets:[]});
   // ── Save BOQ ────────────────────────────────────────────
   $('#bSave').addEventListener('click',()=>{
-    if(!boq.length){alert('Add items to your BOQ first.');return;}
+    if(!boq.length){uiNotify('Add items to your BOQ first.','warn');return;}
     const payload=JSON.stringify({v:2,meta:boqMeta(),boq,notes:bNotes},null,2);
     dl(new Blob([payload],{type:'application/json'}),boqFname('')+'.boq.json');
   });
@@ -3564,7 +3997,7 @@ function initCreate(){
     if(ext==='json') loadBoqJson(f);
     else if(ext==='xlsx'||ext==='xls'||ext==='csv') loadBoqSheet(f);
     else if(ext==='pdf') loadBoqPdf(f);
-    else alert('Unsupported file type "'+ext+'".\nUpload a .json, .xlsx, .xls, .csv or .pdf BOQ.');
+    else uiNotify('Unsupported file type "'+ext+'".\nUpload a .json, .xlsx, .xls, .csv or .pdf BOQ.','err');
   });
   $('#bCatToggle').addEventListener('click',()=>{
     const s=$('#bCatSummary'); s.style.display=s.style.display==='none'?'block':'none';
@@ -3719,8 +4152,8 @@ function _impFromAoa(aoa){
   return {nodes,notes};
 }
 function _impApply(res, srcName){
-  if(res && res.error){ alert(res.error+'\n\nTip: exports made by this app import cleanly. For other files, keep a header row with Description / Qty / Rate.'); return; }
-  if(!res || !res.nodes.length){ alert('No BOQ line items found in "'+srcName+'".'); return; }
+  if(res && res.error){ uiNotify(res.error+'\n\nTip: exports made by this app import cleanly. For other files, keep a header row with Description / Qty / Rate.','err'); return; }
+  if(!res || !res.nodes.length){ uiNotify('No BOQ line items found in "'+srcName+'".','err'); return; }
   const secs=res.nodes.filter(n=>n.type==='header').length, items=res.nodes.length-secs;
   if(!confirm('Import '+items+' line item'+(items===1?'':'s')+(secs?(' and '+secs+' section'+(secs===1?'':'s')):'')+' from "'+srcName+'"?\n\nThis will replace your current BOQ.')) return;
   boq=res.nodes;
@@ -3735,7 +4168,7 @@ function loadBoqJson(f){
   const r=new FileReader();
   r.onload=ev=>{ try{
     const d=JSON.parse(ev.target.result);
-    if(!d.boq||!Array.isArray(d.boq)){ alert('Invalid BOQ file — missing "boq" array.'); return; }
+    if(!d.boq||!Array.isArray(d.boq)){ uiNotify('Invalid BOQ file — missing "boq" array.','err'); return; }
     const nodes=d.boq.filter(n=>n&&typeof n==='object'&&!Array.isArray(n));
     if(!confirm('Load BOQ from file? This will replace your current BOQ.'+(nodes.length<d.boq.length?'\n\n'+(d.boq.length-nodes.length)+' unreadable row(s) will be skipped.':''))) return;
     /* sid is written into HTML attributes and used as a number everywhere — never trust the file's. */
@@ -3745,20 +4178,20 @@ function loadBoqJson(f){
     if(d.meta){ if(d.meta.proj!=null)$('#bProj').value=d.meta.proj; if(d.meta.ref!=null&&$('#bRef'))$('#bRef').value=d.meta.ref; if(d.meta.client!=null)$('#bClient').value=d.meta.client; if(d.meta.wo!=null&&$('#bWO'))$('#bWO').value=d.meta.wo; }
     if(d.notes&&Array.isArray(d.notes)){ bNotes.length=0; d.notes.forEach(n=>bNotes.push(n)); renderNotes('b',bNotes); }
     renderBOQ(); cRender(); bArmBanner(); scheduleAutosave();
-    alert('BOQ loaded: '+boq.length+' items.');
-  }catch(err){ alert('Could not read file: '+err.message); } };
+    uiNotify('BOQ loaded: '+boq.length+' items.','ok');
+  }catch(err){ uiNotify('Could not read file: '+err.message,'err'); } };
   r.readAsText(f);
 }
 // ── Excel / CSV via SheetJS ──
 function loadBoqSheet(f){
-  if(typeof XLSX==='undefined'){ alert('Spreadsheet library not loaded (needs internet on first load).'); return; }
+  if(typeof XLSX==='undefined'){ uiNotify('Spreadsheet library not loaded (needs internet on first load).','err'); return; }
   const r=new FileReader();
   r.onload=ev=>{ try{
     const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
     const ws=wb.Sheets[wb.SheetNames[0]];
     const aoa=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});
     _impApply(_impFromAoa(aoa), f.name);
-  }catch(err){ alert('Could not read spreadsheet: '+err.message); } };
+  }catch(err){ uiNotify('Could not read spreadsheet: '+err.message,'err'); } };
   r.readAsArrayBuffer(f);
 }
 // ── PDF via lazy-loaded pdf.js ──
@@ -3811,7 +4244,7 @@ function _pdfBucket(cells,cols){
 }
 async function loadBoqPdf(f){
   let lib; showToast('Reading PDF…');
-  try{ lib=await ensurePdfLib(); }catch(e){ alert(e.message); return; }
+  try{ lib=await ensurePdfLib(); }catch(e){ uiNotify(e.message,'err'); return; }
   try{
     const buf=await f.arrayBuffer();
     const pdf=await lib.getDocument({data:new Uint8Array(buf)}).promise;
@@ -3830,7 +4263,7 @@ async function loadBoqPdf(f){
       });
       [...byY.keys()].sort((a,b)=>b-a).forEach(y=>rows.push({cells:byY.get(y)}));
     }
-    if(!rows.length){ alert('No selectable text found in this PDF (it may be a scanned image). Please import the Excel or CSV instead.'); return; }
+    if(!rows.length){ uiNotify('No selectable text found in this PDF (it may be a scanned image). Please import the Excel or CSV instead.','err'); return; }
     // find header row + column anchors
     let cols=null, hi=-1;
     for(let i=0;i<rows.length && i<80;i++){
@@ -3839,7 +4272,7 @@ async function loadBoqPdf(f){
         const a=_pdfColAnchors(rows[i].cells); if(a){ cols=a; hi=i; break; }
       }
     }
-    if(!cols){ alert('Could not detect the BOQ table columns in this PDF.\n\nPDF layouts vary a lot — for reliable results import the Excel (.xlsx) or CSV export instead.'); return; }
+    if(!cols){ uiNotify('Could not detect the BOQ table columns in this PDF.\n\nPDF layouts vary a lot — for reliable results import the Excel (.xlsx) or CSV export instead.','err'); return; }
     const nodes=[], notes=[]; let inNotes=false;
     for(let i=hi+1;i<rows.length;i++){
       const joined=_impNorm(rows[i].cells.map(c=>c.s).join(' '));
@@ -3850,7 +4283,7 @@ async function loadBoqPdf(f){
       if(node) nodes.push(node);
     }
     _impApply({nodes,notes}, f.name);
-  }catch(err){ alert('Could not read PDF: '+err.message); }
+  }catch(err){ uiNotify('Could not read PDF: '+err.message,'err'); }
 }
 function bArmGroup(){
   if(bArmedParent==null) return null;
@@ -3913,12 +4346,18 @@ cList.addEventListener('click',e=>{
 const boqScroll=$('#boqScroll');
 // sum of sub-line amounts belonging to a parent at index pIdx
 function bParentTotal(pIdx){ return descendantTotal(pIdx); }
-function recalcFooter(){
+/* Base / GST totals — the single source for the footer AND the Review dialog,
+   so the two can never disagree. */
+function bTotals(){
   let base=0, gstAmt=0;
   boq.forEach(x=>{
     const a=nodeAmount(x);
     if(a){base+=a; gstAmt+=a*(parseFloat(x.gst)||0)/100;}
   });
+  return {base, gstAmt};
+}
+function recalcFooter(){
+  const {base, gstAmt}=bTotals();
   const bEl=$('#bBase'), gEl=$('#bGst'), tEl=$('#bGrand');
   const grand='₹'+inr(Math.round((base+gstAmt)*100)/100);
   if(bEl)bEl.textContent='₹'+inr(Math.round(base*100)/100);
@@ -3930,6 +4369,7 @@ function recalcFooter(){
   const sEl=$('#bSecCount'); if(sEl)sEl.textContent=secs;
   const hEl=$('#bHdrSum');
   if(hEl)hEl.innerHTML=boq.length?`<b>${items}</b> items · <b>${secs}</b> sections · <b>${grand}</b>`:'';
+  if(typeof BUI!=='undefined') BUI.refresh();   /* progress steps, missing-value count */
 }
 function renderCatSummary(){
   const totals={}; let all=0;
@@ -3975,12 +4415,17 @@ function wbsFieldHtml(n,code){
   if(BTYPES[n.type]&&BTYPES[n.type].unnumbered) return '';
   return `<input class="wbsin" data-f="wbs" value="${esc(code)}" title="WBS code (edit to override)">`;
 }
+/* "Missing qty / rate" toolbar filter — combines with the text search */
+let bMissOnly=false;
+/* row sids ticked for bulk actions (UI state only — never saved) */
+let bSel=new Set();
 /* which rows to show + whether filtering is active */
 function bVisibleIndices(){
   const q=(bTreeFilter||'').trim().toLowerCase();
-  if(!q){ const out=[]; for(let i=0;i<boq.length;i++){ if(!ancestorsCollapsed(i)) out.push(i); } return {idx:out,filtered:false}; }
+  if(!q && !bMissOnly){ const out=[]; for(let i=0;i<boq.length;i++){ if(!ancestorsCollapsed(i)) out.push(i); } return {idx:out,filtered:false}; }
   const nums=bNumbering(), wbs=bWBS();
-  const match=i=>{ const n=boq[i]; return (n.name||'').toLowerCase().includes(q)||(n.desc||'').toLowerCase().includes(q)||(n.cat||'').toLowerCase().includes(q)||(wbs[n.sid]||'').toLowerCase().includes(q)||(nums[n.sid]||'').toString().includes(q); };
+  const textMatch=i=>{ if(!q) return true; const n=boq[i]; return (n.name||'').toLowerCase().includes(q)||(n.desc||'').toLowerCase().includes(q)||(n.cat||'').toLowerCase().includes(q)||(wbs[n.sid]||'').toLowerCase().includes(q)||(nums[n.sid]||'').toString().includes(q); };
+  const match=i=>textMatch(i) && (!bMissOnly || !!bMissing(boq[i]));
   const keep=new Set();
   for(let i=0;i<boq.length;i++){
     if(match(i)){ keep.add(i);
@@ -3996,11 +4441,17 @@ function renderBOQ(){
   syncKinds();
   $('#bCount').textContent=boq.filter(n=>QUOTABLE.has(n.type)).length;
   if(!boq.length){
-    boqScroll.innerHTML=`<div class="boq-empty"><svg viewBox="0 0 24 24" fill="none"><path d="M9 11H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-4M12 3v8m0 0 3-3m-3 3L9 8"/></svg><h4>Your BOQ is empty</h4><div>Add a <b>Header</b>, then nest <b>Items</b> under it — or search the library on the left and click ＋. Use ⇥/⇤ to indent, drag ⋮⋮ to reorder. Build unlimited levels.</div></div>`;
+    boqScroll.innerHTML=`<div class="boq-empty"><svg viewBox="0 0 24 24" fill="none"><path d="M9 11H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-4M12 3v8m0 0 3-3m-3 3L9 8"/></svg><h4>Your BOQ is empty</h4><div>Start with a <b>section header</b> and nest <b>items</b> under it, pick items from the library on the left, or open an existing BOQ file (Excel, CSV, PDF or .boq.json).</div>
+      <div class="ui-empty-acts"><button type="button" class="btn primary" data-empty-act="header">Add section header</button><button type="button" class="btn" data-empty-act="item">Add item</button><button type="button" class="btn" data-empty-act="open">Open file…</button></div></div>`;
+    bSel.clear();
     recalcFooter(); return;
   }
   const nums=bNumbering(), wbs=bWBS(), codes=bItemCodes();
   const {idx,filtered}=bVisibleIndices();
+  /* drop selections whose rows no longer exist */
+  const liveSids=new Set(boq.map(n=>n.sid)); bSel.forEach(s=>{ if(!liveSids.has(s)) bSel.delete(s); });
+  const selCell=b=>`<td class="bq-sel"><input type="checkbox" data-sel="${b.sid}"${bSel.has(b.sid)?' checked':''} aria-label="Select row ${esc(String(nums[b.sid]||b.name||''))}"></td>`;
+  const selCls=b=>bSel.has(b.sid)?' ui-selected':'';
   let rows='';
   idx.forEach(i=>{
     const b=boq[i];
@@ -4019,46 +4470,49 @@ function renderBOQ(){
     const canDown = endI<boq.length && (boq[endI].level||0)===lv;
     const acts=actsHtml(b.type,canUp,canDown);
     if(isNote){
-      rows+=`<tr class="bq-row bq-note" data-sid="${b.sid}">
-        <td class="bq-wbs"></td><td class="bq-sl"></td>
+      rows+=`<tr class="bq-row bq-note${selCls(b)}" data-sid="${b.sid}">
+        ${selCell(b)}<td class="bq-wbs"></td><td class="bq-sl"></td>
         <td colspan="8" style="padding-left:${indent}px"><div class="bq-itemcell">${drag}<span class="bq-caret leaf">▾</span><div class="bq-namewrap bq-noteline">${tag}${descField('descin', b.desc)}</div></div></td>
         <td>${acts}</td></tr>`;
       return;
     }
     if(isGrp){
       const tot=descendantTotal(i);
-      rows+=`<tr class="bq-row bq-grp lv${Math.min(lv,2)}" data-sid="${b.sid}">
-        <td class="bq-wbs">${wbsFieldHtml(b,wbs[b.sid])}</td>
+      rows+=`<tr class="bq-row bq-grp lv${Math.min(lv,2)}${selCls(b)}" data-sid="${b.sid}">
+        ${selCell(b)}<td class="bq-wbs">${wbsFieldHtml(b,wbs[b.sid])}</td>
         <td class="bq-sl"><b>${nums[b.sid]}</b></td>
         <td colspan="4" style="padding-left:${indent}px"><div class="bq-itemcell">${drag}${caret}<div class="bq-namewrap"><div class="bq-nameline">${tag}<input class="pnamein" data-f="name" value="${esc(b.name)}" placeholder="${t.label} name…"></div>${descField('descin',b.desc)}</div></div></td>
         <td class="bq-amt"><span class="bq-rowtot">${tot?'₹'+inr(tot):''}</span></td>
-        <td colspan="4" style="text-align:right">${acts}</td></tr>`;
+        <td colspan="3"></td><td style="text-align:right">${acts}</td></tr>`;
       return;
     }
     // quotable item row
     const amt=nodeAmount(b);
     const showAmt = b.type==='rateonly' ? '<span style="color:var(--faint)">rate only</span>' : (amt?'₹'+inr(amt):'–');
     const fixed=t.fixedQty;
+    const miss=bMissing(b)||{};
     const qtyCell = fixed
-      ? `<input class="qin" data-f="qty" value="1" disabled style="opacity:.5">`
-      : `<input class="qin" data-f="qty" value="${esc(b.qty)}" placeholder="0" inputmode="decimal">`;
-    rows+=`<tr class="bq-row bq-${b.type}" data-sid="${b.sid}">
-      <td class="bq-wbs">${wbsFieldHtml(b,wbs[b.sid])}</td>
+      ? `<input class="qin" data-f="qty" value="1" disabled style="opacity:.5" aria-label="Quantity (fixed at 1)">`
+      : `<input class="qin${miss.qty?' ui-missing':''}" data-f="qty" value="${esc(b.qty)}" placeholder="0" inputmode="decimal" aria-label="Quantity">`;
+    rows+=`<tr class="bq-row bq-${b.type}${selCls(b)}" data-sid="${b.sid}">
+      ${selCell(b)}<td class="bq-wbs">${wbsFieldHtml(b,wbs[b.sid])}</td>
       <td class="bq-sl">${nums[b.sid]}${codes[b.sid]?`<div style="font-size:8.5px;color:var(--faint);font-family:'Spline Sans Mono',monospace;margin-top:2px" title="Auto item code (by category)">${codes[b.sid]}</div>`:''}</td>
       <td style="padding-left:${indent}px;max-width:280px"><div class="bq-itemcell">${drag}${caret}<div class="bq-namewrap"><div class="bq-nameline">${tag}<input class="namein bq-acname" data-f="name" value="${esc(b.name)}" placeholder="Short name…" autocomplete="off" style="flex:1"><button class="bq-airow" data-aisid="${b.sid}" title="Create description from short name with AI">✨</button></div>${descField('descin', b.desc)}</div></div></td>
       <td class="bq-uom"><input class="uomin" data-f="uom" value="${esc(b.uom)}" placeholder="Unit" list="uomMasterList" autocomplete="off"></td>
       <td>${qtyCell}</td>
-      <td><input class="rin" data-f="rate" value="${esc(b.rate)}" placeholder="0" inputmode="decimal"></td>
+      <td><input class="rin${miss.rate?' ui-missing':''}" data-f="rate" value="${esc(b.rate)}" placeholder="0" inputmode="decimal" aria-label="Rate"></td>
       <td class="bq-amt">${showAmt}</td>
       <td style="text-align:center;vertical-align:middle">${gstSelHtml(b.gst)}</td>
       <td><input class="rkin" data-f="remarks" value="${esc(b.remarks||'')}" placeholder="Rate ref…" style="width:100%;min-width:70px;font-size:11px;background:transparent;border:none;border-bottom:1px solid var(--line);padding:2px 4px;color:var(--fg);outline:none"></td>
       <td><input class="woin" data-f="wo" value="${esc(b.wo||'')}" placeholder="WO No…" style="width:100%;min-width:70px;font-size:11px;background:transparent;border:none;border-bottom:1px solid var(--line);padding:2px 4px;color:var(--fg);outline:none"></td>
       <td>${acts}</td></tr>`;
   });
-  const filterNote = filtered ? `<div style="padding:6px 12px;font-size:11px;color:var(--accent2);background:rgba(255,210,63,.07)">Showing ${idx.length} row(s) matching “${esc(bTreeFilter)}” (with parent context). Clear the filter to edit the full tree.</div>` : '';
+  const why=[(bTreeFilter||'').trim()?`matching “${esc(bTreeFilter)}”`:'', bMissOnly?'still missing a quantity or rate':''].filter(Boolean).join(' and ');
+  const filterNote = filtered ? `<div class="ui-filternote" style="display:flex;align-items:center;gap:10px;padding:6px 12px;font-size:11.5px;color:var(--accent2);background:var(--warn-bg);border-bottom:1px solid var(--line)">${idx.length?`Showing ${idx.length} row(s) ${why} (with parent context).`:`No rows ${why}.`}<button type="button" class="btn sm ghost" data-clear-filters="1" style="margin-left:auto">Show all rows</button></div>` : '';
   boqScroll.innerHTML=`${filterNote}<table class="boqt"><thead><tr>
-    <th style="width:78px">WBS</th><th style="width:30px">#</th><th style="min-width:240px">Item / Description</th><th style="width:54px">Unit</th><th style="width:74px">Qty</th><th style="width:80px">Rate ₹</th><th style="width:96px;text-align:right">Amount ₹</th><th style="width:54px;text-align:center">GST</th><th style="width:92px">Remarks</th><th style="width:92px">WO No.</th><th style="width:150px;text-align:right">Actions</th>
+    <th class="bq-selh"><input type="checkbox" id="bSelAll" aria-label="Select all visible rows"></th><th style="width:78px">WBS</th><th style="width:30px">#</th><th style="min-width:240px">Item / Description</th><th style="width:60px;text-align:center">Unit</th><th style="width:94px">Qty</th><th style="width:94px">Rate ₹</th><th style="width:106px;text-align:right">Amount ₹</th><th style="width:60px;text-align:center">GST</th><th style="width:92px">Remarks</th><th style="width:92px">WO No.</th><th style="width:96px;text-align:right">Actions</th>
     </tr></thead><tbody>${rows}</tbody></table>`;
+  if(typeof BUI!=='undefined') BUI.syncSelAll(idx);
   rzInstall(boqScroll,'boqt'); rzApplyWidths(boqScroll,'boqt');
   recalcFooter();
   renderCatSummary();
@@ -4160,7 +4614,7 @@ let _bRowAIBusy=false;
 async function bRowAI(sid, btn){
   const b=boq.find(x=>x.sid===sid); if(!b) return;
   const seed=(b.desc||'').trim()||(b.name||'').trim();
-  if(!seed){ alert('Type a short item name first, then click ✨.'); return; }
+  if(!seed){ uiNotify('Type a short item name first, then click ✨.','warn'); return; }
   const catName = (b.cat!=null && b.cat!=='') ? (CATS[parseInt(b.cat)]||b.cat) : '';
   // Route the per-row AI button through the AI Description Studio (multi-version popup)
   if(typeof AIStudio==='undefined'){ return; }
@@ -4192,7 +4646,7 @@ boqScroll.addEventListener('click',e=>{
     case 'up': bMoveUp(sid); break;
     case 'down': bMoveDown(sid); break;
     case 'dup': bDuplicate(sid); break;
-    case 'del': bDelete(sid); break;
+    case 'del': if(typeof BUI!=='undefined'){ BUI.deleteRows([sid]); return; } bDelete(sid); break;
     case 'child': { const n=bAddChild(sid); renderBOQ(); cRender(); scheduleAutosave();
         const ni=boqScroll.querySelector('tr[data-sid="'+(n&&n.sid)+'"] .namein'); if(ni)ni.focus(); return; }
     default: return;
@@ -4332,10 +4786,22 @@ $('#btExpandAll')?.addEventListener('click',()=>{ boq.forEach(n=>n.collapsed=fal
 $('#btCollapseAll')?.addEventListener('click',()=>{ boq.forEach(n=>{ if(BTYPES[n.type]&&BTYPES[n.type].group) n.collapsed=true; }); renderBOQ(); });
 $('#bTreeFind')?.addEventListener('input',function(){ bTreeFilter=this.value; renderBOQ(); });
 
-$('#bClear').addEventListener('click',()=>{if(boq.length&&confirm('Clear all '+boq.length+' rows?')){_undoCapture();boq=[];bArmedParent=null;bArmBanner();renderBOQ();cRender();clearDraft();_undoCapture();}});
+$('#bClear').addEventListener('click',()=>{
+  if(!boq.length){ uiNotify('The BOQ is already empty.'); return; }
+  const n=boq.length;
+  const ask=(typeof BUI!=='undefined')
+    ? BUI.confirm({title:'Clear the whole BOQ?',body:'Remove all '+n+' rows? Project details are kept. You can undo this straight afterwards.',okText:'Clear BOQ',danger:true})
+    : Promise.resolve(confirm('Clear all '+n+' rows?'));
+  ask.then(ok=>{
+    if(!ok) return;
+    const before=JSON.stringify(boq), armed=bArmedParent;
+    _undoCapture();boq=[];bArmedParent=null;bArmBanner();renderBOQ();cRender();clearDraft();_undoCapture();
+    showToastUndo('Cleared '+n+' rows',()=>{ boq=JSON.parse(before); bArmedParent=armed; bArmBanner(); renderBOQ(); cRender(); scheduleAutosave(); uiNotify('BOQ restored','ok'); });
+  });
+});
 
 /* ---- BOQ export helpers ---- */
-function boqMeta(){return {proj:$('#bProj').value||'BOQ',client:$('#bClient').value||''};}
+function boqMeta(){return {proj:$('#bProj').value||'BOQ',client:$('#bClient').value||'',ref:($('#bRef')&&$('#bRef').value)||'',wo:($('#bWO')&&$('#bWO').value)||''};}
 function boqFname(ext){const m=boqMeta();return (m.proj.replace(/[^a-z0-9]+/gi,'_')||'BOQ')+'_'+ext;}
 // Returns {rows:[{kind:'parent'|'note'|'line',sl,wbs,level,name,desc,uom,qty,rate,amt,gst,gstAmt,remarks,wo}], grand}
 function boqRows(){
@@ -4391,10 +4857,10 @@ function boqTransferItems(){
   return out.filter(it=>it.desc||it.short);
 }
 function openTransferDialog(){
-  if(!boq.length){alert('Add items to your BOQ first.');return;}
+  if(!boq.length){uiNotify('Add items to your BOQ first.','warn');return;}
   const items=boqTransferItems();
-  if(!items.length){alert('No transferable line items found \u2014 sections alone cannot be transferred.');return;}
-  if(typeof QM==='undefined'||!QM.importFromBOQ){alert('Enquiry module is not available.');return;}
+  if(!items.length){uiNotify('No transferable line items found \u2014 sections alone cannot be transferred.','err');return;}
+  if(typeof QM==='undefined'||!QM.importFromBOQ){uiNotify('Enquiry module is not available.','err');return;}
   const qs=(QM.listQuotations&&QM.listQuotations())||[];
   let ov=document.getElementById('xferOv');
   if(!ov){ov=document.createElement('div');ov.id='xferOv';ov.className='modal-overlay';document.body.appendChild(ov);
@@ -4439,6 +4905,24 @@ $('#bToQuote').addEventListener('click',openTransferDialog);
   menu&&menu.addEventListener('click',()=>dd.classList.remove('open')); // close after choosing a format
   document.addEventListener('click',e=>{ if(!dd.contains(e.target)) dd.classList.remove('open'); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape') dd.classList.remove('open'); });
+})();
+/* File menu (revisions, save / open file, clear) — same open/close pattern;
+   the buttons inside keep their original ids and handlers. */
+(function(){
+  const dd=$('#bFileDd'), btn=$('#bFileMenuBtn'), menu=$('#bFileMenu');
+  if(!dd||!btn)return;
+  const sync=()=>btn.setAttribute('aria-expanded',dd.classList.contains('open')?'true':'false');
+  btn.addEventListener('click',e=>{ e.stopPropagation(); $('#bExpDd')?.classList.remove('open'); dd.classList.toggle('open'); sync();
+    if(dd.classList.contains('open')) menu.querySelector('[role="menuitem"]')?.focus(); });
+  menu&&menu.addEventListener('click',e=>{ if(e.target.closest('[role="menuitem"]')){ dd.classList.remove('open'); sync(); } });
+  document.addEventListener('click',e=>{ if(!dd.contains(e.target)){ dd.classList.remove('open'); sync(); } });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&dd.classList.contains('open')){ dd.classList.remove('open'); sync(); btn.focus(); } });
+  /* arrow keys move between items while the menu is open */
+  menu&&menu.addEventListener('keydown',e=>{
+    if(e.key!=='ArrowDown'&&e.key!=='ArrowUp')return;
+    const items=[...menu.querySelectorAll('[role="menuitem"]')], i=items.indexOf(document.activeElement);
+    e.preventDefault(); items[(i+(e.key==='ArrowDown'?1:-1)+items.length)%items.length].focus();
+  });
 })();
 
 /* ── BOQ toolbar "＋ Add" menu — same open/close pattern as Export.
@@ -4554,10 +5038,13 @@ $('#bToQuote').addEventListener('click',openTransferDialog);
 })();
 
 $('#bExpCsv').addEventListener('click',()=>{
-  if(!boq.length){alert('Add some items first.');return;}
+  if(!boq.length){uiNotify('Add some items before exporting.','warn');return;}
   const m=boqMeta(),e2=csvCell;
   const {rows,grand}=boqRows();
-  let csv=e2('Project:')+','+e2(m.proj)+'\n'+e2('Contractor:')+','+e2(m.client)+'\n\n';
+  let csv=e2('Project:')+','+e2(m.proj)+'\n';
+  if(m.ref) csv+=e2('Project Code / Ref:')+','+e2(m.ref)+'\n';
+  if(m.wo) csv+=e2('WO No.:')+','+e2(m.wo)+'\n';
+  csv+=e2('Contractor:')+','+e2(m.client)+'\n\n';
   csv+=['WBS','Sl No','Item / Section','Description','Unit','Quantity','Rate','Amount','GST %','GST Amt','Remarks','WO No.'].map(e2).join(',')+'\n';
   rows.forEach(r=>{
     if(r.kind==='note') csv+=[r.wbs||'',r.sl,r.name,r.desc,'','','','','','','',''].map(e2).join(',')+'\n';
@@ -4572,15 +5059,19 @@ $('#bExpCsv').addEventListener('click',()=>{
   dl(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),boqFname('')+'.csv');
 });
 $('#bExpXls').addEventListener('click',()=>{
-  if(!boq.length){alert('Add some items first.');return;}
-  if(typeof XLSX==='undefined'){alert('Excel library not loaded (needs internet on first load). Use CSV instead.');return;}
+  if(!boq.length){uiNotify('Add some items before exporting.','warn');return;}
+  if(typeof XLSX==='undefined'){uiNotify('The Excel library has not loaded (it needs internet the first time). Try again in a moment, or export CSV instead.','err');return;}
   const m=boqMeta(),{rows,grand}=boqRows();
+  /* Project code / WO No. use the row that used to be a blank spacer, so the
+     header still occupies exactly 5 rows (merges, freeze and print titles
+     below all assume that). */
+  const refLine=[m.ref?'Code: '+m.ref:'', m.wo?'WO No.: '+m.wo:''].filter(Boolean).join('   ·   ');
   // ── Sheet data (8 columns: Sl,Name,Desc,Unit,Qty,Rate,Amount,Remarks) ───
   const aoa=[
     ['BILL OF QUANTITIES','','','','','','','','','',''],
     ['Project:',m.proj,'','','','','','','','',''],
     ['Contractor:',m.client,'','','','','','','','',''],
-    ['','','','','','','','','','',''],
+    [refLine?'Reference:':'',refLine,'','','','','','','','',''],
     ['Sl No','Item / Section','Description','Unit','Qty','Rate ₹','Amount ₹','GST %','GST Amt ₹','Remarks','WO No.']
   ];
   const headerRows=aoa.length;
@@ -4640,6 +5131,7 @@ $('#bExpXls').addEventListener('click',()=>{
     {s:{r:1,c:1},e:{r:1,c:10}},   // project value
     {s:{r:2,c:1},e:{r:2,c:10}},   // contractor value
   ];
+  if(refLine) ws['!merges'].push({s:{r:3,c:1},e:{r:3,c:10}});   // code / WO value
   // ── Column widths (A4 portrait optimised, ~182mm usable width) ───────────
   ws['!cols']=[
     {wch:6},   // A – Sl No
@@ -4659,7 +5151,7 @@ $('#bExpXls').addEventListener('click',()=>{
   rh.push({hpt:24}); // title
   rh.push({hpt:15}); // Project
   rh.push({hpt:15}); // Contractor
-  rh.push({hpt:5});  // spacer
+  rh.push({hpt:refLine?15:5});  // code / WO, or spacer when there is neither
   rh.push({hpt:22}); // column headers
   rows.forEach(r=>rh.push({hpt:r.kind==='parent'?18:13}));
   rh.push({hpt:20}); // grand total
@@ -4676,12 +5168,13 @@ $('#bExpXls').addEventListener('click',()=>{
   XLSX.writeFile(wb,boqFname('')+'.xlsx');
 });
 $('#bExpPdf').addEventListener('click',()=>{
-  if(!boq.length){alert('Add some items first.');return;}
+  if(!boq.length){uiNotify('Add some items before exporting.','warn');return;}
   const js=window.jspdf&&window.jspdf.jsPDF;
-  if(!js){alert('PDF library not loaded (needs internet on first load). Use CSV or Excel instead.');return;}
+  if(!js){uiNotify('The PDF library has not loaded (it needs internet the first time). Try again in a moment, or export Excel / CSV instead.','err');return;}
   const m=boqMeta(),{rows,grand}=boqRows();
   const doc=new js({orientation:'portrait',unit:'mm',format:'a4'});
-  const {startY,chrome,finish,pw:W,H,M,B}=pdfHeader(doc,{title:'BILL OF QUANTITIES',subtitle:'Project: '+m.proj,rightBot:m.client?'Contractor: '+m.client:'',footer:'Primarc · Bill of Quantities',running:m.proj});
+  const refTop=[m.ref?'Code: '+m.ref:'', m.wo?'WO No.: '+m.wo:''].filter(Boolean).join('   ·   ');
+  const {startY,chrome,finish,pw:W,H,M,B}=pdfHeader(doc,{title:'BILL OF QUANTITIES',subtitle:'Project: '+m.proj,rightTop:refTop,rightBot:m.client?'Contractor: '+m.client:'',footer:'Primarc · Bill of Quantities',running:m.proj});
   const body=rows.map(r=>{
     if(r.kind==='note'){
       return [{content:'',styles:{}},
@@ -5879,13 +6372,24 @@ function clearFind(){
 function showToast(msg,dur=2600){
   let t=document.getElementById('toastEl');
   if(!t){t=document.createElement('div');t.id='toastEl';t.className='toast';document.body.appendChild(t);}
+  t.classList.remove('t-ok','t-err','t-warn','t-info'); t.setAttribute('role','status'); t.setAttribute('aria-live','polite');
   t.textContent=msg; t.classList.add('show');
   clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),dur);
+}
+/* In-app notice, used where a blocking alert() used to be. kind: info | ok | warn | err.
+   Errors stay up longer and are announced assertively to screen readers. */
+function uiNotify(msg,kind){
+  kind=kind||'info';
+  showToast(String(msg), kind==='err'?7000:kind==='warn'?4500:2800);
+  const t=document.getElementById('toastEl'); if(!t) return;
+  t.classList.add('t-'+kind);
+  if(kind==='err'){ t.setAttribute('role','alert'); t.setAttribute('aria-live','assertive'); }
 }
 /* toast with an Undo action button */
 function showToastUndo(msg,undoFn,dur=6000){
   let t=document.getElementById('toastEl');
   if(!t){t=document.createElement('div');t.id='toastEl';t.className='toast';document.body.appendChild(t);}
+  t.classList.remove('t-ok','t-err','t-warn','t-info');
   t.innerHTML='';
   const span=document.createElement('span'); span.textContent=msg; t.appendChild(span);
   const b=document.createElement('button'); b.textContent='Undo';
@@ -6664,6 +7168,7 @@ function updateRevBadge(){const b=$('#revBadge');if(b)b.textContent='Rev-'+curre
 /* Capture a full, restorable snapshot of the current BOQ working state. */
 function _revSnapshot(){
   return {proj:$('#bProj')?.value||'',client:$('#bClient')?.value||'',
+    ref:$('#bRef')?.value||'',wo:$('#bWO')?.value||'',
     boq:JSON.parse(JSON.stringify(boq)),notes:JSON.parse(JSON.stringify(bNotes)),seq};
 }
 function bumpRevision(){
@@ -6683,6 +7188,8 @@ function _applyRevSnapshot(snap){
   migrateBOQ();
   if($('#bProj'))$('#bProj').value=snap.proj||'';
   if($('#bClient'))$('#bClient').value=snap.client||'';
+  if($('#bRef'))$('#bRef').value=snap.ref||'';
+  if($('#bWO'))$('#bWO').value=snap.wo||'';
   renderBOQ();cRender();renderNotes('b',bNotes);updateRevBadge();
   doAutosave();
   return true;
@@ -8782,7 +9289,7 @@ function renderList(m){
       </div>
       <div class="qm-list-hdr-right">
         <button class="btn primary" onclick="QM.openEditor(null)" style="height:44px;padding:0 22px;font-size:13.5px;font-weight:700;display:inline-flex;align-items:center;gap:8px">
-          <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;stroke:currentColor;stroke-width:2.5"><path d="M12 5v14M5 12h14"/></svg>+ New Enquiry
+          <svg viewBox="0 0 24 24" fill="none" style="width:16px;height:16px;stroke:currentColor;stroke-width:2.5"><path d="M12 5v14M5 12h14"/></svg>New Enquiry
         </button>
       </div>
     </div>
@@ -8817,7 +9324,7 @@ function renderList(m){
         <h4>No enquiries yet</h4>
         <p>Get started by creating your first construction enquiry and inviting vendors to bid.</p>
         <div class="qm-empty-actions">
-          <button class="btn primary" onclick="QM.openEditor(null)"><svg viewBox="0 0 24 24" fill="none" style="width:15px;height:15px;stroke:currentColor;stroke-width:2"><path d="M12 5v14M5 12h14"/></svg>+ Create First Enquiry</button>
+          <button class="btn primary" onclick="QM.openEditor(null)"><svg viewBox="0 0 24 24" fill="none" style="width:15px;height:15px;stroke:currentColor;stroke-width:2"><path d="M12 5v14M5 12h14"/></svg>Create First Enquiry</button>
         </div>
       </div></div>`;
     } else {
@@ -9250,7 +9757,7 @@ function quotePicker(onChange){
 }
 function renderCS(m){
   const pick=quotePicker();
-  if(!pick){m.innerHTML=`<div class="qm-wrap"><div class="qm-h">Comparative Statement</div>${emptyBox('No enquiries with vendors','Add vendors and quotes to a enquiry first.')}</div>`;return;}
+  if(!pick){m.innerHTML=`<div class="qm-wrap"><div class="qm-h">Comparative Statement</div>${emptyBox('No enquiries with vendors','Add vendors and their quotes to an enquiry first.')}</div>`;return;}
   const q=DB.quotations.find(x=>x.id===curId);syncLines(q);
   const vr=vendorRank(q);
   let h=`<div class="qm-wrap">
@@ -12709,13 +13216,19 @@ return api;
     var crumb=el('pwsCrumb');
     if(crumb) crumb.innerHTML='<span class="pws-c-brand">Primarc</span><i class="pws-c-sep">/</i><span class="pws-c-grp">'+esc(meta.group||'Workspace')+'</span>';
     var t=el('pwsTitle'); if(t) t.textContent=meta.label||'';
-    var d=DESC[key]||'';
-    var descEl=el('pwsDesc'); if(descEl) descEl.textContent=d;
+    var view=document.querySelector('.view.on'), onHome=!!(view && view.id==='home');
+    /* The dashboard carries its own description block, so the top bar
+       shows only its title there rather than saying the same thing twice. */
+    var d=onHome?'':(DESC[key]||'');
+    var descEl=el('pwsDesc'); if(descEl){ descEl.textContent=d; descEl.title=d; }
     var dSep=el('pwsDescSep'); if(dSep) dSep.style.display=d?'':'none';
-    /* The dashboard carries its own title block, so the shared header is
-       hidden there rather than showing two titles. */
-    var view=document.querySelector('.view.on');
-    head.style.display = (view && view.id==='home') ? 'none' : '';
+    /* Bell + New Enquiry belong to Enquiry Management (the notification
+       dropdown is drawn inside #quote). The enquiry list has its own New
+       Enquiry button beside its heading, so don't show a second one there. */
+    var inQuote=!!(view && view.id==='quote');
+    var bell=el('qmBell'), nw=el('qmNew');
+    if(bell) bell.style.display=inQuote?'':'none';
+    if(nw) nw.style.display=(inQuote && key!=='enq')?'':'none';
   }
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
@@ -12763,19 +13276,27 @@ return api;
       + '<p class="pws-desc" id="pwsDesc"></p>'
       + '</div>'
       + '<div class="pws-r" id="pwsActions"></div>';
-    /* Child of .app, positioned by grid. It must NOT live inside a view:
-       a view that re-renders its innerHTML would delete it. */
-    app().appendChild(head);
+    /* Lives in the top bar, in place of the logo row the sidebar already
+       shows — one band for "where am I" instead of two. It must NOT live
+       inside a view: a view that re-renders its innerHTML would delete it. */
+    var tb=document.querySelector('.app > .topbar'), brand=tb&&tb.querySelector('.brand');
+    if(brand) brand.parentNode.insertBefore(head, brand.nextSibling);
+    else app().appendChild(head);
+    /* Enquiry Management's bell + New Enquiry move next to the page title;
+       same nodes, so their ids and listeners come along. */
+    var acts=el('pwsActions');
+    ['qmBell','qmNew'].forEach(function(id){ var b=el(id); if(b&&acts) acts.appendChild(b); });
+    var qn=el('qmNew'); if(qn) qn.classList.add('sm');
 
-    /* Hamburger for the off-canvas drawer, next to the existing top icons. */
-    var anchor=el('globalSearchBtn');
-    if(anchor&&anchor.parentNode&&!el('sbBurger')){
+    /* Hamburger for the off-canvas drawer (≤860px only), first in the top
+       bar where people look for it — not between the search and theme icons. */
+    if(tb&&!el('sbBurger')){
       var bg=document.createElement('button');
       bg.id='sbBurger'; bg.className='theme-tog'; bg.type='button';
       bg.title='Menu'; bg.setAttribute('aria-label','Open navigation');
       bg.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
       bg.addEventListener('click',function(){ app().classList.toggle('sb-open'); });
-      anchor.parentNode.insertBefore(bg, anchor);
+      tb.insertBefore(bg, tb.firstChild);
     }
 
     /* Re-paint whenever the app changes view or QM changes sub-section —
@@ -12792,6 +13313,10 @@ return api;
     if(adm) mo.observe(adm,{attributes:true,attributeFilter:['class'],subtree:true,childList:true});
 
     paint(); who(); counts(); dashboard();
+    /* The signed-in name reaches the top-bar chip after login, which can be
+       long after this runs — follow the chip rather than reading it once
+       (the sidebar footer used to stay on "Signed in"). */
+    if(tb) new MutationObserver(function(){ who(); }).observe(tb,{childList:true,subtree:true,characterData:true});
 
     /* Keep badges and the dashboard honest after any server sync. */
     if(window.TSApi&&window.TSApi.onStatus){
@@ -12844,14 +13369,16 @@ return api;
        level (all 1s) — arithmetically true, but it read as "everything is
        full". Against the total, a stage's bar means what a reader assumes:
        how much of the pipeline is sitting there. */
-    var totalN=ORDER.reduce(function(t,s){ return t+(m.byStatus[s[0]]||0); },0)||1;
+    /* realN is what the caption reports; totalN only guards the division
+       (it used to be both, so an empty pipeline read "1 enquiry"). */
+    var realN=ORDER.reduce(function(t,s){ return t+(m.byStatus[s[0]]||0); },0), totalN=realN||1;
     var pipe=ORDER.map(function(s){
       var n=m.byStatus[s[0]]||0, pc=n/totalN*100;
       return '<div class="pp-row"><span class="pp-k">'+s[1]+'</span>'
            + '<span class="pp-bar"><i class="pp-'+s[0]+'" style="width:'+pc.toFixed(1)+'%"></i></span>'
            + '<span class="pp-n">'+n+'</span></div>';
     }).join('')
-    + '<div class="pp-tot">'+totalN+' enquir'+(totalN===1?'y':'ies')+' in the pipeline</div>';
+    + '<div class="pp-tot">'+(realN?realN+' enquir'+(realN===1?'y':'ies')+' in the pipeline':'No enquiries in the pipeline yet')+'</div>';
 
     var rows=m.recent.length ? m.recent.map(function(r){
       var pct=r.vendors?Math.round(r.responses/r.vendors*100):0;
@@ -12904,6 +13431,371 @@ return api;
   else init();
 })();
 
+</script>
+<script id="boqUiJS">
+/* ═══════════════════════════════════════════════════════════════════════
+   BOQ BUILDER — workflow layer
+   ───────────────────────────────────────────────────────────────────────
+   Progress steps, project-details panel, "missing qty / rate" filter,
+   multi-row selection with bulk actions, delete-with-undo, and the Review
+   & Preview dialog. Everything goes through the builder's own state and
+   functions (boq, renderBOQ, bDuplicate, bShiftLevel, boqRows, bTotals …):
+   no figure is computed here that the footer and exports don't also use.
+   ═══════════════════════════════════════════════════════════════════════ */
+var BUI=(function(){
+  'use strict';
+  var DET_KEY='boq_details_open';            /* UI preference only */
+  function q(s){ return document.querySelector(s); }
+  function idxOf(sid){ return boq.findIndex(function(n){ return n.sid===sid; }); }
+  function plural(n,w){ return n+' '+w+(n===1?'':'s'); }
+  function money(n){ return '₹'+inr(Math.round((n||0)*100)/100); }
+
+  /* ── counts used by the steps, the filter chip and Review ───────────── */
+  function stats(){
+    var s={items:0,sections:0,noQty:0,noRate:0,noUnit:0,noText:0,rateOnly:0,missingRows:0};
+    boq.forEach(function(n){
+      var t=BTYPES[n.type]||BTYPES.item;
+      if(t.group){ s.sections++; return; }
+      if(!QUOTABLE.has(n.type)) return;
+      s.items++;
+      if(t.excludeTotal) s.rateOnly++;
+      var m=bMissing(n);
+      if(m){ s.missingRows++; if(m.qty) s.noQty++; if(m.rate) s.noRate++; }
+      if(!String(n.uom||'').trim()) s.noUnit++;
+      if(!String(n.name||'').trim() && !String(n.desc||'').trim()) s.noText++;
+    });
+    return s;
+  }
+  /* cheap change signature: steps 4/5 count as done only for the state that was reviewed / exported */
+  function sig(){ try{ return JSON.stringify(boq)+'|'+JSON.stringify(boqMeta()); }catch(e){ return String(Math.random()); } }
+  var reviewedSig=null, exportedSig=null;
+
+  /* ── progress steps + project details summary ───────────────────────── */
+  function refresh(){
+    var steps=q('#bSteps'); if(!steps) return;
+    var s=stats(), m=boqMeta(), proj=(q('#bProj').value||'').trim(), cur=sig();
+    var st={
+      1:{done:!!proj, sub:proj?'Named':'Name required', warn:!proj && boq.length>0},
+      2:{done:s.items>0, sub:s.items?plural(s.items,'item')+(s.sections?' · '+plural(s.sections,'section'):''):'None yet'},
+      3:{done:s.items>0 && !s.missingRows,
+         warn:s.noQty>0,
+         sub:!s.items?'—':(s.noQty?s.noQty+' without qty':'')+(s.noQty&&s.noRate?' · ':'')+(s.noRate?s.noRate+' without rate':'')||'Complete'},
+      4:{done:s.items>0 && reviewedSig===cur, sub:reviewedSig===cur?'Checked':(s.items?'Not checked':'—')},
+      5:{done:s.items>0 && exportedSig===cur, sub:exportedSig===cur?'Exported':(s.items?'Excel · PDF · CSV':'—')}
+    };
+    var curStep=0;
+    [1,2,3,4,5].forEach(function(k){ if(!curStep && !st[k].done) curStep=k; });
+    steps.querySelectorAll('.bq-step').forEach(function(b){
+      var k=+b.dataset.step, v=st[k];
+      b.classList.toggle('done',!!v.done); b.classList.toggle('warn',!v.done && !!v.warn); b.classList.toggle('cur',k===curStep);
+      b.querySelector('.n').textContent=v.done?'✓':k;
+      b.querySelector('[data-s]').textContent=v.sub;
+      if(k===curStep) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current');
+    });
+    var pj=q('#bProj'); if(pj) pj.classList.toggle('ui-invalid',!proj && boq.length>0);
+    var chip=q('#bMissTog'), cnt=q('#bMissCnt');
+    if(cnt) cnt.textContent=s.missingRows;
+    if(chip){ chip.disabled=!s.missingRows && !bMissOnly; chip.classList.toggle('on',bMissOnly); chip.setAttribute('aria-pressed',bMissOnly?'true':'false'); }
+    var sum=q('#bDetailsSum');
+    if(sum){
+      var parts=[m.ref, m.wo, m.client].filter(function(x){ return String(x||'').trim(); });
+      sum.innerHTML=parts.length?parts.map(function(p){ return '<b>'+esc(p)+'</b>'; }).join(' · '):'';
+      sum.title=parts.join(' · ');
+    }
+    bulkBar();
+  }
+
+  function setDetails(open,focus){
+    var h=q('#bHead'), t=q('#bDetailsTog'); if(!h) return;
+    h.classList.toggle('details-open',open);
+    if(t) t.setAttribute('aria-expanded',open?'true':'false');
+    try{ localStorage.setItem(DET_KEY,open?'1':'0'); }catch(e){}
+    if(open && focus){ var f=q(focus); if(f) f.focus(); }
+  }
+
+  function setMissing(on){
+    bMissOnly=!!on;
+    if(bMissOnly) boq.forEach(function(n){ n.collapsed=false; });   /* a hidden row can't be fixed */
+    renderBOQ();
+    if(bMissOnly){ var f=q('#boqScroll input.ui-missing'); if(f) f.focus(); }
+  }
+
+  function goStep(k){
+    if(k===1){ setDetails(true, (q('#bProj').value||'').trim()?'#bRef':'#bProj'); if(!(q('#bProj').value||'').trim()) q('#bProj').focus(); return; }
+    if(k===2){
+      var body=q('#create .create-body');
+      if(body && body.classList.contains('lib-collapsed')){ var tg=body.querySelector('.split-toggle'); if(tg) tg.click(); }
+      var tab=q('#create .mobile-tabs [data-tab="lib"]'); if(tab && tab.offsetParent) tab.click();
+      var s=q('#cSearch'); if(s) s.focus();
+      return;
+    }
+    if(k===3){
+      var st=stats();
+      if(!st.items){ uiNotify('Add some items first — then enter their quantities and rates.','warn'); return; }
+      if(!st.missingRows){ uiNotify('Every item has a quantity and a rate.','ok'); return; }
+      setMissing(true); return;
+    }
+    if(k===4){ openReview(); return; }
+    if(k===5){
+      if(!stats().items){ uiNotify('Add some items before exporting.','warn'); return; }
+      var dd=q('#bExpDd'), btn=q('#bExpMenuBtn');
+      if(dd && btn && !dd.classList.contains('open')) btn.click();
+      var first=q('#bExpMenu button'); if(first) first.focus();
+    }
+  }
+
+  /* ── selection + bulk actions ───────────────────────────────────────── */
+  var lastSel=null;
+  function visibleSids(){ return Array.prototype.map.call(document.querySelectorAll('#boqScroll tr[data-sid]'),function(tr){ return +tr.dataset.sid; }); }
+  function paintSel(){
+    document.querySelectorAll('#boqScroll tr[data-sid]').forEach(function(tr){
+      var on=bSel.has(+tr.dataset.sid); tr.classList.toggle('ui-selected',on);
+      var cb=tr.querySelector('input[data-sel]'); if(cb) cb.checked=on;
+    });
+    syncSelAll(); bulkBar();
+  }
+  function syncSelAll(){
+    var all=q('#bSelAll'); if(!all) return;
+    var vis=visibleSids(), n=vis.filter(function(s){ return bSel.has(s); }).length;
+    all.checked=vis.length>0 && n===vis.length; all.indeterminate=n>0 && n<vis.length;
+  }
+  function bulkBar(){
+    var bar=q('#bBulk'); if(!bar) return;
+    var n=bSel.size; bar.classList.toggle('on',n>0);
+    var c=q('#bBulkCnt'); if(c) c.textContent=plural(n,'row')+' selected';
+  }
+  /* selected rows whose ancestors are not also selected — each subtree once */
+  function roots(sids){
+    var want=new Set(sids), out=[], stack=[];
+    boq.forEach(function(n){
+      var lv=n.level||0;
+      while(stack.length && stack[stack.length-1].lv>=lv) stack.pop();
+      var covered=stack.some(function(a){ return want.has(a.sid); });
+      if(want.has(n.sid) && !covered) out.push(n.sid);
+      stack.push({lv:lv,sid:n.sid});
+    });
+    return out;
+  }
+  function commit(msg){ renderBOQ(); if(typeof cRender==='function') cRender(); scheduleAutosave(); if(msg) uiNotify(msg,'ok'); }
+
+  function deleteRows(sids){
+    var r=roots(sids), total=0;
+    r.forEach(function(s){ var i=idxOf(s); if(i>=0) total+=subtreeEnd(i)-i; });
+    if(!total) return Promise.resolve(false);
+    var ask=Promise.resolve(true);
+    if(total>r.length || r.length>1){
+      var first=boq[idxOf(r[0])], nm=first&&(first.name||(BTYPES[first.type]||{}).label||'row');
+      var what=r.length===1 ? '“'+nm+'” and its '+plural(total-1,'nested row')
+                            : plural(r.length,'selected row')+(total>r.length?' ('+total+' rows including nested items)':'');
+      ask=uiConfirm({title:'Delete rows?', body:'Delete '+what+'? You can undo this straight afterwards.', okText:'Delete', danger:true});
+    }
+    return ask.then(function(ok){
+      if(!ok) return false;
+      var before=JSON.stringify(boq), armed=bArmedParent;
+      r.forEach(function(s){ var i=idxOf(s); if(i<0) return; boq.splice(i,subtreeEnd(i)-i); if(bArmedParent===s) bArmedParent=null; });
+      normalizeLevels(); r.forEach(function(s){ bSel.delete(s); });
+      if(typeof bArmBanner==='function') bArmBanner();
+      commit();
+      showToastUndo('Deleted '+plural(total,'row'), function(){
+        boq=JSON.parse(before); bArmedParent=armed;
+        if(typeof bArmBanner==='function') bArmBanner();
+        commit('Rows restored');
+      });
+      return true;
+    });
+  }
+
+  function bulk(act){
+    var sel=Array.from(bSel); if(!sel.length && act!=='none') return;
+    var r=roots(sel);
+    if(act==='none'){ bSel.clear(); paintSel(); return; }
+    if(act==='del'){ deleteRows(sel); return; }
+    if(act==='dup'){
+      r.slice().reverse().forEach(function(s){ bDuplicate(s); });
+      commit('Duplicated '+plural(r.length,'row')); return;
+    }
+    if(act==='indent'||act==='outdent'){
+      r.forEach(function(s){ bShiftLevel(s, act==='indent'?1:-1); });
+      commit(); return;
+    }
+  }
+  function bulkGst(v){
+    if(v==='') return;
+    /* a selected section applies to every priced line inside it */
+    var g=parseFloat(v)||0, n=0;
+    roots(Array.from(bSel)).forEach(function(s){
+      var i=idxOf(s); if(i<0) return;
+      for(var j=i, end=subtreeEnd(i); j<end; j++){ var x=boq[j]; if(QUOTABLE.has(x.type)){ x.gst=g; n++; } }
+    });
+    commit(n?'GST set to '+g+'% on '+plural(n,'item'):'No priced items in the selection');
+  }
+
+  /* ── in-app confirm (Promise<boolean>) ──────────────────────────────── */
+  function uiConfirm(o){
+    return new Promise(function(resolve){
+      var prev=document.activeElement;
+      var ov=document.createElement('div'); ov.className='modal-overlay on';
+      ov.innerHTML='<div class="modal ui-confirm" role="alertdialog" aria-modal="true" aria-labelledby="uiCfT" aria-describedby="uiCfB">'
+        +'<div class="modal-head"><h3 id="uiCfT"></h3><button class="modal-x" type="button" aria-label="Close">×</button></div>'
+        +'<div class="modal-body"><p id="uiCfB"></p></div>'
+        +'<div class="modal-foot"><button type="button" class="btn" data-r="0">Cancel</button><button type="button" class="btn '+(o.danger?'danger':'primary')+'" data-r="1"></button></div></div>';
+      ov.querySelector('#uiCfT').textContent=o.title||'Are you sure?';
+      ov.querySelector('#uiCfB').textContent=o.body||'';
+      ov.querySelector('[data-r="1"]').textContent=o.okText||'OK';
+      if(o.danger){ var d=ov.querySelector('.btn.danger'); d.style.background='var(--red)'; d.style.borderColor='var(--red)'; d.style.color='#fff'; }
+      function done(v){ document.removeEventListener('keydown',key,true); ov.remove(); if(prev&&prev.focus) try{ prev.focus(); }catch(e){} resolve(v); }
+      function key(e){ if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); done(false); }
+        if(e.key==='Tab'){ var f=ov.querySelectorAll('button'); if(e.shiftKey&&document.activeElement===f[0]){ e.preventDefault(); f[f.length-1].focus(); } else if(!e.shiftKey&&document.activeElement===f[f.length-1]){ e.preventDefault(); f[0].focus(); } } }
+      ov.addEventListener('click',function(e){
+        if(e.target===ov || e.target.closest('.modal-x')) return done(false);
+        var b=e.target.closest('[data-r]'); if(b) done(b.dataset.r==='1');
+      });
+      document.addEventListener('keydown',key,true);
+      document.body.appendChild(ov);
+      ov.querySelector(o.danger?'[data-r="0"]':'[data-r="1"]').focus();
+    });
+  }
+
+  /* ── Review & Preview ───────────────────────────────────────────────── */
+  var rvPrev=null;
+  function closeReview(){ var ov=q('#bReviewOverlay'); if(ov) ov.classList.remove('on'); document.removeEventListener('keydown',rvKey,true); if(rvPrev&&rvPrev.focus) try{ rvPrev.focus(); }catch(e){} }
+  function rvKey(e){ if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closeReview(); } }
+  function openReview(){
+    if(!boq.length){ uiNotify('The BOQ is empty — add items first, then review.','warn'); return; }
+    var ov=q('#bReviewOverlay');
+    if(!ov){
+      ov=document.createElement('div'); ov.className='modal-overlay'; ov.id='bReviewOverlay';
+      ov.innerHTML='<div class="modal rv-modal" role="dialog" aria-modal="true" aria-labelledby="rvTitle">'
+        +'<div class="modal-head"><h3 id="rvTitle">Review &amp; preview</h3><button class="modal-x" type="button" aria-label="Close review">×</button></div>'
+        +'<div class="modal-body" id="rvBody"></div>'
+        +'<div class="modal-foot rv-foot"><button type="button" class="btn" data-rv="close">Back to editing</button><span class="sp"></span>'
+        +'<button type="button" class="btn ghost" data-rv="#bSave">Save file</button>'
+        +'<button type="button" class="btn xbtn" data-rv="#bExpCsv">CSV</button>'
+        +'<button type="button" class="btn xbtn green" data-rv="#bExpXls">Excel</button>'
+        +'<button type="button" class="btn xbtn red" data-rv="#bExpPdf">PDF</button>'
+        +'<button type="button" class="btn primary" data-rv="#bToQuote">Transfer to Enquiry</button></div></div>';
+      document.body.appendChild(ov);
+      ov.addEventListener('click',function(e){
+        if(e.target===ov || e.target.closest('.modal-x') || e.target.closest('[data-rv="close"]')) return closeReview();
+        var a=e.target.closest('[data-rv]'); if(a){ closeReview(); var t=q(a.dataset.rv); if(t) t.click(); return; }
+        var fix=e.target.closest('[data-fix]'); if(fix){ closeReview(); goStep(+fix.dataset.fix); }
+      });
+    }
+    var s=stats(), m=boqMeta(), T=bTotals(), R=boqRows(), nums=bNumbering();
+    var proj=(q('#bProj').value||'').trim();
+    var meta=[['Project',proj],['Code / ref.',m.ref],['WO No.',m.wo],['Contractor / vendor',m.client],
+      ['Revision','Rev-'+(typeof currentRevision!=='undefined'?currentRevision:0)],['Prepared',new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})]]
+      .map(function(r){ var v=String(r[1]||'').trim(); return '<div><span>'+r[0]+'</span><b class="'+(v?'':'none')+'">'+(v?esc(v):'Not set')+'</b></div>'; }).join('');
+    /* duplicate lines — same name + description, case/space-insensitive */
+    var seen={}, dups=0;
+    boq.forEach(function(n){ if(!QUOTABLE.has(n.type)) return; var k=(String(n.name||'')+'|'+String(n.desc||'')).toLowerCase().replace(/\s+/g,' ').trim(); if(k==='|') return; if(seen[k]) dups++; seen[k]=1; });
+    function chk(kind,txt,fix){ return '<div class="rv-check '+kind+'"><i aria-hidden="true">'+(kind==='ok'?'✓':kind==='warn'?'!':'i')+'</i><span>'+txt+'</span>'+(fix?'<button type="button" data-fix="'+fix[0]+'">'+fix[1]+'</button>':'')+'</div>'; }
+    var checks=''
+      + (proj?chk('ok','Project name is set'):chk('warn','No project name — exports will be titled “BOQ”',[1,'Add name']))
+      + (s.items?chk('ok',plural(s.items,'priced line')+' in '+plural(s.sections,'section')):chk('warn','No priced lines yet',[2,'Add items']))
+      + (s.noQty?chk('warn',plural(s.noQty,'item')+' without a quantity',[3,'Show']):chk('ok','Every item has a quantity'))
+      + (s.noRate?chk('info',plural(s.noRate,'item')+' without a rate — fine for an enquiry BOQ, where vendors quote the rate',[3,'Show']):chk('ok','Every item has a rate'))
+      + (s.noUnit?chk('warn',plural(s.noUnit,'item')+' without a unit of measurement'):chk('ok','Every item has a unit'))
+      + (s.noText?chk('warn',plural(s.noText,'item')+' with neither a name nor a description'):'')
+      + (dups?chk('info',plural(dups,'line')+' repeat another line’s name and description'):'')
+      + (s.rateOnly?chk('info',plural(s.rateOnly,'rate-only item')+' — shown without an amount and excluded from totals, by design'):'');
+    /* totals by top-level section, same descendantTotal() the table uses */
+    var secRows='', loose=0;
+    boq.forEach(function(n,i){
+      var t=BTYPES[n.type]||BTYPES.item;
+      if(t.group && !(n.level||0)) secRows+='<tr><td>'+esc(nums[n.sid]+'  '+(n.name||t.label))+'</td><td class="n">'+money(descendantTotal(i))+'</td></tr>';
+      else if(!(n.level||0) && QUOTABLE.has(n.type)) loose+=nodeAmount(n);
+    });
+    if(loose) secRows+='<tr><td>Items outside any section</td><td class="n">'+money(loose)+'</td></tr>';
+    var sum='<table class="rv-sum">'+secRows
+      +'<tr class="t"><td>Base total (excl. GST)</td><td class="n">'+money(T.base)+'</td></tr>'
+      +'<tr><td>GST</td><td class="n">'+money(T.gstAmt)+'</td></tr>'
+      +'<tr class="t g"><td>Grand total (incl. GST)</td><td class="n">'+money(T.base+T.gstAmt)+'</td></tr></table>';
+    /* line-by-line preview, from boqRows() — the exact rows every export writes */
+    var lines=R.rows.map(function(r){
+      if(r.kind==='note') return '<tr class="note"><td></td><td colspan="6">'+esc(r.desc||'')+'</td></tr>';
+      if(r.kind==='parent') return '<tr class="sec"><td>'+esc(r.sl)+'</td><td colspan="5">'+esc(String(r.name).trim())+(r.desc?'<div class="d">'+esc(r.desc)+'</div>':'')+'</td><td class="n">'+(r.amt?money(r.amt):'')+'</td></tr>';
+      var qMiss=r.qty===''||r.qty===0, rMiss=r.rate===''||r.rate===0;
+      return '<tr><td>'+esc(r.sl)+'</td><td>'+esc(String(r.name).trim())+(r.desc?'<div class="d">'+esc(r.desc)+'</div>':'')+'</td>'
+        +'<td>'+esc(r.uom||'')+'</td>'
+        +'<td class="n'+(qMiss?' miss':'')+'">'+(qMiss?'—':esc(typeof r.qty==='number'?inr(r.qty):r.qty))+'</td>'
+        +'<td class="n'+(rMiss&&!r.excl?' miss':'')+'">'+(rMiss?'—':esc(typeof r.rate==='number'?inr(r.rate):r.rate))+'</td>'
+        +'<td class="n">'+esc(String(r.gst))+'%</td>'
+        +'<td class="n">'+(r.excl?'rate only':(r.amt?money(r.amt):'—'))+'</td></tr>';
+    }).join('');
+    q('#rvBody').innerHTML='<div class="rv-meta">'+meta+'</div>'
+      +'<div class="rv-grid"><section class="rv-card"><h4>Checks</h4>'+checks+'</section><section class="rv-card"><h4>Totals</h4>'+sum+'</section></div>'
+      +'<section class="rv-card" style="padding:0;overflow:hidden"><table class="rv-tbl"><thead><tr><th style="width:52px">#</th><th>Item / description</th><th style="width:64px">Unit</th><th class="n" style="width:90px">Qty</th><th class="n" style="width:100px">Rate</th><th class="n" style="width:56px">GST</th><th class="n" style="width:120px">Amount</th></tr></thead><tbody>'+lines+'</tbody></table></section>';
+    rvPrev=document.activeElement;
+    ov.classList.add('on');
+    document.addEventListener('keydown',rvKey,true);
+    var x=ov.querySelector('.modal-x'); if(x) x.focus();
+    q('#rvBody').scrollTop=0;
+    reviewedSig=sig(); refresh();
+  }
+
+  /* ── wiring ─────────────────────────────────────────────────────────── */
+  function init(){
+    var scroll=q('#boqScroll'); if(!scroll) return;
+    try{ if(localStorage.getItem(DET_KEY)==='1') setDetails(true); }catch(e){}
+    q('#bDetailsTog').addEventListener('click',function(){ setDetails(!q('#bHead').classList.contains('details-open'),'#bRef'); });
+    ['#bProj','#bRef','#bWO','#bClient'].forEach(function(s){ var el=q(s); if(el) el.addEventListener('input',refresh); });
+    q('#bSteps').addEventListener('click',function(e){ var b=e.target.closest('.bq-step'); if(b) goStep(+b.dataset.step); });
+    q('#bReviewBtn').addEventListener('click',openReview);
+    q('#bMissTog').addEventListener('click',function(){ setMissing(!bMissOnly); });
+    ['#bExpCsv','#bExpXls','#bExpPdf','#bSave'].forEach(function(s){ var el=q(s); if(el) el.addEventListener('click',function(){ if(boq.length){ exportedSig=sig(); setTimeout(refresh,0); } }); });
+    /* the Open file <label> is focusable; make Enter/Space open the picker like a button */
+    var lb=q('#bLoadBtn'); if(lb) lb.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); q('#bLoadFile').click(); } });
+
+    /* selection (click, so Shift is known) */
+    scroll.addEventListener('click',function(e){
+      var cb=e.target.closest('input[data-sel]');
+      if(cb){
+        var sid=+cb.dataset.sel, on=cb.checked;
+        if(e.shiftKey && lastSel!=null){
+          var vis=visibleSids(), a=vis.indexOf(lastSel), b=vis.indexOf(sid);
+          if(a>=0&&b>=0){ var lo=Math.min(a,b), hi=Math.max(a,b); for(var i=lo;i<=hi;i++){ if(on) bSel.add(vis[i]); else bSel.delete(vis[i]); } }
+        } else { if(on) bSel.add(sid); else bSel.delete(sid); }
+        lastSel=sid; paintSel(); return;
+      }
+      if(e.target.closest('#bSelAll')){
+        var all=e.target.checked; visibleSids().forEach(function(s){ if(all) bSel.add(s); else bSel.delete(s); }); paintSel(); return;
+      }
+      if(e.target.closest('[data-clear-filters]')){
+        bMissOnly=false; bTreeFilter=''; var f=q('#bTreeFind'); if(f) f.value=''; renderBOQ(); return;
+      }
+      var ea=e.target.closest('[data-empty-act]');
+      if(ea){
+        var map={header:'#btAddHeader',item:'#btAddItem',open:'#bLoadFile'}; var t=q(map[ea.dataset.emptyAct]); if(t) t.click();
+      }
+    });
+    /* missing-value highlight follows typing without a re-render */
+    scroll.addEventListener('input',function(e){
+      var inp=e.target.closest('.qin,.rin'); if(!inp) return;
+      var tr=inp.closest('tr'), n=tr&&boq.find(function(x){ return x.sid===+tr.dataset.sid; }); if(!n) return;
+      var m=bMissing(n)||{}; var qi=tr.querySelector('.qin'), ri=tr.querySelector('.rin');
+      if(qi&&!qi.disabled) qi.classList.toggle('ui-missing',!!m.qty); if(ri) ri.classList.toggle('ui-missing',!!m.rate);
+    });
+    q('#bBulk').addEventListener('click',function(e){ var b=e.target.closest('[data-bulk]'); if(b) bulk(b.dataset.bulk); });
+    q('#bBulkGst').addEventListener('change',function(){ bulkGst(this.value); this.value=''; });
+
+    /* Unsaved work: the draft is debounced (20 s). Flush it on the way out —
+       CloudflareAPI.draft.save() writes local-first synchronously, so the
+       next visit can restore it. With no draft store at all (static build),
+       fall back to the browser's own "leave site?" prompt. */
+    function flush(){ try{ if(window._draftDirty && typeof doAutosave==='function') doAutosave(); }catch(e){} }
+    window.addEventListener('pagehide',flush);
+    window.addEventListener('beforeunload',function(e){
+      if(!window._draftDirty) return;
+      flush();
+      if(!(window.CloudflareAPI && window.CloudflareAPI.draft) && boq.length){ e.preventDefault(); e.returnValue=''; }
+    });
+    refresh();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+
+  return { refresh:refresh, syncSelAll:syncSelAll, deleteRows:deleteRows, openReview:openReview, confirm:uiConfirm, goStep:goStep, stats:stats };
+})();
 </script>
 </body>
 </html>
