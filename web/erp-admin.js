@@ -77,7 +77,10 @@
   /* ───────────────────────── current admin / session ───────────────────────── */
   function currentName() { try { const s = JSON.parse(localStorage.getItem('ts_session') || sessionStorage.getItem('ts_session')); return s ? s.name : 'Administrator'; } catch (e) { return 'Administrator'; } }
   function canAdmin() { return !window.Auth || (window.Auth.can && window.Auth.can('users')); }
-  function myIP() { let s = settings(); if (!s.ip) { s.ip = '10.20.' + (Math.floor(Math.random() * 40) + 10) + '.' + (Math.floor(Math.random() * 200) + 20); save(K.settings, s); } return s.ip; }
+  /* A browser cannot see its own public IP. This used to invent a random
+     "10.20.x.y" address and stamp it on every audit entry as if it were real;
+     the field is now left empty rather than recording a made-up value. */
+  function myIP() { return ''; }
   function browserName() { const u = navigator.userAgent; if (/Edg\//.test(u)) return 'Edge'; if (/Chrome\//.test(u)) return 'Chrome'; if (/Firefox\//.test(u)) return 'Firefox'; if (/Safari\//.test(u)) return 'Safari'; return 'Browser'; }
   function osName() { const u = navigator.userAgent; if (/Windows/.test(u)) return 'Windows'; if (/Mac OS/.test(u)) return 'macOS'; if (/Android/.test(u)) return 'Android'; if (/iPhone|iPad/.test(u)) return 'iOS'; if (/Linux/.test(u)) return 'Linux'; return 'Desktop'; }
 
@@ -93,11 +96,9 @@
     save(K.notif, n.slice(0, 200));
     refreshBadge();
   }
-  function refreshBadge() {
-    const dot = document.getElementById('erpBellDot');
-    const unread = notifs().filter(n => !n.read).length;
-    if (dot) { dot.style.display = unread ? 'flex' : 'none'; dot.textContent = unread > 9 ? '9+' : unread; }
-  }
+  /* Unread count now lives on the Notifications nav item (the separate bell
+     button went with the old header bar). */
+  function refreshBadge() { renderNav(); }
 
   /* ───────────────────────── password hashing (compatible w/ Auth) ───────────────────────── */
   function simpleHash(s) { let h = 5381; for (let i = 0; i < s.length; i++) { h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; } return ('0000000' + h.toString(16)).slice(-8); }
@@ -285,31 +286,11 @@
       license: { total: 50, expires: '2027-03-31' }
     });
 
-    // seed audit + notifications
-    const aud = [];
-    const sampleAudit = [
-      ['Administration', 'User Created', 'Priya Verma', '', 'QS Engineer · QS & Contracts'],
-      ['Administration', 'Permission Modified', 'Priya Verma', 'BOQ Master: Delete OFF', 'BOQ Master: Delete ON'],
-      ['Enquiry', 'Tender Approved', 'ENQ/RDBT/2026/014', 'Pending', 'Approved'],
-      ['Administration', 'Account Locked', 'Sandeep Yadav', 'Active', 'Locked — Multiple failed login attempts'],
-      ['Administration', 'Login Success', 'Rahul Sharma', '', ''],
-      ['Administration', 'Login Failure', 'unknown', '', 'Invalid password'],
-      ['Work Order', 'Work Order Issued', 'WO/ARNY/2026/008', '', '₹42,50,000'],
-      ['Administration', 'Platform Access Revoked', 'Ritu Agarwal', 'Enabled', 'Disabled'],
-      ['Vendor', 'Vendor Registered', 'Steelcon Infra Pvt Ltd', '', 'Active'],
-      ['Administration', 'Role Changed', 'Arjun Das', 'QS Engineer', 'Senior QS']
-    ];
-    sampleAudit.forEach((s, i) => aud.push({ id: uid('au'), ts: Date.now() - i * 1000 * 3600 * 7 - 60000, admin: i % 3 === 0 ? 'Administrator' : 'Anjali Mehra', module: s[0], action: s[1], target: s[2], oldVal: s[3], newVal: s[4], ip: '10.20.' + (12 + i) + '.30', browser: browserName(), reason: '' }));
-    save(K.audit, aud);
-
-    save(K.notif, [
-      ['perm', 'Permission changed', 'Priya Verma was granted Delete on BOQ Master.', 2],
-      ['lock', 'User locked', 'Sandeep Yadav locked after 5 failed login attempts.', 5],
-      ['tender', 'Tender approved', 'ENQ/RDBT/2026/014 approved by Commercial Manager.', 8],
-      ['boq', 'New BOQ assigned', 'Aaranya — Structural BOQ assigned to Arjun Das.', 20],
-      ['vendor', 'Vendor registered', 'Steelcon Infra Pvt Ltd added to vendor master.', 26],
-      ['wo', 'Work order issued', 'WO/ARNY/2026/008 issued — ₹42.5 L.', 30]
-    ].map(([type, title, msg, hAgo]) => ({ id: uid('n'), ts: Date.now() - hAgo * 3600000, type, title, msg, read: hAgo > 12 })));
+    /* Audit trail and notifications start empty. They used to be seeded with
+       invented entries (named staff, a made-up work order value) that the
+       dashboard then presented as real activity in an "immutable" log. */
+    save(K.audit, []);
+    save(K.notif, []);
 
     save(K.seeded, true);
   }
@@ -342,288 +323,376 @@
     if (document.getElementById('erpCSS')) return;
     const s = document.createElement('style'); s.id = 'erpCSS';
     s.textContent = `
+    /* Administration — compact enterprise layout. Every rule is scoped to
+       .erp-* / #admin / #erpCmd, so nothing here reaches other modules. Colours
+       come from the app's theme tokens, so light and dark both follow. */
+    /* drawers, dialogs, menus and the palette are attached to <body>, outside
+       #admin — so the shared variables are defined on each of them too */
+    #admin,.erp-ov,.erp-rowmenu,#erpCmd{--erp-r:10px;--erp-r-sm:7px;--erp-fl:var(--field-line,var(--line));--erp-fb:var(--field-bg,var(--panel));--erp-ring:var(--focus-ring,0 0 0 3px rgba(91,147,245,.3))}
     #admin{font-family:'Archivo',sans-serif}
-    .erp-wrap{display:flex;width:100%;height:100%;overflow:hidden}
-    .erp-side{width:244px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;transition:width .18s ease;box-shadow:4px 0 16px -6px rgba(0,0,0,.28);position:relative;z-index:2}
-    .erp-side.collapsed{width:70px}
-    .erp-side-head{display:flex;align-items:center;gap:9px;padding:14px 16px 12px;border-bottom:1px solid var(--line);min-height:34px}
-    .erp-side-head .badge{width:36px;height:36px;border-radius:10px;box-shadow:0 4px 14px -3px rgba(255,106,44,.5);background:linear-gradient(135deg,var(--accent),#c9501a);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-    .erp-side-head .badge svg{width:19px;height:19px;stroke:#fff;fill:none;stroke-width:2}
-    .erp-side-head .t{font-size:14px;font-weight:800;color:var(--ink);line-height:1.1;letter-spacing:.2px}
-    .erp-side-head .t span{display:block;font-size:8.5px;font-weight:600;color:var(--faint);letter-spacing:1.2px;text-transform:uppercase;margin-top:2px}
-    .erp-side.collapsed .t,.erp-side.collapsed .erp-nav-lbl,.erp-side.collapsed .erp-nav-sec,.erp-side.collapsed .erp-nav .pin,.erp-side.collapsed .erp-side-foot .txt{display:none}
-    .erp-nav{flex:1;overflow-y:auto;padding:8px 8px 16px}
-    .erp-nav-sec{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--faint);padding:16px 12px 6px}
-    .erp-nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;color:var(--ink);opacity:.82;font-size:13.5px;font-weight:600;cursor:pointer;text-decoration:none;position:relative;transition:.12s;margin-bottom:1px}
-    .erp-nav a svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;flex-shrink:0}
-    .erp-nav a:hover{background:var(--hi);color:var(--ink);opacity:1}
-    .erp-nav a.on{background:linear-gradient(90deg,rgba(255,106,44,.2),rgba(255,106,44,.07));color:var(--accent);opacity:1;font-weight:700;box-shadow:inset 0 0 0 1px rgba(255,106,44,.28)}
-    .erp-nav a.on svg{stroke-width:2.1}
-    .erp-nav a.on::before{content:'';position:absolute;left:-8px;top:8px;bottom:8px;width:4px;border-radius:0 4px 4px 0;background:var(--accent);box-shadow:0 0 10px rgba(255,106,44,.55)}
-    .erp-side.collapsed .erp-nav-sec{display:block;font-size:0;padding:0;height:1px;margin:9px 12px;background:var(--line)}
+    .erp-wrap{display:flex;width:100%;height:100%;overflow:hidden;background:var(--bg)}
+
+    /* side navigation */
+    .erp-side{width:220px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;transition:width .16s ease;position:relative;z-index:2}
+    .erp-side.collapsed{width:60px}
+    .erp-side-head{display:flex;flex-direction:column;gap:8px;padding:12px 10px 10px;border-bottom:1px solid var(--line)}
+    .erp-side-head .t{font-size:13px;font-weight:700;color:var(--ink);padding:0 4px;display:flex;align-items:center;gap:8px}
+    .erp-side-head .t svg{width:16px;height:16px;stroke:var(--accent);fill:none;stroke-width:2;flex-shrink:0}
+    .erp-side-head .t span{display:block;font-size:10.5px;font-weight:500;color:var(--faint);margin-top:1px}
+    .erp-findbtn{display:flex;align-items:center;gap:8px;width:100%;height:32px;padding:0 9px;background:var(--erp-fb);border:1px solid var(--erp-fl);border-radius:var(--erp-r-sm);color:var(--faint);font:inherit;font-size:12px;cursor:pointer;text-align:left}
+    .erp-findbtn:hover{border-color:var(--accent);color:var(--ink)}
+    .erp-findbtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+    .erp-findbtn .kbd{margin-left:auto;font-size:10px;font-family:'Spline Sans Mono',monospace;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--faint)}
+    .erp-side.collapsed .t span,.erp-side.collapsed .t b,.erp-side.collapsed .erp-findbtn .lbl,.erp-side.collapsed .erp-findbtn .kbd,
+    .erp-side.collapsed .erp-nav-lbl,.erp-side.collapsed .erp-nav .pin,.erp-side.collapsed .erp-nav .ext,.erp-side.collapsed .erp-side-foot .txt{display:none}
+    .erp-side.collapsed .erp-findbtn{justify-content:center;padding:0}
+    .erp-side.collapsed .erp-side-head .t{justify-content:center}
+    .erp-nav{flex:1;overflow-y:auto;padding:6px 8px 12px}
+    .erp-nav-sec{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--faint);padding:12px 10px 4px}
+    .erp-nav a{display:flex;align-items:center;gap:9px;height:32px;padding:0 10px;border-radius:var(--erp-r-sm);color:var(--dim);font-size:12.5px;font-weight:600;cursor:pointer;text-decoration:none;position:relative;transition:background-color .12s,color .12s;margin-bottom:1px}
+    .erp-nav a svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;flex-shrink:0}
+    .erp-nav a:hover{background:var(--hi);color:var(--ink)}
+    .erp-nav a:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+    .erp-nav a.on{background:rgba(var(--accent-rgb,91,147,245),.10);color:var(--accent);font-weight:700}
+    .erp-nav a.on::before{content:'';position:absolute;left:-8px;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--accent)}
+    .erp-nav a .ext{margin-left:auto;font-size:11px;color:var(--faint)}
+    .erp-side.collapsed .erp-nav-sec{font-size:0;padding:0;height:1px;margin:8px 10px;background:var(--line)}
     .erp-side.collapsed .erp-nav-sec:first-child{display:none}
-    .erp-nav a .pin{margin-left:auto;font-size:11px;color:var(--faint);opacity:0;transition:.12s}
-    .erp-nav a:hover .pin{opacity:.7}
+    .erp-nav a .pin{margin-left:auto;font-size:11px;color:var(--faint);opacity:0;transition:opacity .12s}
+    .erp-nav a:hover .pin,.erp-nav a:focus-visible .pin{opacity:.7}
     .erp-nav a .pin.on{opacity:1;color:var(--accent2)}
-    .erp-nav a .cnt{margin-left:auto;font-size:10px;font-family:'Spline Sans Mono',monospace;background:var(--panel3);color:var(--faint);padding:1px 7px;border-radius:10px}
-    .erp-side.collapsed .erp-nav a{justify-content:center;padding:12px 0}
+    .erp-nav a .cnt{margin-left:auto;font-size:10.5px;font-variant-numeric:tabular-nums;background:var(--panel3);color:var(--dim);padding:0 6px;border-radius:9px;line-height:17px}
+    .erp-nav a .cnt.hot{background:var(--accent);color:#fff}
+    .erp-side.collapsed .erp-nav a{justify-content:center;padding:0}
     .erp-side.collapsed .erp-nav a .cnt{display:none}
-    .erp-side-foot{padding:9px;border-top:1px solid var(--line)}
-    .erp-collapse{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--faint);font-size:11.5px;font-weight:600;padding:7px 10px;border-radius:7px;cursor:pointer;font-family:inherit}
+    .erp-side-foot{padding:8px;border-top:1px solid var(--line)}
+    .erp-collapse{display:flex;align-items:center;gap:9px;width:100%;height:30px;background:none;border:none;color:var(--faint);font-size:11.5px;font-weight:600;padding:0 10px;border-radius:var(--erp-r-sm);cursor:pointer;font-family:inherit}
     .erp-collapse:hover{background:var(--hi);color:var(--ink)}
-    .erp-collapse svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+    .erp-collapse svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
 
     .erp-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-    .erp-bar{display:flex;align-items:center;gap:14px;padding:13px 22px;border-bottom:1px solid var(--line);background:var(--bg);flex-shrink:0}
-    .erp-crumb{font-size:11px;color:var(--faint);font-weight:600}
-    .erp-crumb b{color:var(--ink);font-weight:700;font-size:13px}
-    .erp-crumb .sep{margin:0 7px;opacity:.5}
-    .erp-search{flex:1;max-width:380px;position:relative}
-    .erp-search input{width:100%;box-sizing:border-box;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-size:12.5px;padding:8px 12px 8px 34px;outline:none;font-family:inherit}
-    .erp-search input:focus{border-color:var(--accent)}
-    .erp-search svg{position:absolute;left:11px;top:9px;width:15px;height:15px;stroke:var(--faint);fill:none;stroke-width:2}
-    .erp-search .kbd{position:absolute;right:9px;top:8px;font-size:9.5px;font-family:'Spline Sans Mono',monospace;color:var(--faint);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
-    .erp-bar-sp{flex:1}
-    .erp-iconbtn{position:relative;width:34px;height:34px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);color:var(--dim);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s,color .15s,transform .1s}
-    .erp-iconbtn:hover{border-color:var(--accent);color:var(--accent)}
-    .erp-iconbtn:active{transform:scale(.94)}
+    .erp-iconbtn{position:relative;width:30px;height:30px;border-radius:var(--erp-r-sm);background:transparent;border:1px solid transparent;color:var(--dim);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background-color .12s,color .12s}
+    .erp-iconbtn:hover{background:var(--hi);color:var(--ink)}
+    .erp-iconbtn:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
     .erp-iconbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
-    #erpBellDot{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 3px;border-radius:9px;background:var(--red);color:#fff;font-size:9px;font-weight:700;display:none;align-items:center;justify-content:center;font-family:'Spline Sans Mono',monospace}
+    #erpBellDot{display:none}
 
-    .erp-body{flex:1;overflow-y:auto;padding:22px}
-    @media (prefers-reduced-motion: no-preference) {
-      .erp-fade-in{animation:erpFadeIn .32s cubic-bezier(.22,.61,.36,1)}
-      @keyframes erpFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-    }
-    .erp-h{font-size:19px;font-weight:800;color:var(--ink);margin:0 0 3px}
-    .erp-sub{font-size:12.5px;color:var(--faint);margin-bottom:18px}
-    .erp-sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+    .erp-body{flex:1;overflow-y:auto;padding:18px 22px 28px}
+    .erp-page{max-width:1320px}
+    @media (prefers-reduced-motion: no-preference){ .erp-fade-in{animation:erpFadeIn .14s ease-out} @keyframes erpFadeIn{from{opacity:.4}to{opacity:1}} }
+    .erp-h{font-size:18px;font-weight:700;color:var(--ink);margin:0 0 3px;letter-spacing:-.2px}
+    .erp-sub{font-size:12.5px;color:var(--dim);margin-bottom:14px;line-height:1.5;max-width:90ch}
+    .erp-sec-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap}
+    .erp-sec-head .erp-sub{margin-bottom:0}
+    .erp-sec-head .acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .erp-h2{font-size:14px;font-weight:700;color:var(--ink);margin:22px 0 4px}
+    .erp-local{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:var(--dim);background:var(--panel3);border:1px solid var(--line);border-radius:10px;padding:1px 8px;vertical-align:2px;margin-left:8px;white-space:nowrap}
+    .erp-note{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:var(--erp-r-sm);border:1px solid var(--line);background:var(--panel2);font-size:12px;color:var(--dim);line-height:1.5;margin-bottom:14px}
+    .erp-note svg{width:16px;height:16px;stroke:var(--accent);fill:none;stroke-width:2;flex-shrink:0;margin-top:1px}
+    .erp-note b{color:var(--ink)}
+    .erp-note.warn{background:var(--warn-bg,rgba(251,191,36,.1));border-color:var(--warn-line,rgba(251,191,36,.5))}
+    .erp-note.warn svg{stroke:var(--accent2)}
+    .erp-note .erp-btn{margin-left:auto;flex-shrink:0}
 
-    /* tiles */
-    .erp-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:13px;margin-bottom:22px}
-    .erp-tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 16px;position:relative;overflow:hidden}
-    .erp-tile .ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:11px}
-    .erp-tile .ic svg{width:18px;height:18px;fill:none;stroke-width:2}
-    .erp-tile .n{font-size:27px;font-weight:800;color:var(--ink);line-height:1;font-family:'Archivo',sans-serif}
-    .erp-tile .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--faint);margin-top:5px;font-weight:600}
-    .erp-tile .d{font-size:10.5px;color:var(--dim);margin-top:6px}
+    /* summary strip (dashboard + page headers) — compact, real figures only */
+    .erp-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+    .erp-tile{background:var(--panel);border:1px solid var(--line);border-radius:var(--erp-r);padding:11px 13px;text-align:left;font:inherit;color:inherit}
+    button.erp-tile{cursor:pointer;transition:border-color .12s}
+    button.erp-tile:hover{border-color:var(--accent)}
+    button.erp-tile:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    .erp-tile .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--faint);font-weight:700}
+    .erp-tile .n{font-size:22px;font-weight:700;color:var(--ink);line-height:1.2;margin-top:4px;font-variant-numeric:tabular-nums}
+    .erp-tile .d{font-size:11px;color:var(--dim);margin-top:2px}
+    .erp-tile .ic{display:none}
 
-    .erp-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-    .erp-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line)}
+    .erp-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--erp-r);overflow:hidden}
+    .erp-card + .erp-card{margin-top:14px}
+    .erp-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);min-height:44px}
     .erp-card-head .ttl{font-size:13px;font-weight:700;color:var(--ink)}
-    .erp-card-head .ttl span{font-size:11px;font-weight:500;color:var(--faint);margin-left:6px}
-    .erp-card-body{padding:16px}
-    .erp-grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start}
-    @media(max-width:1100px){.erp-grid2{grid-template-columns:1fr}}
+    .erp-card-head .ttl span{font-size:11.5px;font-weight:500;color:var(--faint);margin-left:6px}
+    .erp-card-body{padding:14px}
+    .erp-grid2{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px;align-items:start}
+    .erp-grid2 > div > .erp-card + .erp-card{margin-top:14px}
+    @media(max-width:1100px){.erp-grid2{grid-template-columns:minmax(0,1fr)}}
+    details.erp-card > summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;min-height:44px;font-size:13px;font-weight:700;color:var(--ink)}
+    details.erp-card > summary::-webkit-details-marker{display:none}
+    details.erp-card > summary::after{content:'';width:8px;height:8px;border-right:2px solid var(--faint);border-bottom:2px solid var(--faint);transform:rotate(45deg);margin-right:4px;transition:transform .15s}
+    details.erp-card[open] > summary{border-bottom:1px solid var(--line)}
+    details.erp-card[open] > summary::after{transform:rotate(-135deg)}
+    details.erp-card > summary span{font-size:11.5px;font-weight:500;color:var(--faint);margin-left:6px}
+    details.erp-card > summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 
-    /* toolbar */
-    .erp-toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:14px}
+    /* admin modules directory on the dashboard */
+    .erp-mods{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px 8px}
+    .erp-mod{display:flex;gap:9px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:var(--erp-r-sm);background:var(--panel);cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+    .erp-mod:hover{border-color:var(--accent)}
+    .erp-mod:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    .erp-mod svg{width:16px;height:16px;stroke:var(--accent);fill:none;stroke-width:2;flex-shrink:0;margin-top:2px}
+    .erp-mod b{display:block;font-size:12.5px;color:var(--ink)}
+    .erp-mod span{display:block;font-size:11.5px;color:var(--dim);margin-top:1px;line-height:1.4}
+    .erp-modgrp{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--faint);margin:10px 0 0}
+    .erp-modgrp:first-child{margin-top:0}
+
+    /* toolbar: search + filters together, secondary actions to the right */
+    .erp-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
     .erp-field{position:relative}
-    .erp-field>svg{position:absolute;left:10px;top:9px;width:15px;height:15px;stroke:var(--faint);fill:none;stroke-width:2;pointer-events:none}
-    .erp-input,.erp-select{background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-size:12.5px;padding:8px 11px;outline:none;font-family:inherit}
-    .erp-field .erp-input{padding-left:32px;min-width:230px}
-    .erp-input:focus,.erp-select:focus{border-color:var(--accent)}
-    .erp-select{cursor:pointer}
+    .erp-field>svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--faint);fill:none;stroke-width:2;pointer-events:none}
+    .erp-input,.erp-select{height:32px;background:var(--erp-fb);border:1px solid var(--erp-fl);border-radius:var(--erp-r-sm);color:var(--ink);font-size:12.5px;padding:0 10px;outline:none;font-family:inherit}
+    .erp-field .erp-input{padding-left:30px;min-width:240px}
+    .erp-input:focus,.erp-select:focus{border-color:var(--accent);box-shadow:var(--erp-ring)}
+    .erp-select{cursor:pointer;max-width:200px}
     .erp-tb-sp{flex:1}
-    .erp-btn{display:inline-flex;align-items:center;gap:7px;background:var(--panel2);border:1px solid var(--line);color:var(--dim);font-size:12px;font-weight:600;padding:8px 13px;border-radius:8px;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s,background-color .15s,filter .15s,transform .1s;white-space:nowrap}
-    .erp-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+    .erp-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:32px;background:var(--panel);border:1px solid var(--erp-fl);color:var(--ink);font-size:12.5px;font-weight:600;padding:0 12px;border-radius:var(--erp-r-sm);cursor:pointer;font-family:inherit;transition:border-color .12s,color .12s,background-color .12s;white-space:nowrap;box-shadow:var(--shadow-1,none)}
+    .erp-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
     .erp-btn:hover{border-color:var(--accent);color:var(--accent)}
-    .erp-btn:active{transform:scale(.96)}
+    .erp-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    .erp-btn:disabled{opacity:.5;cursor:not-allowed}
     .erp-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-    .erp-btn.primary:hover{filter:brightness(1.08);color:#fff}
+    .erp-btn.primary:hover{background:var(--accent-deep,var(--accent));border-color:var(--accent-deep,var(--accent));color:#fff}
+    .erp-btn.danger{color:var(--red)}
     .erp-btn.danger:hover{border-color:var(--red);color:var(--red)}
-    .erp-btn.sm{padding:5px 9px;font-size:11px}
-    .erp-btn.ghost{background:none}
+    .erp-btn.danger.solid{background:var(--red);border-color:var(--red);color:#fff}
+    .erp-btn.sm{min-height:28px;padding:0 9px;font-size:11.5px}
+    .erp-btn.ghost{background:none;border-color:transparent;box-shadow:none;color:var(--dim)}
+    .erp-btn.ghost:hover{background:var(--hi);color:var(--ink);border-color:transparent}
+    .erp-btn.icon{width:28px;min-height:28px;padding:0}
 
     /* tables */
-    .erp-tbl-wrap{overflow-x:auto}
+    .erp-tbl-wrap{overflow:auto;max-height:calc(100vh - 230px)}
     .erp-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
-    .erp-tbl th{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--faint);font-weight:700;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--panel2);position:sticky;top:0;cursor:pointer;user-select:none}
+    .erp-tbl th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--th-ink,var(--faint));font-weight:700;padding:0 12px;height:36px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--th-bg,var(--panel2));position:sticky;top:0;z-index:1;cursor:pointer;user-select:none}
     .erp-tbl th.nosort{cursor:default}
+    .erp-tbl th.num,.erp-tbl td.num{text-align:right;font-variant-numeric:tabular-nums}
     .erp-tbl th .ar{color:var(--accent);margin-left:3px}
-    .erp-tbl td{padding:10px 12px;border-bottom:1px solid var(--line);color:var(--dim);vertical-align:middle}
-    .erp-tbl tbody tr{transition:background-color .15s ease}
+    .erp-tbl td{padding:8px 12px;height:44px;border-bottom:1px solid var(--line2,var(--line));color:var(--dim);vertical-align:middle}
+    .erp-tbl tbody tr:last-child td{border-bottom:none}
+    .erp-tbl tbody tr{transition:background-color .1s ease}
     .erp-tbl tbody tr:hover{background:var(--hi)}
-    .erp-tbl tbody tr.sel{background:rgba(255,106,44,.07)}
-    .erp-tbl .mono{font-family:'Spline Sans Mono',monospace;font-size:11px}
+    .erp-tbl tbody tr.sel{background:rgba(var(--accent-rgb,91,147,245),.07)}
+    .erp-tbl tbody tr[data-uid]{cursor:pointer}
+    .erp-tbl .mono{font-family:'Spline Sans Mono',monospace;font-size:11.5px}
     .erp-tbl .nm{color:var(--ink);font-weight:600}
-    .erp-cellname{display:flex;align-items:center;gap:10px}
+    .erp-tbl .sub2{font-size:11.5px;color:var(--faint);margin-top:1px}
+    .erp-tbl .acts{text-align:right;white-space:nowrap}
+    .erp-tbl .acts > *{vertical-align:middle}
+    .erp-cellname{display:flex;align-items:center;gap:10px;min-width:0}
     .erp-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0;overflow:hidden;background-size:cover;background-position:center}
     .erp-chk{width:15px;height:15px;cursor:pointer;accent-color:var(--accent)}
 
-    .erp-badge{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:2px 9px;border-radius:11px}
-    .erp-tag{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:var(--panel3);color:var(--dim)}
-    .erp-pill{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:2px 8px;border-radius:10px;color:#fff}
+    .erp-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:1px 8px;border-radius:10px;white-space:nowrap;line-height:18px}
+    .erp-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+    .erp-badge.mute{color:var(--dim);background:var(--panel3)}
+    .erp-badge.ok{color:var(--green);background:var(--green-soft,rgba(52,211,153,.13))}
+    .erp-badge.warn{color:var(--accent2);background:var(--amber-soft,rgba(251,191,36,.12))}
+    .erp-badge.bad{color:var(--red);background:rgba(220,38,38,.10)}
+    .erp-tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 8px;border-radius:6px;background:var(--panel3);color:var(--dim);white-space:nowrap}
+    .erp-pill{display:inline-block;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:1px 6px;border-radius:9px;color:#fff;vertical-align:1px}
 
     /* row menu */
-    .erp-rowmenu{position:fixed;z-index:100020;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 16px 48px rgba(0,0,0,.45);padding:5px;min-width:190px;display:none}
-    .erp-rowmenu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;color:var(--ink);font-size:12.5px;font-weight:500;padding:8px 11px;border-radius:7px;cursor:pointer;font-family:inherit}
-    .erp-rowmenu button svg{width:15px;height:15px;stroke:var(--faint);fill:none;stroke-width:1.9}
-    .erp-rowmenu button:hover{background:var(--hi)}
+    .erp-rowmenu{position:fixed;z-index:100020;background:var(--panel);border:1px solid var(--line);border-radius:var(--erp-r);box-shadow:var(--shadow-pop,0 14px 36px rgba(0,0,0,.35));padding:4px;min-width:200px;display:none;font-family:'Archivo',sans-serif}
+    .erp-rowmenu button{display:flex;align-items:center;gap:9px;width:100%;height:32px;text-align:left;background:none;border:none;color:var(--ink);font-size:12.5px;font-weight:500;padding:0 10px;border-radius:6px;cursor:pointer;font-family:inherit}
+    .erp-rowmenu button svg{width:15px;height:15px;stroke:var(--faint);fill:none;stroke-width:1.9;flex-shrink:0}
+    .erp-rowmenu button:hover,.erp-rowmenu button:focus-visible{background:var(--hi);outline:none}
     .erp-rowmenu button:hover svg{stroke:var(--accent)}
     .erp-rowmenu button.danger{color:var(--red)} .erp-rowmenu button.danger svg{stroke:var(--red)}
-    .erp-rowmenu button.danger:hover{background:rgba(248,113,113,.1)}
     .erp-rowmenu .sep{height:1px;background:var(--line);margin:4px}
 
-    .erp-pager{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 4px 2px;font-size:11.5px;color:var(--faint)}
-    .erp-pager .pg{display:flex;gap:5px}
-    .erp-pager .pg button{width:28px;height:28px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);color:var(--dim);font-size:12px;cursor:pointer;font-family:inherit}
+    .erp-pager{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px 0;font-size:12px;color:var(--faint);flex-wrap:wrap}
+    .erp-pager .pg{display:flex;gap:4px;align-items:center}
+    .erp-pager .pg button{min-width:30px;height:30px;border-radius:6px;background:var(--panel);border:1px solid var(--erp-fl);color:var(--ink);font-size:12px;cursor:pointer;font-family:inherit}
     .erp-pager .pg button.on{background:var(--accent);border-color:var(--accent);color:#fff}
     .erp-pager .pg button:disabled{opacity:.4;cursor:default}
+    .erp-pager select{height:30px;border-radius:6px;border:1px solid var(--erp-fl);background:var(--erp-fb);color:var(--ink);font:inherit;font-size:12px;padding:0 6px}
 
-    .erp-bulkbar{display:flex;align-items:center;gap:10px;background:rgba(255,106,44,.1);border:1px solid rgba(255,106,44,.3);border-radius:9px;padding:8px 14px;margin-bottom:13px;font-size:12px;color:var(--ink)}
+    .erp-bulkbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:rgba(var(--accent-rgb,91,147,245),.07);border:1px solid rgba(var(--accent-rgb,91,147,245),.28);border-radius:var(--erp-r-sm);padding:6px 10px;margin-bottom:12px;font-size:12.5px;color:var(--ink)}
     .erp-bulkbar b{color:var(--accent)}
 
-    .erp-empty{text-align:center;padding:44px 20px;color:var(--faint)}
-    .erp-empty svg{width:40px;height:40px;stroke:var(--line);fill:none;stroke-width:1.5;margin-bottom:10px}
+    .erp-empty{text-align:center;padding:36px 20px;color:var(--faint);font-size:12.5px}
+    .erp-empty svg{display:block;width:32px;height:32px;stroke:var(--faint);fill:none;stroke-width:1.5;margin:0 auto 8px;opacity:.7}
+    .erp-empty b{display:block;color:var(--ink);font-size:13px;margin-bottom:3px}
+    .erp-empty .erp-btn{margin-top:12px}
 
     /* overlays: drawer + modal */
-    .erp-ov{position:fixed;inset:0;z-index:100015;background:rgba(8,10,14,.62);display:none;opacity:0;transition:opacity .2s cubic-bezier(.22,.61,.36,1)}
+    .erp-ov{position:fixed;inset:0;z-index:100015;background:var(--scrim,rgba(8,10,14,.55));display:none;opacity:0;transition:opacity .16s ease;font-family:'Archivo',sans-serif}
     .erp-ov.on{display:block;opacity:1}
-    .erp-drawer{position:absolute;top:0;right:0;height:100%;width:min(680px,96vw);background:var(--bg);border-left:1px solid var(--line);box-shadow:-16px 0 60px rgba(0,0,0,.4);transform:translateX(40px);opacity:0;transition:transform .26s cubic-bezier(.22,.61,.36,1),opacity .22s ease;display:flex;flex-direction:column}
+    .erp-drawer{position:absolute;top:0;right:0;height:100%;width:min(640px,100vw);background:var(--panel);border-left:1px solid var(--line);box-shadow:var(--shadow-pop,-16px 0 50px rgba(0,0,0,.35));transform:translateX(24px);opacity:0;transition:transform .2s ease,opacity .18s ease;display:flex;flex-direction:column}
     .erp-ov.on .erp-drawer{transform:none;opacity:1}
-    .erp-modal{position:absolute;top:50%;left:50%;transform:translate(-50%,-47%) scale(.98);width:min(560px,94vw);max-height:88vh;background:var(--bg);border:1px solid var(--line);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.5);display:flex;flex-direction:column;opacity:0;transition:transform .22s cubic-bezier(.22,.61,.36,1),opacity .2s ease}
-    .erp-ov.on .erp-modal{transform:translate(-50%,-50%) scale(1);opacity:1}
+    .erp-modal{position:absolute;top:50%;left:50%;transform:translate(-50%,-48%);width:min(540px,94vw);max-height:88vh;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-pop,0 24px 60px rgba(0,0,0,.45));display:flex;flex-direction:column;opacity:0;transition:transform .18s ease,opacity .16s ease}
+    .erp-ov.on .erp-modal{transform:translate(-50%,-50%);opacity:1}
     .erp-modal.wide{width:min(820px,96vw)}
-    .erp-dh{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;border-bottom:1px solid var(--line);flex-shrink:0}
-    .erp-dh h3{font-size:15px;font-weight:800;color:var(--ink);margin:0}
-    .erp-dh .sub{font-size:11.5px;color:var(--faint);margin-top:2px}
-    .erp-x{width:30px;height:30px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);color:var(--dim);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-    .erp-x:hover{border-color:var(--red);color:var(--red)}
-    .erp-dbody{flex:1;overflow-y:auto;padding:20px 22px}
-    .erp-dfoot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid var(--line);flex-shrink:0;background:var(--panel)}
-    .erp-dfoot .msg{margin-right:auto;font-size:12px}
+    .erp-modal.sm{width:min(440px,94vw)}
+    .erp-dh{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);flex-shrink:0}
+    .erp-dh h3{font-size:16px;font-weight:700;color:var(--ink);margin:0}
+    .erp-dh .sub{font-size:12px;color:var(--faint);margin-top:2px}
+    .erp-x{width:32px;height:32px;border-radius:7px;background:transparent;border:1px solid transparent;color:var(--dim);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .erp-x:hover{background:var(--hi);color:var(--ink)}
+    .erp-x:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+    .erp-dbody{flex:1;overflow-y:auto;padding:16px 18px}
+    .erp-dbody > p{font-size:13px;line-height:1.55;color:var(--ink);margin:0 0 12px}
+    .erp-dfoot{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid var(--line);flex-shrink:0;background:var(--panel2);border-radius:0 0 12px 12px}
+    .erp-drawer .erp-dfoot{border-radius:0}
+    .erp-dfoot .msg{margin-right:auto;font-size:12px;font-weight:600}
 
     /* form */
-    .erp-fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+    .erp-fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
     .erp-fgrid .full{grid-column:1/-1}
-    .erp-flbl{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--faint);font-weight:700;margin-bottom:5px}
-    .erp-flbl .req{color:var(--accent)}
-    .erp-fin,.erp-fsel,.erp-fta{width:100%;box-sizing:border-box;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--ink);font-size:13px;padding:9px 11px;outline:none;font-family:inherit}
-    .erp-fta{resize:vertical;min-height:62px}
-    .erp-fin:focus,.erp-fsel:focus,.erp-fta:focus{border-color:var(--accent)}
-    .erp-fhint{font-size:10.5px;color:var(--faint);margin-top:4px}
-    .erp-fsec{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--accent);font-weight:700;margin:22px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--line);grid-column:1/-1;display:flex;align-items:center;gap:8px}
+    .erp-flbl{display:block;font-size:11.5px;color:var(--dim);font-weight:600;margin-bottom:5px}
+    .erp-flbl .req{color:var(--red)}
+    .erp-fin,.erp-fsel,.erp-fta{width:100%;box-sizing:border-box;height:34px;background:var(--erp-fb);border:1px solid var(--erp-fl);border-radius:var(--erp-r-sm);color:var(--ink);font-size:13px;padding:0 10px;outline:none;font-family:inherit}
+    .erp-fta{height:auto;resize:vertical;min-height:64px;padding:8px 10px;line-height:1.5}
+    .erp-fin:focus,.erp-fsel:focus,.erp-fta:focus{border-color:var(--accent);box-shadow:var(--erp-ring)}
+    .erp-fin[aria-invalid="true"],.erp-fsel[aria-invalid="true"]{border-color:var(--red)}
+    .erp-fin:disabled{background:var(--panel2);color:var(--faint)}
+    .erp-fhint{font-size:11px;color:var(--faint);margin-top:4px;line-height:1.4}
+    /* the section label's icon had no size rule, so in the user drawer it
+       rendered as a full-width silhouette that pushed the form off-screen */
+    .erp-fsec{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--dim);font-weight:700;margin:18px 0 2px;padding-bottom:6px;border-bottom:1px solid var(--line);grid-column:1/-1;display:flex;align-items:center;gap:7px}
+    .erp-fsec svg{width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:2;flex-shrink:0}
     .erp-fsec:first-child{margin-top:0}
+    .erp-fset{border:1px solid var(--line);border-radius:var(--erp-r-sm);padding:10px 12px;margin:0}
 
     .erp-combo{position:relative}
-    .erp-combo-list{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--panel);border:1px solid var(--line);border-radius:9px;box-shadow:0 14px 40px rgba(0,0,0,.4);z-index:5;max-height:240px;overflow-y:auto;display:none}
+    .erp-combo-list{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--panel);border:1px solid var(--line);border-radius:var(--erp-r-sm);box-shadow:var(--shadow-pop,0 14px 36px rgba(0,0,0,.35));z-index:5;max-height:240px;overflow-y:auto;display:none}
     .erp-combo-list.on{display:block}
-    .erp-combo-list .it{padding:9px 12px;font-size:12.5px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .erp-combo-list .it{padding:8px 11px;font-size:12.5px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px}
     .erp-combo-list .it:hover,.erp-combo-list .it.hi{background:var(--hi)}
-    .erp-combo-list .it .meta{font-size:10.5px;color:var(--faint)}
+    .erp-combo-list .it .meta{font-size:11px;color:var(--faint)}
     .erp-combo-list .new{color:var(--accent);font-weight:600;border-top:1px solid var(--line)}
     .erp-combo-list .new svg{width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:2;vertical-align:-2px;margin-right:5px}
 
-    .erp-avup{display:flex;align-items:center;gap:14px}
-    .erp-avbig{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:800;flex-shrink:0;background-size:cover;background-position:center;cursor:pointer;position:relative;overflow:hidden}
+    .erp-avup{display:flex;align-items:center;gap:12px}
+    .erp-avbig{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;font-weight:700;flex-shrink:0;background-size:cover;background-position:center;cursor:pointer;position:relative;overflow:hidden;border:0;padding:0;font-family:inherit}
+    .erp-avbig:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     .erp-avbig .ov{position:absolute;inset:0;background:rgba(0,0,0,.45);color:#fff;font-size:9px;display:none;align-items:center;justify-content:center;text-align:center;font-weight:600}
-    .erp-avbig:hover .ov{display:flex}
+    .erp-avbig:hover .ov,.erp-avbig:focus-visible .ov{display:flex}
 
-    .erp-toggle{display:inline-flex;align-items:center;cursor:pointer;gap:9px}
-    .erp-toggle input{display:none}
-    .erp-toggle .tk{width:38px;height:21px;border-radius:11px;background:var(--panel3);border:1px solid var(--line);position:relative;transition:.16s;flex-shrink:0}
-    .erp-toggle .tk::after{content:'';position:absolute;top:1px;left:1px;width:17px;height:17px;border-radius:50%;background:var(--faint);transition:.16s}
-    .erp-toggle input:checked+.tk{background:rgba(52,211,153,.25);border-color:var(--green)}
-    .erp-toggle input:checked+.tk::after{transform:translateX(17px);background:var(--green)}
+    .erp-toggle{display:inline-flex;align-items:center;cursor:pointer;gap:9px;position:relative}
+    .erp-toggle input{position:absolute;opacity:0;width:1px;height:1px}
+    .erp-toggle .tk{width:34px;height:20px;border-radius:10px;background:var(--panel3);border:1px solid var(--erp-fl);position:relative;transition:background-color .15s,border-color .15s;flex-shrink:0}
+    .erp-toggle .tk::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--faint);transition:transform .15s,background-color .15s}
+    .erp-toggle input:checked+.tk{background:var(--accent);border-color:var(--accent)}
+    .erp-toggle input:checked+.tk::after{transform:translateX(14px);background:#fff}
+    .erp-toggle input:focus-visible+.tk{box-shadow:var(--erp-ring)}
     .erp-toggle .tl{font-size:12.5px;color:var(--ink);font-weight:600}
 
-    .erp-pwbar{height:5px;border-radius:3px;background:var(--panel3);margin-top:7px;overflow:hidden}
-    .erp-pwbar i{display:block;height:100%;width:0;border-radius:3px;transition:.2s}
+    .erp-pwbar{height:4px;border-radius:2px;background:var(--panel3);margin-top:6px;overflow:hidden}
+    .erp-pwbar i{display:block;height:100%;width:0;border-radius:2px;transition:width .2s}
 
     /* permission matrix */
-    .erp-matrix{width:100%;border-collapse:collapse;font-size:11.5px}
-    .erp-matrix th,.erp-matrix td{border:1px solid var(--line);padding:0;text-align:center}
-    .erp-matrix thead th{background:var(--panel2);color:var(--faint);font-size:9px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;padding:8px 4px;position:sticky;top:0;z-index:2}
-    .erp-matrix thead th.mod{text-align:left;padding-left:12px;min-width:150px}
-    .erp-matrix tbody td.mod{text-align:left;padding:8px 12px;color:var(--ink);font-weight:600;background:var(--panel);position:sticky;left:0;z-index:1}
-    .erp-matrix .cell{width:100%;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.1s}
+    .erp-matrix{width:100%;border-collapse:collapse;font-size:12px}
+    .erp-matrix th,.erp-matrix td{border-bottom:1px solid var(--line2,var(--line));padding:0;text-align:center}
+    .erp-matrix thead th{background:var(--th-bg,var(--panel2));color:var(--th-ink,var(--faint));font-size:10px;text-transform:uppercase;letter-spacing:.4px;font-weight:700;padding:0 4px;height:34px;position:sticky;top:0;z-index:2;border-bottom:1px solid var(--line)}
+    .erp-matrix thead th.mod{text-align:left;padding-left:12px;min-width:160px;left:0;z-index:3}
+    .erp-matrix tbody td.mod{text-align:left;padding:6px 12px;color:var(--ink);font-weight:600;background:var(--panel);position:sticky;left:0;z-index:1}
+    .erp-matrix .cell{width:100%;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background-color .1s}
     .erp-matrix .cell:hover{background:var(--hi)}
-    .erp-matrix .cb{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center}
-    .erp-matrix .cell.on .cb{background:var(--green);border-color:var(--green)}
-    .erp-matrix .cell.on .cb svg{width:10px;height:10px;stroke:#06281d;stroke-width:3;fill:none}
+    .erp-matrix .cb{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--erp-fl);display:flex;align-items:center;justify-content:center}
+    .erp-matrix .cell.on .cb{background:var(--accent);border-color:var(--accent)}
+    .erp-matrix .cell.on .cb svg{width:10px;height:10px;stroke:#fff;stroke-width:3;fill:none}
     .erp-matrix .cell.ovr .cb{box-shadow:0 0 0 2px var(--accent2)}
     .erp-matrix tbody tr:hover td.mod{background:var(--hi)}
     .erp-colh{cursor:pointer}
     .erp-colh:hover{color:var(--accent)}
 
-    .erp-leg{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--faint);margin-top:12px}
+    .erp-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--faint);margin-top:10px}
     .erp-leg span{display:flex;align-items:center;gap:6px}
-    .erp-leg i{width:13px;height:13px;border-radius:4px;display:inline-block}
+    .erp-leg i{width:12px;height:12px;border-radius:3px;display:inline-block}
 
     /* workflow */
-    .erp-flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;padding:6px 0}
+    .erp-flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;row-gap:10px}
     .erp-step{display:flex;align-items:center}
-    .erp-stepbox{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 15px;min-width:130px;position:relative}
-    .erp-stepbox .lv{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
+    .erp-stepbox{background:var(--panel2);border:1px solid var(--line);border-radius:var(--erp-r-sm);padding:8px 12px;min-width:120px;position:relative}
+    .erp-stepbox .lv{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--faint);margin-bottom:2px}
     .erp-stepbox .nm{font-size:12.5px;font-weight:700;color:var(--ink)}
-    .erp-stepbox .dp{font-size:10px;color:var(--faint);margin-top:2px}
-    .erp-stepbox .rm{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);color:var(--faint);font-size:12px;cursor:pointer;display:none;align-items:center;justify-content:center}
-    .erp-stepbox:hover .rm{display:flex}
+    .erp-stepbox .dp{font-size:11px;color:var(--dim);margin-top:1px;font-variant-numeric:tabular-nums}
+    .erp-stepbox .rm{position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--dim);font-size:13px;cursor:pointer;display:none;align-items:center;justify-content:center}
+    .erp-stepbox:hover .rm,.erp-stepbox .rm:focus-visible{display:flex}
     .erp-stepbox .rm:hover{border-color:var(--red);color:var(--red)}
-    .erp-arrow{width:34px;display:flex;align-items:center;justify-content:center;color:var(--faint)}
-    .erp-arrow svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+    .erp-arrow{width:26px;display:flex;align-items:center;justify-content:center;color:var(--faint)}
+    .erp-arrow svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
 
     /* org tree */
     .erp-tree{font-size:12.5px}
-    .erp-tnode{margin-left:0}
-    .erp-trow{display:flex;align-items:center;gap:9px;padding:6px 10px;border-radius:8px;cursor:default}
+    .erp-trow{display:flex;align-items:center;gap:9px;padding:5px 8px;border-radius:6px;cursor:default;min-height:32px}
     .erp-trow:hover{background:var(--hi)}
-    .erp-tcaret{width:16px;text-align:center;color:var(--faint);cursor:pointer;user-select:none;flex-shrink:0}
-    .erp-tkids{margin-left:20px;border-left:1px dashed var(--line);padding-left:10px}
-    .erp-tkind{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:1px 7px;border-radius:9px}
+    .erp-tcaret{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;color:var(--dim);cursor:pointer;user-select:none;flex-shrink:0;border-radius:4px;background:none;border:0;font:inherit;padding:0}
+    .erp-tcaret:hover{background:var(--panel3)}
+    .erp-tkids{margin-left:18px;border-left:1px solid var(--line);padding-left:10px}
+    .erp-tkind{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:0 7px;border-radius:9px;line-height:17px}
 
     .erp-act-feed{display:flex;flex-direction:column}
-    .erp-act{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+    .erp-act{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2,var(--line));align-items:flex-start}
     .erp-act:last-child{border-bottom:none}
-    .erp-act .dot{width:30px;height:30px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-    .erp-act .dot svg{width:15px;height:15px;fill:none;stroke-width:2}
+    .erp-act .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:6px;background:var(--faint)}
+    .erp-act .dot svg{display:none}
     .erp-act .txt{flex:1;min-width:0}
     .erp-act .txt .a{font-size:12.5px;color:var(--ink);font-weight:600}
-    .erp-act .txt .m{font-size:11px;color:var(--faint);margin-top:2px}
-    .erp-act .tm{font-size:10.5px;color:var(--faint);white-space:nowrap;font-family:'Spline Sans Mono',monospace}
+    .erp-act .txt .m{font-size:11.5px;color:var(--faint);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .erp-act .tm{font-size:11px;color:var(--faint);white-space:nowrap;font-variant-numeric:tabular-nums}
 
-    .erp-notif{display:flex;gap:13px;padding:13px 16px;border-bottom:1px solid var(--line);cursor:pointer;transition:.1s}
+    .erp-notif{display:flex;gap:11px;padding:11px 14px;border-bottom:1px solid var(--line2,var(--line));cursor:pointer;transition:background-color .1s;align-items:flex-start}
+    .erp-notif:last-child{border-bottom:none}
     .erp-notif:hover{background:var(--hi)}
-    .erp-notif.unread{background:rgba(94,155,240,.05)}
-    .erp-notif .nd{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-    .erp-notif .nd svg{width:17px;height:17px;fill:none;stroke-width:2}
+    .erp-notif:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+    .erp-notif.unread{background:rgba(var(--accent-rgb,91,147,245),.05)}
+    .erp-notif .nd{width:28px;height:28px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+    .erp-notif .nd svg{width:15px;height:15px;fill:none;stroke-width:2}
     .erp-notif .ttl{font-size:12.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:7px}
-    .erp-notif .ttl .ud{width:7px;height:7px;border-radius:50%;background:var(--blue)}
-    .erp-notif .ms{font-size:11.5px;color:var(--dim);margin-top:2px}
-    .erp-notif .tm{font-size:10px;color:var(--faint);margin-top:3px;font-family:'Spline Sans Mono',monospace}
+    .erp-notif .ttl .ud{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+    .erp-notif .ms{font-size:12px;color:var(--dim);margin-top:1px}
+    .erp-notif .tm{font-size:11px;color:var(--faint);margin-top:2px}
 
     /* command palette */
-    #erpCmd{position:fixed;inset:0;z-index:100030;background:rgba(8,10,14,.6);display:none;align-items:flex-start;justify-content:center;padding-top:13vh}
+    #erpCmd{position:fixed;inset:0;z-index:100030;background:var(--scrim,rgba(8,10,14,.55));display:none;align-items:flex-start;justify-content:center;padding-top:12vh;font-family:'Archivo',sans-serif}
     #erpCmd.on{display:flex}
-    #erpCmd .box{width:min(560px,94vw);background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.55);overflow:hidden}
-    #erpCmd .ci{display:flex;align-items:center;gap:11px;padding:15px 18px;border-bottom:1px solid var(--line)}
-    #erpCmd .ci svg{width:18px;height:18px;stroke:var(--faint);fill:none;stroke-width:2}
-    #erpCmd input{flex:1;background:none;border:none;outline:none;color:var(--ink);font-size:15px;font-family:inherit}
-    #erpCmd .res{max-height:54vh;overflow-y:auto;padding:7px}
-    #erpCmd .cg{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--faint);font-weight:700;padding:9px 12px 5px}
-    #erpCmd .ci-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:9px;cursor:pointer;color:var(--ink);font-size:13px}
-    #erpCmd .ci-row svg{width:16px;height:16px;stroke:var(--faint);fill:none;stroke-width:1.9;flex-shrink:0}
+    #erpCmd .box{width:min(560px,94vw);background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-pop,0 24px 60px rgba(0,0,0,.5));overflow:hidden}
+    #erpCmd .ci{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+    #erpCmd .ci svg{width:16px;height:16px;stroke:var(--faint);fill:none;stroke-width:2}
+    #erpCmd input{flex:1;background:none;border:none;outline:none;color:var(--ink);font-size:14px;font-family:inherit}
+    #erpCmd .res{max-height:54vh;overflow-y:auto;padding:6px}
+    #erpCmd .cg{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--faint);font-weight:700;padding:8px 10px 4px}
+    #erpCmd .ci-row{display:flex;align-items:center;gap:10px;height:34px;padding:0 10px;border-radius:7px;cursor:pointer;color:var(--ink);font-size:13px}
+    #erpCmd .ci-row svg{width:15px;height:15px;stroke:var(--faint);fill:none;stroke-width:1.9;flex-shrink:0}
     #erpCmd .ci-row .meta{margin-left:auto;font-size:11px;color:var(--faint)}
-    #erpCmd .ci-row.hi,#erpCmd .ci-row:hover{background:var(--accent);color:#fff}
-    #erpCmd .ci-row.hi svg,#erpCmd .ci-row:hover svg{stroke:#fff}
-    #erpCmd .ci-row.hi .meta,#erpCmd .ci-row:hover .meta{color:rgba(255,255,255,.8)}
+    #erpCmd .ci-row.hi,#erpCmd .ci-row:hover{background:rgba(var(--accent-rgb,91,147,245),.10);color:var(--accent)}
+    #erpCmd .ci-row.hi svg,#erpCmd .ci-row:hover svg{stroke:var(--accent)}
 
-    .erp-deny{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;color:var(--faint);gap:14px}
-    .erp-deny svg{width:54px;height:54px;stroke:var(--line);fill:none;stroke-width:1.5}
-    .erp-deny h2{font-size:20px;color:var(--ink);margin:0}
+    .erp-deny{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;color:var(--dim);gap:10px;padding:20px}
+    .erp-deny svg{width:40px;height:40px;stroke:var(--faint);fill:none;stroke-width:1.5}
+    .erp-deny h2{font-size:17px;color:var(--ink);margin:0}
 
-    .erp-kv{display:flex;flex-direction:column;gap:0}
-    .erp-kv .r{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+    .erp-kv{display:flex;flex-direction:column}
+    .erp-kv .r{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:8px 0;border-bottom:1px solid var(--line2,var(--line));font-size:12.5px}
     .erp-kv .r:last-child{border-bottom:none}
-    .erp-kv .r .k{color:var(--faint)} .erp-kv .r .v{color:var(--ink);font-weight:600;text-align:right}
+    .erp-kv .r .k{color:var(--dim)} .erp-kv .r .v{color:var(--ink);font-weight:600;text-align:right}
 
-    .erp-seg{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:3px}
-    .erp-seg button{background:none;border:none;color:var(--dim);font-size:11.5px;font-weight:600;padding:6px 13px;border-radius:6px;cursor:pointer;font-family:inherit}
-    .erp-seg button.on{background:var(--accent);color:#fff}
+    .erp-seg{display:inline-flex;background:var(--panel2);border:1px solid var(--erp-fl);border-radius:var(--erp-r-sm);padding:2px}
+    .erp-seg button{background:none;border:none;color:var(--dim);font-size:12px;font-weight:600;height:28px;padding:0 12px;border-radius:5px;cursor:pointer;font-family:inherit}
+    .erp-seg button.on{background:var(--panel);color:var(--accent);box-shadow:0 0 0 1px var(--line)}
+    .erp-seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 
-    .erp-bar2{height:7px;border-radius:4px;background:var(--panel3);overflow:hidden}
-    .erp-bar2 i{display:block;height:100%;border-radius:4px}
+    .erp-bar2{height:6px;border-radius:3px;background:var(--panel3);overflow:hidden}
+    .erp-bar2 i{display:block;height:100%;border-radius:3px}
+
+    /* narrow screens: the admin nav becomes a scrolling tab strip above the page */
+    @media (max-width:860px){
+      .erp-wrap{flex-direction:column}
+      .erp-side,.erp-side.collapsed{width:auto;border-right:0;border-bottom:1px solid var(--line);flex-direction:row;align-items:center}
+      .erp-side-head{border-bottom:0;padding:6px 8px;flex-shrink:0}
+      .erp-side-head .t,.erp-findbtn .lbl,.erp-findbtn .kbd,.erp-side-foot{display:none}
+      .erp-findbtn{width:32px;justify-content:center;padding:0}
+      .erp-nav{display:flex;overflow-x:auto;overflow-y:hidden;padding:6px 8px;gap:2px;scrollbar-width:thin}
+      .erp-nav-sec{display:none!important}
+      .erp-nav a{flex-shrink:0;justify-content:flex-start!important;padding:0 10px!important}
+      .erp-nav a .erp-nav-lbl{display:inline!important}
+      .erp-nav a .pin,.erp-nav a .cnt:not(.hot),.erp-nav a .ext{display:none}
+      .erp-nav a.on::before{display:none}
+      .erp-body{padding:14px}
+      .erp-fgrid{grid-template-columns:1fr}
+      .erp-field .erp-input{min-width:0;width:100%}
+      .erp-toolbar > .erp-field{flex:1 1 100%}
+      .erp-select{max-width:none;flex:1 1 140px}
+    }
     `;
     document.head.appendChild(s);
   }
@@ -659,7 +728,8 @@
     check: '<path d="M20 6 9 17l-5-5"/>',
     chevL: '<path d="M15 18l-6-6 6-6"/>',
     chevR: '<path d="M9 18l6-6-6-6"/>',
-    settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 2.6 15H2a2 2 0 0 1 0-4h.1A1.6 1.6 0 0 0 4 9.4l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 9 6.6V6a2 2 0 0 1 4 0v.1A1.6 1.6 0 0 0 17 7.6l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.6 1.6 0 0 0 21.4 13H21'
+    /* was an unterminated path (never rendered until used) — sliders icon instead */
+    settings: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>'
   };
   const ic = (k, cls) => `<svg viewBox="0 0 24 24" ${cls ? 'class="' + cls + '"' : ''}>${ICON[k] || ''}</svg>`;
 
@@ -677,35 +747,46 @@
     return `<div class="erp-av" style="width:${s}px;height:${s}px;font-size:${Math.round(s / 2.6)}px;${style}">${u.photo ? '' : (u.initials || (u.name || '?').slice(0, 1).toUpperCase())}</div>`;
   }
   function statusBadge(st) {
+    /* compact badge: one dot (CSS) + the label, so status is never colour alone;
+       green / amber / red are kept for genuine states only */
     const s = STATUS[st] || STATUS.inactive;
-    return `<span class="erp-badge" style="color:${s.color};background:${s.color.replace('var(--', 'rgba(').replace(')', '')};background:color-mix(in srgb, ${s.color} 15%, transparent)">${s.dot} ${s.label}</span>`;
+    const tone = { active: 'ok', suspended: 'warn', pending: 'warn', locked: 'bad' }[st] || 'mute';
+    return `<span class="erp-badge ${tone}">${s.label}</span>`;
   }
   function desigTag(id) {
-    const d = desigById(id); if (!d) return '<span class="erp-tag">—</span>';
+    const d = desigById(id); if (!d) return '<span style="color:var(--faint)">—</span>';
     return `<span class="erp-tag" title="${esc(deptName(d.departmentId))}">${esc(d.name)}</span>`;
   }
 
   /* ════════════════════════════════════════════════════════════════════
      STATE + ROUTER
      ════════════════════════════════════════════════════════════════════ */
+  /* Grouped by purpose. Entries with `id` are admin sections; `act` runs an
+     existing dialog; `ext` opens an existing app module (via the shell's own
+     router). Nothing here is a new feature — only a place to find it. */
   const NAV = [
     { sec: 'Overview' },
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-    { sec: 'Identity' },
+    { sec: 'Users & Access' },
     { id: 'users', label: 'Users', icon: 'users', cnt: () => users().length },
+    { act: 'roleAccess', label: 'Role Access', icon: 'key', tip: 'Sign-in roles and what each role may do — this is what the app enforces' },
     { id: 'designations', label: 'Designations', icon: 'desig', cnt: () => desigs().length },
+    { id: 'permissions', label: 'Designation Matrix', icon: 'perm' },
+    { id: 'workflow', label: 'Approval & Limits', icon: 'flow' },
+    { id: 'security', label: 'Security Policy', icon: 'security' },
+    { sec: 'Organisation & Data' },
     { id: 'departments', label: 'Departments', icon: 'dept', cnt: () => depts().length },
     { id: 'organization', label: 'Organization', icon: 'org' },
-    { sec: 'Access' },
-    { id: 'permissions', label: 'Permissions', icon: 'perm' },
     { id: 'projects', label: 'Projects', icon: 'project', cnt: () => projects().length },
-    { id: 'workflow', label: 'Approval & Limits', icon: 'flow' },
-    { id: 'security', label: 'Security', icon: 'security' },
-    { sec: 'Monitor' },
+    { ext: 'bmaster', label: 'BOQ Master', icon: 'audit', tip: 'Opens the BOQ Master library' },
+    { ext: 'vmaster', label: 'Vendor Master', icon: 'user', tip: 'Opens the Vendor Master' },
+    { id: 'system', label: 'System & Data', icon: 'settings' },
+    { sec: 'Audit & Maintenance' },
     { id: 'audit', label: 'Audit Trail', icon: 'audit' },
-    { id: 'notifications', label: 'Notifications', icon: 'bell' }
+    { id: 'notifications', label: 'Notifications', icon: 'bell', cnt: () => notifs().filter(n => !n.read).length, hot: true },
+    { ext: 'del', label: 'Deleted Items', icon: 'trash', tip: 'Opens Deleted Items' }
   ];
-  const TITLES = { dashboard: 'Dashboard', users: 'User Management', designations: 'Designation Master', departments: 'Department Master', organization: 'Organization Hierarchy', permissions: 'Permission Management', projects: 'Projects', workflow: 'Approval Workflow & Financial Limits', security: 'Security & Access Control', audit: 'Audit Trail', notifications: 'Notification Center' };
+  const TITLES = { dashboard: 'Administration', users: 'Users', designations: 'Designations', departments: 'Departments', organization: 'Organization', permissions: 'Designation Matrix', projects: 'Projects', workflow: 'Approval & Limits', security: 'Security Policy', audit: 'Audit Trail', notifications: 'Notifications', system: 'System & Data' };
 
   const S = {
     view: 'dashboard',
@@ -727,37 +808,39 @@
   function renderShell() {
     const root = document.getElementById('admin');
     if (!root) return;
+    /* One header for the whole workspace: the app's top bar already shows
+       "Administration / <section>", so the old second bar (breadcrumb +
+       search + bell) is gone. Search moved into the side panel; unread
+       notifications show as a count on the Notifications item. */
     root.innerHTML = `
       <div class="erp-wrap">
-        <aside class="erp-side ${S.collapsed ? 'collapsed' : ''}" id="erpSide">
+        <aside class="erp-side ${S.collapsed ? 'collapsed' : ''}" id="erpSide" aria-label="Administration sections">
           <div class="erp-side-head">
-            <div class="badge">${ic('security')}</div>
-            <div class="t">Administration<span>Control Centre</span></div>
+            <div class="t">${ic('security')}<b>Administration<span>Users, access &amp; settings</span></b></div>
+            <button type="button" class="erp-findbtn" id="erpGlobal" title="Search sections, users and actions (Ctrl/⌘ K)">${ic('search')}<span class="lbl">Search admin…</span><span class="kbd">⌘K</span></button>
           </div>
           <nav class="erp-nav" id="erpNav"></nav>
           <div class="erp-side-foot">
-            <button class="erp-collapse" id="erpCollapse">${ic('chevL')}<span class="txt">Collapse</span></button>
+            <button type="button" class="erp-collapse" id="erpCollapse" aria-expanded="${S.collapsed ? 'false' : 'true'}">${ic(S.collapsed ? 'chevR' : 'chevL')}<span class="txt">Collapse</span></button>
           </div>
         </aside>
         <div class="erp-main">
-          <div class="erp-bar">
-            <div class="erp-crumb" id="erpCrumb"></div>
-            <div class="erp-bar-sp"></div>
-            <div class="erp-search" style="max-width:300px">
-              <svg viewBox="0 0 24 24">${ICON.search}</svg>
-              <input id="erpGlobal" placeholder="Search users, designations…" readonly>
-              <span class="kbd">⌘K</span>
-            </div>
-            <button class="erp-iconbtn" id="erpBell" title="Notifications">${ic('bell')}<span id="erpBellDot"></span></button>
-          </div>
           <div class="erp-body" id="erpBody"></div>
         </div>
       </div>`;
-    document.getElementById('erpCollapse').onclick = () => { S.collapsed = !S.collapsed; save('erp_side_collapsed', S.collapsed); document.getElementById('erpSide').classList.toggle('collapsed', S.collapsed); document.getElementById('erpCollapse').innerHTML = ic(S.collapsed ? 'chevR' : 'chevL') + '<span class="txt">Collapse</span>'; };
-    document.getElementById('erpBell').onclick = () => go('notifications');
-    const gs = document.getElementById('erpGlobal'); gs.onclick = openCmd; gs.onfocus = openCmd;
+    document.getElementById('erpCollapse').onclick = () => { S.collapsed = !S.collapsed; save('erp_side_collapsed', S.collapsed); document.getElementById('erpSide').classList.toggle('collapsed', S.collapsed); const b = document.getElementById('erpCollapse'); b.innerHTML = ic(S.collapsed ? 'chevR' : 'chevL') + '<span class="txt">Collapse</span>'; b.setAttribute('aria-expanded', S.collapsed ? 'false' : 'true'); };
+    document.getElementById('erpGlobal').onclick = openCmd;
     renderNav();
     refreshBadge();
+  }
+  function navAct(it) {
+    if (it.act === 'roleAccess') {
+      /* the existing User Management dialog (user-chip menu) — its role matrix is the one sign-in enforces */
+      try { if (window.Auth && typeof window.Auth._users === 'function') window.Auth._users(); }
+      catch (e) { console.error('[admin] Role Access', e); }
+      return;
+    }
+    if (it.ext && window.PShell) window.PShell.go(it.ext);
   }
   function renderNav() {
     const nav = document.getElementById('erpNav'); if (!nav) return;
@@ -772,14 +855,20 @@
       h += navLink(it, false);
     });
     nav.innerHTML = h;
-    nav.querySelectorAll('a[data-v]').forEach(a => a.onclick = (e) => { if (e.target.closest('.pin')) return; go(a.dataset.v); });
-    nav.querySelectorAll('.pin').forEach(p => p.onclick = (e) => { e.stopPropagation(); togglePin(p.dataset.pin); });
+    nav.querySelectorAll('a[data-v]').forEach(a => a.onclick = (e) => { e.preventDefault(); if (e.target.closest('.pin')) return; go(a.dataset.v); });
+    nav.querySelectorAll('a[data-x]').forEach(a => a.onclick = (e) => { e.preventDefault(); const it = NAV.find(n => (n.act || n.ext) === a.dataset.x); if (it) navAct(it); });
+    nav.querySelectorAll('.pin').forEach(p => p.onclick = (e) => { e.preventDefault(); e.stopPropagation(); togglePin(p.dataset.pin); });
   }
   function navLink(it, isPinned) {
-    const cnt = it.cnt ? `<span class="cnt">${it.cnt()}</span>` : '';
+    if (it.act || it.ext) {
+      return `<a href="#" data-x="${it.act || it.ext}" title="${esc(it.tip || it.label)}">${ic(it.icon)}<span class="erp-nav-lbl">${esc(it.label)}</span>${it.ext ? '<span class="ext" aria-hidden="true">↗</span>' : ''}</a>`;
+    }
+    const n = it.cnt ? it.cnt() : 0;
+    const cnt = it.cnt && (n || !it.hot) ? `<span class="cnt${it.hot && n ? ' hot' : ''}"${it.hot ? ` aria-label="${n} unread"` : ''}>${n}</span>` : '';
     const pinned = S.pinned.includes(it.id);
-    const pin = isPinned ? '' : `<span class="pin ${pinned ? 'on' : ''}" data-pin="${it.id}" title="${pinned ? 'Unpin' : 'Pin to top'}">${pinned ? '★' : '☆'}</span>`;
-    return `<a data-v="${it.id}" class="${S.view === it.id ? 'on' : ''}" title="${esc(it.label)}">${ic(it.icon)}<span class="erp-nav-lbl">${esc(it.label)}</span>${cnt || pin}</a>`;
+    const pin = isPinned || it.cnt ? '' : `<span class="pin ${pinned ? 'on' : ''}" data-pin="${it.id}" title="${pinned ? 'Unpin' : 'Pin to top'}" role="button" aria-label="${pinned ? 'Unpin' : 'Pin'} ${esc(it.label)}">${pinned ? '★' : '☆'}</span>`;
+    const on = S.view === it.id;
+    return `<a href="#" data-v="${it.id}" class="${on ? 'on' : ''}"${on ? ' aria-current="page"' : ''} title="${esc(it.label)}">${ic(it.icon)}<span class="erp-nav-lbl">${esc(it.label)}</span>${cnt || pin}</a>`;
   }
   function togglePin(id) { const i = S.pinned.indexOf(id); if (i >= 0) S.pinned.splice(i, 1); else S.pinned.push(id); save('erp_pinned', S.pinned); renderNav(); }
 
@@ -787,13 +876,11 @@
   function renderMain() {
     if (!document.getElementById('erpBody')) renderShell();
     // active nav
-    document.querySelectorAll('#erpNav a[data-v]').forEach(a => a.classList.toggle('on', a.dataset.v === S.view));
-    const cr = document.getElementById('erpCrumb');
-    if (cr) cr.innerHTML = `Administration<span class="sep">›</span><b>${esc(TITLES[S.view] || S.view)}</b>`;
+    document.querySelectorAll('#erpNav a[data-v]').forEach(a => { const on = a.dataset.v === S.view; a.classList.toggle('on', on); if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     const body = document.getElementById('erpBody');
     if (!canAdmin()) { body.parentElement.innerHTML = denyHTML(); return; }
     const fn = VIEWS[S.view] || VIEWS.dashboard;
-    body.innerHTML = fn();
+    body.innerHTML = '<div class="erp-page">' + fn() + '</div>';
     // Fade the content in only when actually switching sections — not on every
     // in-place re-render after a save/toggle, which would flicker on rapid clicks.
     if (S.view !== _lastRenderedView) {
@@ -815,62 +902,71 @@
      DASHBOARD
      ════════════════════════════════════════════════════════════════════ */
   VIEWS.dashboard = function () {
+    /* Every figure here is counted from data the app already holds — no
+       estimates. (This used to add a hard-coded +3 to "Pending Approvals" and
+       showed "Online now" / "Today's logins" from this browser's local
+       session list, which is always empty once sign-in is server-side.) */
     const u = users();
-    const online = u.filter(x => (x.sessions || []).length).length;
-    const pending = u.filter(x => x.status === 'pending').length + 3;
-    const today = load(K.hist, []).filter(h => h.ok && Date.now() - h.ts < 86400000).length + u.filter(x => x.lastLogin && Date.now() - x.lastLogin < 86400000).length;
-    const pol = policy();
-    const activeUsers = u.filter(x => x.status === 'active').length;
-    const lic = pol.license || { total: 50 };
-    const used = u.filter(x => x.status !== 'archived').length;
-    // storage
-    let bytes = 0; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); bytes += (localStorage.getItem(k) || '').length + k.length; } } catch (e) {}
-    const mb = (bytes / 1048576);
-    const tile = (icon, color, n, l, d) => `<div class="erp-tile"><div class="ic" style="background:color-mix(in srgb,${color} 16%,transparent)">${ic(icon).replace('<svg', '<svg style="stroke:' + color + '"')}</div><div class="n">${n}</div><div class="l">${l}</div>${d ? `<div class="d">${d}</div>` : ''}</div>`;
+    const by = (k) => u.filter(x => (x.status || 'active') === k).length;
+    const active = by('active'), locked = by('locked'), pending = by('pending');
+    const inactive = u.length - active;
+    const pr = projects(), prOpen = pr.filter(p => p.status !== 'inactive').length;
+    const lib = (typeof CATALOG !== 'undefined' && CATALOG) ? CATALOG.length : null;
+    const comp = (typeof COMP !== 'undefined' && COMP) ? COMP.length : null;
+    let vendors = null; try { if (window.QM && typeof window.QM.metrics === 'function') vendors = window.QM.metrics().vendorsOnFile; } catch (e) {}
+    const num = (n) => n == null ? '—' : Number(n).toLocaleString('en-IN');
+    const tile = (l, n, d, go, ext) => `<button type="button" class="erp-tile" ${ext ? `onclick="PShell.go('${ext}')"` : `onclick="ERP.go('${go}')"`}><div class="l">${l}</div><div class="n">${n}</div>${d ? `<div class="d">${d}</div>` : ''}</button>`;
+    const userDetail = [active + ' active', inactive ? inactive + ' inactive' : '', locked ? locked + ' locked' : '', pending ? pending + ' pending' : ''].filter(Boolean).join(' · ');
 
-    const acts = audit().slice(0, 7).map(a => {
-      const map = { 'User Created': ['var(--green)', 'user'], 'Permission Modified': ['var(--accent)', 'perm'], 'Account Locked': ['var(--red)', 'lock'], 'Login Success': ['var(--blue)', 'power'], 'Login Failure': ['var(--red)', 'power'], 'Platform Access Revoked': ['var(--red)', 'power'], 'Role Changed': ['var(--violet)', 'desig'] };
-      const m = map[a.action] || ['var(--faint)', 'audit'];
-      return `<div class="erp-act"><div class="dot" style="background:color-mix(in srgb,${m[0]} 16%,transparent)">${ic(m[1]).replace('<svg', '<svg style="stroke:' + m[0] + '"')}</div><div class="txt"><div class="a">${esc(a.action)}${a.target ? ' · ' + esc(a.target) : ''}</div><div class="m">${esc(a.module)} • by ${esc(a.admin)}${a.newVal ? ' → ' + esc(a.newVal) : ''}</div></div><div class="tm">${ago(a.ts)}</div></div>`;
-    }).join('');
+    const acts = audit().slice(0, 6).map(a => `<div class="erp-act"><span class="dot" aria-hidden="true"></span><div class="txt"><div class="a">${esc(a.action)}${a.target ? ' · ' + esc(a.target) : ''}</div><div class="m">${esc(a.module || '')}${a.admin ? ' · by ' + esc(a.admin) : ''}</div></div><div class="tm">${ago(a.ts)}</div></div>`).join('');
 
-    const dist = depts().map(d => ({ d, n: u.filter(x => x.departmentId === d.id).length })).filter(x => x.n).sort((a, b) => b.n - a.n);
-    const maxD = Math.max(1, ...dist.map(x => x.n));
+    /* the admin modules, grouped the same way as the side navigation */
+    const DESC = {
+      users: 'Accounts, status, password resets', roleAccess: 'What each sign-in role may do (enforced)',
+      designations: 'Job titles, hierarchy and limits', permissions: 'Reference permissions per designation',
+      workflow: 'Approval chains and ₹ limits', security: 'Password and session policy',
+      departments: 'Department master', organization: 'Company › branch › department tree',
+      projects: 'Project master and user access', bmaster: 'Item library and rate history',
+      vmaster: 'Contractor and supplier records', system: 'Backup, import, theme, AI provider',
+      audit: 'Who changed what, and when', notifications: 'Administrative alerts', del: 'Restore soft-deleted records'
+    };
+    let mods = '', sec = '';
+    NAV.forEach(it => {
+      if (it.sec) { sec = it.sec === 'Overview' ? '' : it.sec; if (sec) mods += `<div class="erp-modgrp" style="grid-column:1/-1">${esc(sec)}</div>`; return; }
+      if (!sec) return;
+      const key = it.id || it.act || it.ext;
+      const click = it.id ? `ERP.go('${it.id}')` : it.ext ? `PShell.go('${it.ext}')` : `ERP._navAct('${it.act}')`;
+      mods += `<button type="button" class="erp-mod" onclick="${click}">${ic(it.icon)}<div><b>${esc(it.label)}${it.ext ? ' ↗' : ''}</b><span>${esc(DESC[key] || '')}</span></div></button>`;
+    });
 
+    const server = !!(window.TSApi && window.TSApi.active && window.TSApi.session && window.CloudflareAPI);
+    const pol = policy(), lic = pol.license;
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Good ${greeting()}, ${esc(currentName().split(' ')[0])}</h1><div class="erp-sub">${new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} · Primarc Projects</div></div>
-        <div style="display:flex;gap:9px"><button class="erp-btn" onclick="ERP.go('audit')">${ic('audit')}Audit trail</button><button class="erp-btn primary" onclick="ERP.addUser()">${ic('plus')}Add user</button></div></div>
+      <div class="erp-sec-head"><div><h1 class="erp-h">Administration</h1><div class="erp-sub">Users, access, organisation data and audit for the Tendering System.</div></div>
+        <div class="acts"><button class="erp-btn" onclick="ERP.go('audit')">${ic('audit')}Audit trail</button><button class="erp-btn primary" onclick="ERP.addUser()">${ic('plus')}Add user</button></div></div>
       <div class="erp-tiles">
-        ${tile('users', 'var(--accent)', u.length, 'Total Users', activeUsers + ' active')}
-        ${tile('power', 'var(--green)', online, 'Online Now', 'live sessions')}
-        ${tile('dept', 'var(--blue)', depts().length, 'Departments', desigs().length + ' designations')}
-        ${tile('project', 'var(--violet)', projects().length, 'Projects', 'active sites')}
-        ${tile('flow', 'var(--accent2)', pending, 'Pending Approvals', 'awaiting action')}
-        ${tile('power', 'var(--blue)', today, "Today's Logins", 'last 24h')}
+        ${tile('Users', num(u.length), userDetail, 'users')}
+        ${tile('Projects', num(pr.length), prOpen + ' active', 'projects')}
+        ${tile('BOQ library', num(lib), comp != null ? num(comp) + ' multi-vendor items' : '', '', 'bmaster')}
+        ${tile('Vendors', num(vendors), 'on file', '', 'vmaster')}
+        ${tile('Designations', num(desigs().length), depts().length + ' departments', 'designations')}
       </div>
       <div class="erp-grid2">
-        <div class="erp-card"><div class="erp-card-head"><div class="ttl">Recent Activity<span>live audit feed</span></div><button class="erp-btn sm ghost" onclick="ERP.go('audit')">View all</button></div>
-          <div class="erp-card-body" style="padding:6px 16px"><div class="erp-act-feed">${acts || '<div class="erp-empty">No activity yet</div>'}</div></div></div>
-        <div style="display:flex;flex-direction:column;gap:16px">
-          <div class="erp-card"><div class="erp-card-head"><div class="ttl">License</div>${statusBadge('active')}</div>
-            <div class="erp-card-body">
-              <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px"><div><div style="font-size:24px;font-weight:800;color:var(--ink);line-height:1">${used}<span style="font-size:14px;color:var(--faint)"> / ${lic.total}</span></div><div style="font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.5px;margin-top:3px">Seats used</div></div><div style="text-align:right;font-size:11px;color:var(--dim)">${lic.total - used} available<br><span style="color:var(--faint)">expires ${fmtDate(new Date(lic.expires).getTime())}</span></div></div>
-              <div class="erp-bar2"><i style="width:${Math.min(100, used / lic.total * 100)}%;background:${used / lic.total > .9 ? 'var(--red)' : 'var(--green)'}"></i></div>
-            </div></div>
-          <div class="erp-card"><div class="erp-card-head"><div class="ttl">System Health</div></div>
+        <div class="erp-card"><div class="erp-card-head"><div class="ttl">Admin modules</div></div>
+          <div class="erp-card-body"><div class="erp-mods">${mods}</div></div></div>
+        <div>
+          <div class="erp-card"><div class="erp-card-head"><div class="ttl">Recent activity</div><button class="erp-btn sm ghost" onclick="ERP.go('audit')">View all</button></div>
+            <div class="erp-card-body" style="padding:4px 14px">${acts ? `<div class="erp-act-feed">${acts}</div>` : `<div class="erp-empty"><b>No activity recorded yet</b>Changes made in Administration are listed here.</div>`}</div></div>
+          <div class="erp-card"><div class="erp-card-head"><div class="ttl">Status</div></div>
             <div class="erp-card-body erp-kv">
-              <div class="r"><span class="k">Storage used</span><span class="v">${mb.toFixed(2)} MB</span></div>
-              <div class="r"><span class="k">Auth method</span><span class="v">SHA-256 + salt</span></div>
-              <div class="r"><span class="k">Session timeout</span><span class="v">${pol.sessionTimeout || 30} min</span></div>
-              <div class="r"><span class="k">2-Factor</span><span class="v" style="color:var(--faint)">Ready (off)</span></div>
-              <div class="r"><span class="k">Backups</span><span class="v" style="color:var(--green)">● Local</span></div>
+              <div class="r"><span class="k">User accounts &amp; sign-in</span><span class="v">${server ? 'Server' : 'This browser only'}</span></div>
+              <div class="r"><span class="k">Admin master data</span><span class="v">This browser</span></div>
+              <div class="r"><span class="k">Session limits</span><span class="v">${server ? '30 min idle · 12 h max' : (pol.sessionTimeout || 30) + ' min idle'}</span></div>
+              <div class="r"><span class="k">Min. password length</span><span class="v">${pol.minLen || 8} characters</span></div>
+              ${lic && lic.total ? `<div class="r"><span class="k">Licensed seats</span><span class="v">${u.filter(x => x.status !== 'archived').length} of ${lic.total} used</span></div>` : ''}
             </div></div>
         </div>
-      </div>
-      <div class="erp-card" style="margin-top:16px"><div class="erp-card-head"><div class="ttl">Headcount by Department</div></div>
-        <div class="erp-card-body" style="display:flex;flex-direction:column;gap:9px">
-          ${dist.map(x => `<div style="display:flex;align-items:center;gap:12px"><div style="width:140px;font-size:12px;color:var(--ink);font-weight:600">${esc(x.d.name)}</div><div style="flex:1"><div class="erp-bar2" style="height:9px"><i style="width:${x.n / maxD * 100}%;background:var(--accent)"></i></div></div><div style="width:30px;text-align:right;font-size:12px;font-weight:700;color:var(--ink)">${x.n}</div></div>`).join('')}
-        </div></div>`;
+      </div>`;
   };
   function greeting() { const h = new Date().getHours(); return h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening'; }
 
@@ -886,6 +982,7 @@
      ════════════════════════════════════════════════════════════════════ */
   const api = {
     go, addUser: () => {}, _seedReady: false,
+    _navAct: (k) => { const it = NAV.find(n => (n.act || n.ext) === k); if (it) navAct(it); },
     open: async function () {
       injectCSS();
       if (!this._seedReady) { await seed(); this._seedReady = true; }

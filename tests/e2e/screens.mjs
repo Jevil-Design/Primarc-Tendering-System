@@ -42,8 +42,11 @@ const created = await page.evaluate(async () => {
 check('user created through TSApi exists on the server', Array.isArray(created) && created.includes('e2e.viewer'), JSON.stringify(created));
 const locked = await page.evaluate(async () => {
   const list = await window.TSApi.listUsers(); const u = list.find((x) => x.username === 'e2e.viewer');
-  window.prompt = () => 'Security Investigation';
-  await new Promise((res) => { window.ERP.lockUser(u.id); setTimeout(res, 1500); });
+  /* the lock reason is chosen in an in-app dialog (it was a browser prompt) */
+  const p = window.ERP.lockUser(u.id);
+  await new Promise((res) => setTimeout(res, 300));
+  document.querySelector('#erpDlg [data-r="1"]').click();
+  await p; await new Promise((res) => setTimeout(res, 1500));
   const r = await (await fetch('/api/users', { credentials: 'include' })).json();
   return r.data.users.find((x) => x.username === 'e2e.viewer').status;
 });

@@ -41,24 +41,103 @@
   }
   async function serverDo(fn, okMsg, extra) {
     try { const r = await fn(); await serverRefresh(extra && extra(r)); if (okMsg) toast(okMsg); renderMain(); return r || true; }
-    catch (e) { alert('Not saved — ' + ((e && e.message) || 'the server refused the change') + '.'); renderMain(); return false; }
+    catch (e) { renderMain(); notice('Not saved', 'The server did not accept the change: ' + ((e && e.message) || 'no reason given') + '. Check the details or your connection and try again.'); return false; }
   }
   const setStatus = (id, status) => window.CloudflareAPI.users.update(id, { status });
+  /* With server sign-in, user accounts are shared but the admin master data
+     below (departments, designations, projects, approval chains, policy,
+     audit, notifications) is still kept in this browser's storage only. Say
+     so on those pages rather than let it look centrally saved. */
+  const localBadge = () => SERVER() ? '<span class="erp-local" title="Kept in this browser\'s storage — not shared with other computers or users">Saved in this browser</span>' : '';
 
   /* ───────── overlay (drawer / modal) ───────── */
+  /* Typing in a drawer / modal marks it dirty; closing it by ×, Cancel,
+     Escape or a click on the backdrop then asks before throwing the edits
+     away. Saving closes through closeOv() directly, so it never asks. */
+  let ovDirty = false, ovPrevFocus = null;
   function ensureOv() {
     let ov = document.getElementById('erpOv');
-    if (!ov) { ov = document.createElement('div'); ov.className = 'erp-ov'; ov.id = 'erpOv'; document.body.appendChild(ov); ov.addEventListener('mousedown', e => { if (e.target === ov) closeOv(); }); }
+    if (!ov) {
+      ov = document.createElement('div'); ov.className = 'erp-ov'; ov.id = 'erpOv'; document.body.appendChild(ov);
+      ov.addEventListener('mousedown', e => { if (e.target === ov) requestClose(); });
+      const dirty = (e) => { if (e.target.closest('input,select,textarea')) ovDirty = true; };
+      ov.addEventListener('input', dirty); ov.addEventListener('change', dirty);
+    }
     return ov;
   }
   function openOv(kind, html) {
     const ov = ensureOv();
-    ov.innerHTML = `<div class="${kind === 'drawer' ? 'erp-drawer' : 'erp-modal' + (kind === 'wide' ? ' wide' : '')}">${html}</div>`;
+    if (!ov.classList.contains('on')) ovPrevFocus = document.activeElement;
+    const cls = kind === 'drawer' ? 'erp-drawer' : 'erp-modal' + (kind === 'wide' ? ' wide' : '');
+    ov.innerHTML = `<div class="${cls}" role="dialog" aria-modal="true">${html}</div>`;
+    ovDirty = false;
+    ov.querySelectorAll('label.erp-flbl:not([for])').forEach(l => { const c = l.parentElement && l.parentElement.querySelector('input:not([type=checkbox]):not([type=file]),select,textarea'); if (c && c.id) { l.htmlFor = c.id; if (l.querySelector('.req')) c.setAttribute('aria-required', 'true'); } });
+    const h3 = ov.querySelector('.erp-dh h3'); if (h3) { h3.id = 'erpOvT'; ov.firstElementChild.setAttribute('aria-labelledby', 'erpOvT'); }
     requestAnimationFrame(() => ov.classList.add('on'));
-    document.onkeydown = (e) => { if (e.key === 'Escape') closeOv(); };
+    document.onkeydown = (e) => { if (e.key === 'Escape') requestClose(); };
+    setTimeout(() => { if (!ov.contains(document.activeElement)) { const f = ov.querySelector('input:not([type=hidden]):not([type=file]):not([disabled]),select,textarea'); if (f) f.focus(); } }, 80);
   }
-  function closeOv() { const ov = document.getElementById('erpOv'); if (ov) { ov.classList.remove('on'); setTimeout(() => { if (ov && !ov.classList.contains('on')) ov.innerHTML = ''; }, 200); } document.onkeydown = null; }
-  window.ERP._closeOv = closeOv;
+  function closeOv() {
+    ovDirty = false;
+    const ov = document.getElementById('erpOv');
+    if (ov) { ov.classList.remove('on'); setTimeout(() => { if (ov && !ov.classList.contains('on')) ov.innerHTML = ''; }, 200); }
+    document.onkeydown = null;
+    if (ovPrevFocus && ovPrevFocus.isConnected) { try { ovPrevFocus.focus(); } catch (e) {} } ovPrevFocus = null;
+  }
+  function requestClose() {
+    if (!ovDirty) return closeOv();
+    dialog({ title: 'Discard changes?', text: 'This form has changes that have not been saved. Close it and lose them?', ok: 'Discard changes', cancel: 'Keep editing', danger: true })
+      .then(ok => { if (ok) closeOv(); });
+  }
+  window.ERP._closeOv = requestClose;
+
+  /* ───────── in-app dialog (confirm / small forms) ─────────
+     Replaces the browser's confirm() / prompt() for admin actions. Sits above
+     drawers and modals. Resolves to false on cancel; otherwise to true, or to
+     whatever o.validate(root, setMsg) returns (return false to keep it open). */
+  function dialog(o) {
+    return new Promise(resolve => {
+      const prev = document.activeElement;
+      const ov = document.createElement('div'); ov.className = 'erp-ov on'; ov.id = 'erpDlg'; ov.style.zIndex = '100025';
+      ov.innerHTML = `<div class="erp-modal sm" role="${o.danger ? 'alertdialog' : 'dialog'}" aria-modal="true" aria-labelledby="erpDlgT" aria-describedby="erpDlgB">
+        <div class="erp-dh"><div><h3 id="erpDlgT"></h3><div class="sub" id="erpDlgS"></div></div><button type="button" class="erp-x" data-r="0" aria-label="Close">×</button></div>
+        <div class="erp-dbody" id="erpDlgB">${o.html || '<p></p>'}</div>
+        <div class="erp-dfoot"><span class="msg" id="erpDlgMsg" role="alert" style="color:var(--red)"></span><button type="button" class="erp-btn" data-r="0"></button><button type="button" class="erp-btn ${o.danger ? 'danger solid' : 'primary'}" data-r="1"></button></div></div>`;
+      ov.querySelector('#erpDlgT').textContent = o.title || 'Are you sure?';
+      const sub = ov.querySelector('#erpDlgS'); if (o.sub) sub.textContent = o.sub; else sub.remove();
+      if (!o.html) ov.querySelector('#erpDlgB p').textContent = o.text || '';
+      if (o.alert) ov.querySelector('.erp-dfoot [data-r="0"]').remove();
+      else ov.querySelector('.erp-dfoot [data-r="0"]').textContent = o.cancel || 'Cancel';
+      const okBtn = ov.querySelector('[data-r="1"]'); okBtn.textContent = o.ok || 'OK';
+      const setMsg = (t) => { ov.querySelector('#erpDlgMsg').textContent = t || ''; };
+      let busy = false;
+      const done = (v) => { document.removeEventListener('keydown', key, true); ov.remove(); if (prev && prev.isConnected) { try { prev.focus(); } catch (e) {} } resolve(v); };
+      const submit = async () => {
+        if (busy) return; busy = true; okBtn.disabled = true;
+        try { const r = o.validate ? await o.validate(ov, setMsg) : true; if (r !== false) return done(r === undefined ? true : r); }
+        finally { busy = false; if (ov.isConnected) okBtn.disabled = false; }
+      };
+      function key(e) {
+        if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); done(false); return; }
+        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'BUTTON' && ov.contains(e.target)) { e.preventDefault(); submit(); return; }
+        if (e.key === 'Tab') {
+          const f = [...ov.querySelectorAll('button,input,select,textarea')].filter(x => !x.disabled);
+          if (!f.length) return;
+          if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+          else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+        }
+      }
+      ov.addEventListener('mousedown', e => { if (e.target === ov) done(false); });
+      ov.addEventListener('click', e => { const b = e.target.closest('[data-r]'); if (!b) return; if (b.dataset.r === '1') submit(); else done(false); });
+      document.addEventListener('keydown', key, true);
+      document.body.appendChild(ov);
+      const first = ov.querySelector('.erp-dbody input,.erp-dbody select,.erp-dbody textarea');
+      (first || ov.querySelector(o.danger && !o.alert ? '.erp-dfoot [data-r="0"]' : '[data-r="1"]')).focus();
+    });
+  }
+  const confirmBox = (title, text, ok, danger) => dialog({ title, text, ok, danger: danger !== false });
+  const notice = (title, text) => dialog({ title, text, ok: 'OK', alert: true });
+  window.ERP._dialog = dialog;
 
   /* ───────── row context menu ───────── */
   function ensureMenu() { let m = document.getElementById('erpRowMenu'); if (!m) { m = document.createElement('div'); m.className = 'erp-rowmenu'; m.id = 'erpRowMenu'; document.body.appendChild(m); document.addEventListener('click', e => { if (!e.target.closest('#erpRowMenu') && !e.target.closest('[data-rowmenu]')) m.style.display = 'none'; }); } return m; }
@@ -102,64 +181,72 @@
     const pages = Math.max(1, Math.ceil(total / f.per));
     if (f.page > pages) f.page = pages;
     const slice = all.slice((f.page - 1) * f.per, f.page * f.per);
-    const sortArrow = (k) => f.sort === k ? `<span class="ar">${f.dir > 0 ? '▲' : '▼'}</span>` : '';
-    const deptOpts = `<option value="">All Departments</option>` + depts().map(d => `<option value="${d.id}" ${f.dept === d.id ? 'selected' : ''}>${esc(d.name)}</option>`).join('');
-    const desigOpts = `<option value="">All Designations</option>` + desigs().map(d => `<option value="${d.id}" ${f.desig === d.id ? 'selected' : ''}>${esc(d.name)}</option>`).join('');
-    const statusOpts = `<option value="">All Status</option>` + Object.keys(STATUS).map(k => `<option value="${k}" ${f.status === k ? 'selected' : ''}>${STATUS[k].label}</option>`).join('');
+    const sortArrow = (k) => f.sort === k ? `<span class="ar" aria-hidden="true">${f.dir > 0 ? '▲' : '▼'}</span>` : '';
+    const ariaSort = (k) => f.sort === k ? ` aria-sort="${f.dir > 0 ? 'ascending' : 'descending'}"` : '';
+    const deptOpts = `<option value="">All departments</option>` + depts().map(d => `<option value="${d.id}" ${f.dept === d.id ? 'selected' : ''}>${esc(d.name)}</option>`).join('');
+    const desigOpts = `<option value="">All designations</option>` + desigs().map(d => `<option value="${d.id}" ${f.desig === d.id ? 'selected' : ''}>${esc(d.name)}</option>`).join('');
+    const statusOpts = `<option value="">Any status</option>` + Object.keys(STATUS).map(k => `<option value="${k}" ${f.status === k ? 'selected' : ''}>${STATUS[k].label}</option>`).join('');
     const allSel = slice.length && slice.every(x => f.sel.includes(x.id));
+    const filtering = !!(f.q || f.dept || f.desig || f.status);
+    const all0 = users(), nActive = all0.filter(x => (x.status || 'active') === 'active').length;
 
     const rows = slice.map(x => {
       const sel = f.sel.includes(x.id);
+      /* platformAccess is only ever set to false explicitly (records listed from
+         the server don't carry it at all) — the drawer and every action treat
+         "missing" as allowed, so the table now does too. It used to show
+         "access off" for every server account, including the signed-in admin. */
+      const off = x.platformAccess === false && x.status !== 'locked';
       return `<tr class="${sel ? 'sel' : ''}" data-uid="${x.id}">
-        <td><input type="checkbox" class="erp-chk uchk" data-id="${x.id}" ${sel ? 'checked' : ''}></td>
-        <td><div class="erp-cellname">${avatar(x)}<div><div class="nm">${esc(x.name)}${x.id === 'u_admin' ? ' <span class="erp-pill" style="background:var(--red);font-size:8px">SUPER</span>' : ''}</div><div class="mono" style="color:var(--faint)">${esc(x.empId || '—')}</div></div></div></td>
+        <td style="width:36px"><input type="checkbox" class="erp-chk uchk" data-id="${x.id}" ${sel ? 'checked' : ''} aria-label="Select ${esc(x.name)}"></td>
+        <td><div class="erp-cellname">${avatar(x)}<div style="min-width:0"><div class="nm">${esc(x.name)}${x.id === 'u_admin' ? ' <span class="erp-pill" style="background:var(--red)">Super</span>' : ''}</div><div class="sub2">${esc(x.email || x.empId || '—')}</div></div></div></td>
         <td class="mono">${esc(x.username)}</td>
-        <td>${desigTag(x.designationId)}</td>
+        <td>${desigTag(x.designationId)}${x.role ? `<div class="sub2">${esc(x.role)}</div>` : ''}</td>
         <td>${esc(deptName(x.departmentId))}</td>
-        <td><span style="font-size:11px">${esc(branchName(x.branchId))}</span></td>
-        <td>${statusBadge(x.status || 'active')}${!x.platformAccess && x.status !== 'locked' ? '<div style="font-size:9px;color:var(--red);margin-top:2px">⊘ access off</div>' : ''}</td>
-        <td class="mono" style="font-size:10.5px;color:var(--faint)">${x.lastLogin ? ago(x.lastLogin) : 'never'}</td>
-        <td style="text-align:right"><button class="erp-iconbtn" style="width:28px;height:28px" data-rowmenu data-id="${x.id}" onclick="ERP._userMenu(event,'${x.id}')">${ic('dots')}</button></td>
+        <td>${statusBadge(x.status || 'active')}${off ? '<div class="sub2" style="color:var(--red)">Sign-in disabled</div>' : ''}</td>
+        <td style="white-space:nowrap">${x.lastLogin ? ago(x.lastLogin) : '<span style="color:var(--faint)">Never</span>'}</td>
+        <td class="acts"><button type="button" class="erp-btn ghost icon" title="Edit ${esc(x.name)}" aria-label="Edit ${esc(x.name)}" onclick="event.stopPropagation();ERP.editUser('${x.id}')">${ic('edit')}</button><button type="button" class="erp-btn ghost icon" data-rowmenu data-id="${x.id}" title="More actions" aria-label="More actions for ${esc(x.name)}" aria-haspopup="menu" onclick="ERP._userMenu(event,'${x.id}')">${ic('dots')}</button></td>
       </tr>`;
     }).join('');
 
     const pg = pageBtns(f.page, pages, 'ERP._uPage');
+    const empty = filtering
+      ? `<div class="erp-empty">${ic('search')}<b>No users match these filters</b>Try a different search, or <button type="button" class="erp-btn sm" onclick="ERP._uClear()">Clear filters</button></div>`
+      : `<div class="erp-empty">${ic('users')}<b>No users yet</b>Add the first account to give someone access.<br><button type="button" class="erp-btn primary sm" onclick="ERP.addUser()">${ic('plus')}Add user</button></div>`;
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">User Management</h1><div class="erp-sub">${users().length} employees · ${users().filter(x => x.status === 'active').length} active · ${users().filter(x => (x.sessions || []).length).length} online</div></div></div>
-      <div class="erp-toolbar">
-        <div class="erp-field"><svg viewBox="0 0 24 24">${ICON.search}</svg><input class="erp-input" id="uSearch" placeholder="Search name, username, email, ID…" value="${esc(f.q)}"></div>
-        <select class="erp-select" id="uDept">${deptOpts}</select>
-        <select class="erp-select" id="uDesig">${desigOpts}</select>
-        <select class="erp-select" id="uStatus">${statusOpts}</select>
-        <div class="erp-tb-sp"></div>
-        <button class="erp-btn" onclick="ERP._importUsers()">${ic('download')}Import</button>
-        <button class="erp-btn" onclick="ERP._exportUsers('csv')">${ic('download')}Export</button>
-        <button class="erp-btn primary" onclick="ERP.addUser()">${ic('plus')}Add User</button>
+      <div class="erp-sec-head"><div><h1 class="erp-h">Users</h1><div class="erp-sub">${all0.length} account${all0.length === 1 ? '' : 's'} · ${nActive} active. Sign-in roles are set per user; what each role may do is under <a href="#" onclick="event.preventDefault();ERP._navAct('roleAccess')" style="color:var(--accent)">Role Access</a>.</div></div>
+        <div class="acts"><button class="erp-btn" onclick="ERP._exportUsers('csv')">${ic('download')}Export CSV</button><button class="erp-btn primary" onclick="ERP.addUser()">${ic('plus')}Add user</button></div></div>
+      <div class="erp-toolbar" role="search">
+        <div class="erp-field"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON.search}</svg><input class="erp-input" id="uSearch" type="search" placeholder="Search name, username, email, ID…" aria-label="Search users" value="${esc(f.q)}"></div>
+        <select class="erp-select" id="uDept" aria-label="Filter by department">${deptOpts}</select>
+        <select class="erp-select" id="uDesig" aria-label="Filter by designation">${desigOpts}</select>
+        <select class="erp-select" id="uStatus" aria-label="Filter by status">${statusOpts}</select>
+        ${filtering ? `<button type="button" class="erp-btn ghost" onclick="ERP._uClear()">Clear filters</button>` : ''}
       </div>
-      ${f.sel.length ? `<div class="erp-bulkbar"><b>${f.sel.length}</b> selected
+      ${f.sel.length ? `<div class="erp-bulkbar" role="region" aria-label="Actions for selected users"><b>${f.sel.length}</b> selected
         <div class="erp-tb-sp"></div>
         <button class="erp-btn sm" onclick="ERP._bulk('activate')">${ic('check')}Activate</button>
         <button class="erp-btn sm" onclick="ERP._bulk('deactivate')">${ic('power')}Deactivate</button>
         <button class="erp-btn sm" onclick="ERP._bulk('lock')">${ic('lock')}Lock</button>
         <button class="erp-btn sm" onclick="ERP._bulk('unlock')">${ic('unlock')}Unlock</button>
         <button class="erp-btn sm danger" onclick="ERP._bulk('delete')">${ic('trash')}Delete</button>
-        <button class="erp-btn sm ghost" onclick="ERP._clearSel()">Clear</button>
+        <button class="erp-btn sm ghost" onclick="ERP._clearSel()">Clear selection</button>
       </div>` : ''}
       <div class="erp-card"><div class="erp-tbl-wrap"><table class="erp-tbl">
         <thead><tr>
-          <th class="nosort"><input type="checkbox" class="erp-chk" id="uAll" ${allSel ? 'checked' : ''}></th>
-          <th data-sort="name">Employee${sortArrow('name')}</th>
-          <th data-sort="username">Username${sortArrow('username')}</th>
-          <th data-sort="designation">Designation${sortArrow('designation')}</th>
-          <th data-sort="department">Department${sortArrow('department')}</th>
-          <th class="nosort">Branch</th>
-          <th data-sort="status">Status${sortArrow('status')}</th>
-          <th data-sort="lastLogin">Last Login${sortArrow('lastLogin')}</th>
-          <th class="nosort"></th>
+          <th class="nosort" style="width:36px"><input type="checkbox" class="erp-chk" id="uAll" ${allSel ? 'checked' : ''} aria-label="Select all users on this page"></th>
+          <th data-sort="name"${ariaSort('name')}>Employee${sortArrow('name')}</th>
+          <th data-sort="username"${ariaSort('username')}>Username${sortArrow('username')}</th>
+          <th data-sort="designation"${ariaSort('designation')}>Designation / role${sortArrow('designation')}</th>
+          <th data-sort="department"${ariaSort('department')}>Department${sortArrow('department')}</th>
+          <th data-sort="status"${ariaSort('status')}>Status${sortArrow('status')}</th>
+          <th data-sort="lastLogin"${ariaSort('lastLogin')}>Last sign-in${sortArrow('lastLogin')}</th>
+          <th class="nosort"><span class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Actions</span></th>
         </tr></thead>
-        <tbody>${rows || `<tr><td colspan="9"><div class="erp-empty">${ic('users')}<div>No users match your filters</div></div></td></tr>`}</tbody>
+        <tbody>${rows || `<tr><td colspan="8">${empty}</td></tr>`}</tbody>
       </table></div></div>
-      <div class="erp-pager"><div>Showing ${slice.length ? (f.page - 1) * f.per + 1 : 0}–${(f.page - 1) * f.per + slice.length} of ${total}</div><div class="pg">${pg}</div></div>`;
+      <div class="erp-pager"><div>Showing ${slice.length ? (f.page - 1) * f.per + 1 : 0}–${(f.page - 1) * f.per + slice.length} of ${total}
+        · <label>Rows <select id="uPer" aria-label="Rows per page">${[8, 25, 50, 100].map(n => `<option ${f.per === n ? 'selected' : ''}>${n}</option>`).join('')}</select></label></div><div class="pg">${pg}</div></div>`;
   };
   BIND.users = function () {
     const f = S.u;
@@ -167,16 +254,19 @@
     $('#uDept').onchange = e => { f.dept = e.target.value; f.page = 1; renderMain(); };
     $('#uDesig').onchange = e => { f.desig = e.target.value; f.page = 1; renderMain(); };
     $('#uStatus').onchange = e => { f.status = e.target.value; f.page = 1; renderMain(); };
-    document.querySelectorAll('#erpBody th[data-sort]').forEach(th => th.onclick = () => { const k = th.dataset.sort; if (f.sort === k) f.dir *= -1; else { f.sort = k; f.dir = 1; } renderMain(); });
-    document.querySelectorAll('.uchk').forEach(c => c.onchange = () => { const id = c.dataset.id; const i = f.sel.indexOf(id); if (c.checked && i < 0) f.sel.push(id); else if (!c.checked && i >= 0) f.sel.splice(i, 1); renderMain(); });
+    const per = $('#uPer'); if (per) per.onchange = e => { f.per = +e.target.value || 8; f.page = 1; renderMain(); };
+    document.querySelectorAll('#erpBody th[data-sort]').forEach(th => { th.tabIndex = 0; th.onclick = () => { const k = th.dataset.sort; if (f.sort === k) f.dir *= -1; else { f.sort = k; f.dir = 1; } renderMain(); }; th.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); th.click(); } }; });
+    document.querySelectorAll('.uchk').forEach(c => { c.onclick = (e) => e.stopPropagation(); c.onchange = () => { const id = c.dataset.id; const i = f.sel.indexOf(id); if (c.checked && i < 0) f.sel.push(id); else if (!c.checked && i >= 0) f.sel.splice(i, 1); renderMain(); }; });
     const ua = $('#uAll'); if (ua) ua.onchange = () => { const slice = filteredUsers().slice((f.page - 1) * f.per, f.page * f.per); if (ua.checked) slice.forEach(x => { if (!f.sel.includes(x.id)) f.sel.push(x.id); }); else slice.forEach(x => { const i = f.sel.indexOf(x.id); if (i >= 0) f.sel.splice(i, 1); }); renderMain(); };
+    /* a click anywhere else on a row opens the user for editing */
+    document.querySelectorAll('#erpBody tr[data-uid]').forEach(tr => tr.onclick = (e) => { if (e.target.closest('button,input,a,select')) return; window.ERP.editUser(tr.dataset.uid); });
   };
   function pageBtns(cur, pages, fn) {
-    let h = `<button onclick="${fn}(${cur - 1})" ${cur <= 1 ? 'disabled' : ''}>‹</button>`;
-    const add = (p) => h += `<button class="${p === cur ? 'on' : ''}" onclick="${fn}(${p})">${p}</button>`;
+    let h = `<button onclick="${fn}(${cur - 1})" ${cur <= 1 ? 'disabled' : ''} aria-label="Previous page">‹</button>`;
+    const add = (p) => h += `<button class="${p === cur ? 'on' : ''}" onclick="${fn}(${p})"${p === cur ? ' aria-current="page"' : ''} aria-label="Page ${p}">${p}</button>`;
     const set = new Set([1, pages, cur, cur - 1, cur + 1]); let last = 0;
     [...set].filter(p => p >= 1 && p <= pages).sort((a, b) => a - b).forEach(p => { if (p - last > 1) h += `<span style="padding:0 3px;color:var(--faint)">…</span>`; add(p); last = p; });
-    h += `<button onclick="${fn}(${cur + 1})" ${cur >= pages ? 'disabled' : ''}>›</button>`;
+    h += `<button onclick="${fn}(${cur + 1})" ${cur >= pages ? 'disabled' : ''} aria-label="Next page">›</button>`;
     return h;
   }
 
@@ -196,7 +286,7 @@
       <div class="erp-dh"><div><h3>${u ? 'Edit User' : 'Add New User'}</h3><div class="sub">${u ? esc(u.name) + ' · ' + esc(u.empId || '') : 'Create an employee account with role-based access'}</div></div><button class="erp-x" onclick="ERP._closeOv()">×</button></div>
       <div class="erp-dbody">
         <div class="erp-avup" style="margin-bottom:20px">
-          <div class="erp-avbig" id="uPhoto" style="${draft.photo ? `background-image:url('${draft.photo}')` : `background:${av.avatarColor}`}" onclick="document.getElementById('uPhotoFile').click()">${draft.photo ? '' : (av.initials)}<div class="ov">Upload</div></div>
+          <button type="button" class="erp-avbig" id="uPhoto" aria-label="Upload profile photo" style="${draft.photo ? `background-image:url('${draft.photo}')` : `background:${av.avatarColor}`}" onclick="document.getElementById('uPhotoFile').click()">${draft.photo ? '' : (av.initials)}<div class="ov">Upload</div></button>
           <div><div style="font-size:13px;font-weight:700;color:var(--ink)">Profile Photo</div><div class="erp-fhint">JPG/PNG · click avatar to upload. Optional.</div>
             ${draft.photo ? `<button class="erp-btn sm" style="margin-top:7px" onclick="ERP._clearPhoto()">${ic('trash')}Remove</button>` : ''}</div>
           <input type="file" id="uPhotoFile" accept="image/*" style="display:none">
@@ -293,20 +383,19 @@
       <td>${esc(deptName(d.departmentId))}</td>
       <td>${d.reportsTo ? esc(desigName(d.reportsTo)) : '<span style="color:var(--faint)">Top level</span>'}</td>
       <td><span class="erp-tag">L${d.level || '—'}</span></td>
-      <td style="text-align:center"><b style="color:var(--ink)">${userCount(d.id)}</b></td>
-      <td>${d.status === 'inactive' ? '<span style="color:var(--faint)">○ Disabled</span>' : '<span style="color:var(--green)">● Active</span>'}</td>
-      <td style="text-align:right;white-space:nowrap">
-        <button class="erp-btn sm" onclick="ERP._permFor('${d.id}')">${ic('perm')}Permissions</button>
-        <button class="erp-btn sm" onclick="ERP.editDesig('${d.id}')">${ic('edit')}Edit</button>
-        <button class="erp-iconbtn" style="width:28px;height:28px" onclick="ERP._desigMenu(event,'${d.id}')">${ic('dots')}</button>
+      <td class="num">${userCount(d.id)}</td>
+      <td>${d.status === 'inactive' ? '<span class="erp-badge mute">Disabled</span>' : '<span class="erp-badge ok">Active</span>'}</td>
+      <td class="acts">
+        <button type="button" class="erp-btn ghost icon" title="Edit ${esc(d.name)}" aria-label="Edit ${esc(d.name)}" onclick="ERP.editDesig('${d.id}')">${ic('edit')}</button>
+        <button type="button" class="erp-btn ghost icon" data-rowmenu title="More actions" aria-label="More actions for ${esc(d.name)}" aria-haspopup="menu" onclick="ERP._desigMenu(event,'${d.id}')">${ic('dots')}</button>
       </td></tr>`).join('');
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Designation Master</h1><div class="erp-sub">${ds.length} designations across ${depts().length} departments · drives the permission engine</div></div>
-        <div style="display:flex;gap:9px"><button class="erp-btn" onclick="ERP._compareDesig()">${ic('desig')}Compare roles</button><button class="erp-btn primary" onclick="ERP.editDesig('')">${ic('plus')}New Designation</button></div></div>
+      <div class="erp-sec-head"><div><h1 class="erp-h">Designations${localBadge()}</h1><div class="erp-sub">${ds.length} job titles across ${depts().length} departments, with their reporting line and approval limits.</div></div>
+        <div class="acts"><button class="erp-btn" onclick="ERP._compareDesig()">${ic('desig')}Compare</button><button class="erp-btn primary" onclick="ERP.editDesig('')">${ic('plus')}New designation</button></div></div>
       <div class="erp-card"><div class="erp-tbl-wrap"><table class="erp-tbl">
-        <thead><tr><th class="nosort">Designation</th><th class="nosort">Department</th><th class="nosort">Reports To</th><th class="nosort">Level</th><th class="nosort" style="text-align:center">Users</th><th class="nosort">Status</th><th class="nosort"></th></tr></thead>
-        <tbody>${rows}</tbody></table></div></div>
-      <div class="erp-sub" style="margin-top:18px">Reporting hierarchy</div>
+        <thead><tr><th class="nosort">Designation</th><th class="nosort">Department</th><th class="nosort">Reports To</th><th class="nosort">Level</th><th class="nosort num">Users</th><th class="nosort">Status</th><th class="nosort"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Actions</span></th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="7"><div class="erp-empty"><b>No designations yet</b>Create the job titles people hold.</div></td></tr>`}</tbody></table></div></div>
+      <h2 class="erp-h2">Reporting hierarchy</h2><div class="erp-sub">Main approval line, top to bottom.</div>
       ${hierarchyChain()}`;
   };
   function hierarchyChain() {
@@ -350,18 +439,18 @@
         <td><div class="nm">${esc(d.name)}</div></td>
         <td class="mono">${esc(d.code || '—')}</td>
         <td>${head ? `<div class="erp-cellname">${avatar(head, 24)}<span style="font-size:12px">${esc(head.name)}</span></div>` : '<span style="color:var(--faint)">—</span>'}</td>
-        <td style="text-align:center"><b style="color:var(--ink)">${users().filter(u => u.departmentId === d.id).length}</b></td>
-        <td style="text-align:center">${desigs().filter(x => x.departmentId === d.id).length}</td>
-        <td>${d.status === 'inactive' ? '<span style="color:var(--faint)">○ Disabled</span>' : '<span style="color:var(--green)">● Active</span>'}</td>
-        <td style="text-align:right"><button class="erp-btn sm" onclick="ERP.editDept('${d.id}')">${ic('edit')}Edit</button><button class="erp-btn sm danger" onclick="ERP._delDept('${d.id}')">${ic('trash')}</button></td>
+        <td class="num">${users().filter(u => u.departmentId === d.id).length}</td>
+        <td class="num">${desigs().filter(x => x.departmentId === d.id).length}</td>
+        <td>${d.status === 'inactive' ? '<span class="erp-badge mute">Disabled</span>' : '<span class="erp-badge ok">Active</span>'}</td>
+        <td class="acts"><button type="button" class="erp-btn ghost icon" title="Edit ${esc(d.name)}" aria-label="Edit ${esc(d.name)}" onclick="ERP.editDept('${d.id}')">${ic('edit')}</button><button type="button" class="erp-btn ghost icon danger" title="Delete ${esc(d.name)}" aria-label="Delete ${esc(d.name)}" onclick="ERP._delDept('${d.id}')">${ic('trash')}</button></td>
       </tr>`;
     }).join('');
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Department Master</h1><div class="erp-sub">${depts().length} departments · reusable across the whole system</div></div>
-        <button class="erp-btn primary" onclick="ERP.editDept('')">${ic('plus')}New Department</button></div>
+      <div class="erp-sec-head"><div><h1 class="erp-h">Departments${localBadge()}</h1><div class="erp-sub">${depts().length} departments, used by users and designations.</div></div>
+        <div class="acts"><button class="erp-btn primary" onclick="ERP.editDept('')">${ic('plus')}New department</button></div></div>
       <div class="erp-card"><div class="erp-tbl-wrap"><table class="erp-tbl">
-        <thead><tr><th class="nosort">Department</th><th class="nosort">Code</th><th class="nosort">Head</th><th class="nosort" style="text-align:center">Users</th><th class="nosort" style="text-align:center">Designations</th><th class="nosort">Status</th><th class="nosort"></th></tr></thead>
-        <tbody>${rows}</tbody></table></div></div>`;
+        <thead><tr><th class="nosort">Department</th><th class="nosort">Code</th><th class="nosort">Head</th><th class="nosort num">Users</th><th class="nosort num">Designations</th><th class="nosort">Status</th><th class="nosort"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Actions</span></th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="7"><div class="erp-empty"><b>No departments yet</b></div></td></tr>`}</tbody></table></div></div>`;
   };
   function deptEditor(editId) {
     const d = editId ? depts().find(x => x.id === editId) : null;
@@ -412,17 +501,18 @@
       return `<tr><td class="mod">${esc(m.name)}${m.core ? '' : ' <span class="erp-pill" style="background:var(--violet);font-size:7px">NEW</span>'}<div style="font-size:9px;font-weight:500;color:var(--faint)">${permCount(d, m.id)}/${ACTIONS.length}</div></td>${cells}</tr>`;
     }).join('');
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Permission Management</h1><div class="erp-sub">Module-wise access for each designation · auto-includes future modules</div></div></div>
+      <div class="erp-sec-head"><div><h1 class="erp-h">Designation Matrix${localBadge()}</h1><div class="erp-sub">Module-by-action permissions recorded for each designation.</div></div></div>
+      <div class="erp-note">${ic('key')}<div><b>Reference only — this matrix does not control access.</b> What a person can do in the app is decided by their sign-in <b>role</b>; change that in Role Access.</div><button class="erp-btn sm" onclick="ERP._navAct('roleAccess')">Open Role Access</button></div>
       <div class="erp-toolbar">
-        <label class="erp-flbl" style="margin:0;align-self:center">Designation</label>
-        <select class="erp-select" id="permDesig" style="min-width:260px">${desigOpts}</select>
+        <label class="erp-flbl" for="permDesig" style="margin:0;align-self:center">Designation</label>
+        <select class="erp-select" id="permDesig" style="min-width:260px;max-width:none">${desigOpts}</select>
         <div class="erp-tb-sp"></div>
-        <button class="erp-btn" onclick="ERP._permAll(1)">${ic('check')}Select All</button>
-        <button class="erp-btn" onclick="ERP._permAll(0)">Clear All</button>
-        <button class="erp-btn" onclick="ERP._addModule()">${ic('plus')}Register Module</button>
+        <button class="erp-btn ghost" onclick="ERP._permAll(1)">${ic('check')}Grant all</button>
+        <button class="erp-btn ghost" onclick="ERP._permAll(0)">Clear all</button>
+        <button class="erp-btn" onclick="ERP._addModule()">${ic('plus')}Register module</button>
       </div>
       <div class="erp-card"><div class="erp-tbl-wrap" style="max-height:none"><table class="erp-matrix"><thead>${head}</thead><tbody>${body}</tbody></table></div></div>
-      <div class="erp-leg"><span><i style="background:var(--green)"></i>Granted</span><span><i style="background:var(--panel3);border:1.5px solid var(--line)"></i>Denied</span><span>Click a column header to toggle that action across all modules · changes save instantly &amp; apply across the app.</span></div>`;
+      <div class="erp-leg"><span><i style="background:var(--accent)"></i>Granted</span><span><i style="background:var(--panel3);border:1.5px solid var(--line)"></i>Denied</span><span>Click a column heading to toggle that action for every module. Changes save straight away.</span></div>`;
   };
   BIND.permissions = function () { const s = $('#permDesig'); if (s) s.onchange = e => { S.permDesig = e.target.value; renderMain(); }; };
   function permCount(d, mId) { if (!d || !d.perms || !d.perms[mId]) return 0; return ACTIONS.filter(a => d.perms[mId][a[0]]).length; }
@@ -447,16 +537,16 @@
         <td>${esc(p.client || '—')}</td>
         <td>${esc(p.location || '—')}</td>
         <td>${p.managerId && userById(p.managerId) ? esc(userName(p.managerId)) : '<span style="color:var(--faint)">—</span>'}</td>
-        <td>${p.status === 'inactive' ? '<span style="color:var(--faint)">○ Closed</span>' : '<span style="color:var(--green)">● Active</span>'}</td>
-        <td style="text-align:right"><button class="erp-btn sm" onclick="ERP.editProject('${p.id}')">${ic('edit')}Edit</button><button class="erp-btn sm danger" onclick="ERP._delProject('${p.id}')">${ic('trash')}</button></td>
+        <td>${p.status === 'inactive' ? '<span class="erp-badge mute">Closed</span>' : '<span class="erp-badge ok">Active</span>'}</td>
+        <td class="acts"><button type="button" class="erp-btn ghost icon" title="Edit ${esc(p.name)}" aria-label="Edit ${esc(p.name)}" onclick="ERP.editProject('${p.id}')">${ic('edit')}</button><button type="button" class="erp-btn ghost icon danger" title="Delete ${esc(p.name)}" aria-label="Delete ${esc(p.name)}" onclick="ERP._delProject('${p.id}')">${ic('trash')}</button></td>
       </tr>`).join('');
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Projects</h1><div class="erp-sub">${projects().length} project${projects().length === 1 ? '' : 's'} · master list and per-user access</div></div>
-        <button class="erp-btn primary" onclick="ERP.editProject('')">${ic('plus')}New Project</button></div>
+      <div class="erp-sec-head"><div><h1 class="erp-h">Projects${localBadge()}</h1><div class="erp-sub">${projects().length} project${projects().length === 1 ? '' : 's'} — the master list, and which projects each user may work on.</div></div>
+        <div class="acts"><button class="erp-btn primary" onclick="ERP.editProject('')">${ic('plus')}New project</button></div></div>
       <div class="erp-card" style="margin-bottom:22px"><div class="erp-tbl-wrap"><table class="erp-tbl">
         <thead><tr><th class="nosort">Project</th><th class="nosort">Code</th><th class="nosort">Client</th><th class="nosort">Location</th><th class="nosort">Project Manager</th><th class="nosort">Status</th><th class="nosort"></th></tr></thead>
-        <tbody>${masterRows || '<tr><td colspan="7" style="text-align:center;color:var(--faint);padding:24px">No projects yet — click “New Project” to add one.</td></tr>'}</tbody></table></div></div>
-      <div class="erp-sec-head" style="margin-bottom:12px"><div><h1 class="erp-h" style="font-size:16px">Project Access Control</h1><div class="erp-sub">Restrict which projects each user can see and work on</div></div></div>
+        <tbody>${masterRows || `<tr><td colspan="7"><div class="erp-empty"><b>No projects yet</b><button class="erp-btn primary sm" onclick="ERP.editProject('')">${ic('plus')}New project</button></div></td></tr>`}</tbody></table></div></div>
+      <h2 class="erp-h2">Project access</h2><div class="erp-sub">Choose which projects a user can see and work on.</div>
       <div class="erp-grid2">
         <div class="erp-card"><div class="erp-card-head"><div class="ttl">Assign projects</div><button class="erp-btn sm primary" onclick="ERP._saveProjAccess()">${ic('check')}Save</button></div>
           <div class="erp-card-body">
@@ -498,9 +588,9 @@
     const chains = wf.map(w => {
       const steps = w.steps.map((sid, i) => {
         const d = desigById(sid);
-        return `<div class="erp-step"><div class="erp-stepbox"><button class="rm" title="Remove step" onclick="ERP._wfRemove('${w.id}',${i})">×</button><div class="lv">Step ${i + 1}</div><div class="nm">${d ? esc(d.name) : '—'}</div><div class="dp">limit ${inr((d && d.limits && d.limits[wfKind(w)]) || 0)}</div></div>${i < w.steps.length - 1 ? `<div class="erp-arrow">${ic('chevR')}</div>` : ''}</div>`;
+        return `<div class="erp-step"><div class="erp-stepbox"><button class="rm" title="Remove this level" aria-label="Remove ${d ? esc(d.name) : 'level'}" onclick="ERP._wfRemove('${w.id}',${i})">×</button><div class="lv">Step ${i + 1}</div><div class="nm">${d ? esc(d.name) : '—'}</div><div class="dp">limit ${inr((d && d.limits && d.limits[wfKind(w)]) || 0)}</div></div>${i < w.steps.length - 1 ? `<div class="erp-arrow">${ic('chevR')}</div>` : ''}</div>`;
       }).join('');
-      return `<div class="erp-card" style="margin-bottom:14px"><div class="erp-card-head"><div class="ttl">${esc(w.name)}<span>${w.steps.length} levels · ${esc((modules().find(m => m.id === w.moduleId) || {}).name || '')}</span></div><button class="erp-btn sm" onclick="ERP._wfAdd('${w.id}')">${ic('plus')}Add step</button></div>
+      return `<div class="erp-card" style="margin-bottom:14px"><div class="erp-card-head"><div class="ttl">${esc(w.name)}<span>${w.steps.length} levels · ${esc((modules().find(m => m.id === w.moduleId) || {}).name || '')}</span></div><button class="erp-btn sm" onclick="ERP._wfAdd('${w.id}')">${ic('plus')}Add level</button></div>
         <div class="erp-card-body"><div class="erp-flow">${steps}</div>
           <div class="erp-leg" style="margin-top:14px"><span>Each level supports: Pending · Approved · Rejected · Returned · Comments · Digital Signature · Approval Date. Amounts above a level's limit escalate automatically.</span></div></div></div>`;
     }).join('');
@@ -515,7 +605,7 @@
       </tr>`;
     }).join('');
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Approval Workflow & Financial Limits</h1><div class="erp-sub">Multi-level approval chains and per-designation spending authority</div></div></div>
+      <div class="erp-sec-head"><div><h1 class="erp-h">Approval &amp; Limits${localBadge()}</h1><div class="erp-sub">Approval chains, and the ₹ amount each designation may approve.</div></div></div>
       ${chains}
       <div class="erp-card"><div class="erp-card-head"><div class="ttl">Financial Approval Limits<span>₹ per designation — anything above escalates to the next level</span></div></div>
         <div class="erp-tbl-wrap"><table class="erp-tbl">
@@ -536,12 +626,9 @@
     const lic = p.license || { total: 50 };
     const used = u.filter(x => x.status !== 'archived').length;
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Security & Access Control</h1><div class="erp-sub">Platform lock, password policy, sessions, license & login rules</div></div>
-        <button class="erp-btn primary" onclick="ERP._savePolicy()">${ic('check')}Save policy</button></div>
-
-      <div class="erp-tiles">
-        ${statusCounts.map(c => `<div class="erp-tile"><div class="n" style="color:${STATUS[c.k].color}">${c.n}</div><div class="l">${STATUS[c.k].label}</div></div>`).join('')}
-      </div>
+      <div class="erp-sec-head"><div><h1 class="erp-h">Security Policy${localBadge()}</h1><div class="erp-sub">${statusCounts.map(c => c.n + ' ' + STATUS[c.k].label.toLowerCase()).join(' · ')} account${u.length === 1 ? '' : 's'}.</div></div>
+        <div class="acts"><button class="erp-btn primary" id="pSave" onclick="ERP._savePolicy()">${ic('check')}Save policy</button></div></div>
+      <div class="erp-note warn">${ic('security')}<div><b>What is enforced today:</b> the minimum password length, when passwords are set here. ${SERVER() ? 'Sign-in sessions are controlled by the server (30 min idle, 12 h maximum). ' : ''}The other rules on this page are recorded but not yet enforced at sign-in.</div></div>
 
       <div class="erp-grid2">
         <div style="display:flex;flex-direction:column;gap:16px">
@@ -557,27 +644,27 @@
           <div class="erp-card"><div class="erp-card-head"><div class="ttl">Sessions & Login</div></div><div class="erp-card-body"><div class="erp-fgrid">
             <div><label class="erp-flbl">Idle timeout (min)</label><input class="erp-fin mono" id="pTimeout" type="number" value="${p.sessionTimeout || 30}"></div>
             <div><label class="erp-flbl">Concurrent logins</label><select class="erp-fsel" id="pConc"><option value="multi" ${p.concurrent === 'multi' ? 'selected' : ''}>Multiple devices</option><option value="one" ${p.concurrent === 'one' ? 'selected' : ''}>One device only</option><option value="two" ${p.concurrent === 'two' ? 'selected' : ''}>Two devices max</option></select></div>
-            <div class="full"><label class="erp-toggle"><input type="checkbox" id="p2fa" ${p.twoFactor ? 'checked' : ''}><span class="tk"></span><span class="tl">Two-Factor Authentication <span style="color:var(--faint);font-weight:500">(future-ready)</span></span></label></div>
+            <div class="full"><label class="erp-toggle"><input type="checkbox" id="p2fa" ${p.twoFactor ? 'checked' : ''}><span class="tk"></span><span class="tl">Two-factor authentication <span style="color:var(--faint);font-weight:500">(not available yet)</span></span></label></div>
             <div class="full"><label class="erp-toggle"><input type="checkbox" id="pRem" ${p.rememberMe ? 'checked' : ''}><span class="tk"></span><span class="tl">Allow “Remember me”</span></label></div>
             <div class="full"><label class="erp-toggle"><input type="checkbox" id="pSched" ${p.scheduleEnabled ? 'checked' : ''}><span class="tk"></span><span class="tl">Restrict login hours</span></label></div>
             <div><label class="erp-flbl">From</label><input class="erp-fin" id="pFrom" type="time" value="${p.scheduleFrom || '09:00'}"></div>
             <div><label class="erp-flbl">To</label><input class="erp-fin" id="pTo" type="time" value="${p.scheduleTo || '19:00'}"></div>
           </div></div></div>
 
-          <div class="erp-card"><div class="erp-card-head"><div class="ttl">IP Restriction</div></div><div class="erp-card-body"><div class="erp-fgrid">
+          <details class="erp-card"><summary>IP restriction<span>advanced</span></summary><div class="erp-card-body"><div class="erp-fgrid">
             <div class="full"><label class="erp-flbl">Mode</label><select class="erp-fsel" id="pIpMode"><option value="any" ${p.ipMode === 'any' ? 'selected' : ''}>Allow any IP</option><option value="office" ${p.ipMode === 'office' ? 'selected' : ''}>Office IP ranges only</option><option value="block" ${p.ipMode === 'block' ? 'selected' : ''}>Block specific IPs</option></select></div>
             <div class="full"><label class="erp-flbl">IP / CIDR list</label><input class="erp-fin mono" id="pIpList" value="${esc(p.ipList || '')}" placeholder="203.122.45.0/24"></div>
-          </div></div></div>
+          </div></div></details>
         </div>
 
         <div style="display:flex;flex-direction:column;gap:16px">
-          <div class="erp-card"><div class="erp-card-head"><div class="ttl">License</div>${statusBadge('active')}</div><div class="erp-card-body">
+          <details class="erp-card"><summary>Licence seats<span>${used} of ${lic.total} used</span></summary><div class="erp-card-body">
             <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px"><div style="font-size:24px;font-weight:800;color:var(--ink)">${used}<span style="font-size:14px;color:var(--faint)"> / ${lic.total}</span></div><div style="font-size:11px;color:var(--dim);text-align:right">${lic.total - used} free<br><span style="color:var(--faint)">exp ${fmtDate(new Date(lic.expires).getTime())}</span></div></div>
             <div class="erp-bar2"><i style="width:${Math.min(100, used / lic.total * 100)}%;background:${used / lic.total > .9 ? 'var(--red)' : 'var(--green)'}"></i></div>
             <div class="erp-fgrid" style="margin-top:14px"><div><label class="erp-flbl">Seats</label><input class="erp-fin mono" id="pLicTotal" type="number" value="${lic.total}"></div><div><label class="erp-flbl">Expires</label><input class="erp-fin" id="pLicExp" type="date" value="${lic.expires}"></div></div>
-          </div></div>
+          </div></details>
 
-          <div class="erp-card"><div class="erp-card-head"><div class="ttl">Active Sessions<span>${sessions.length} live</span></div><button class="erp-btn sm danger" onclick="ERP._killAll()">Terminate all</button></div>
+          <div class="erp-card"><div class="erp-card-head"><div class="ttl">Active sessions<span>${sessions.length} in this browser's list</span></div>${sessions.length ? '<button class="erp-btn sm danger" onclick="ERP._killAll()">End all</button>' : ''}</div>
             <div class="erp-card-body" style="padding:6px 0">${sessions.length ? sessions.map(({ u, s }) => `<div class="erp-act" style="padding:11px 16px"><div class="dot" style="background:color-mix(in srgb,var(--green) 16%,transparent)">${ic('power').replace('<svg', '<svg style="stroke:var(--green)"')}</div><div class="txt"><div class="a">${esc(u.name)}</div><div class="m">${esc(s.browser)} · ${esc(s.os)} · ${esc(s.ip)} · ${ago(s.last)}</div></div><button class="erp-btn sm danger" onclick="ERP._killSession('${u.id}','${s.id}')">End</button></div>`).join('') : '<div class="erp-empty">No active sessions</div>'}</div></div>
 
           <div class="erp-card"><div class="erp-card-head"><div class="ttl">Locked / Restricted</div></div><div class="erp-card-body" style="padding:6px 0">
@@ -602,18 +689,20 @@
       <td style="font-size:11.5px">${esc(x.admin)}</td>
       <td style="font-size:11px;color:var(--faint);max-width:160px">${x.oldVal ? esc(x.oldVal) : '<span style="opacity:.4">—</span>'}</td>
       <td style="font-size:11px;color:var(--ink);max-width:160px">${x.newVal ? esc(x.newVal) : (x.reason ? esc(x.reason) : '<span style="opacity:.4">—</span>')}</td>
-      <td class="mono" style="font-size:10px;color:var(--faint)">${esc(x.ip)} · ${esc(x.browser)}</td>
+      <td style="font-size:11.5px;color:var(--faint)">${esc(x.browser || '—')}</td>
     </tr>`).join('');
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Audit Trail</h1><div class="erp-sub">${audit().length} immutable entries · read-only · searchable</div></div>
-        <button class="erp-btn" onclick="ERP._exportAudit()">${ic('download')}Export</button></div>
+      <div class="erp-sec-head"><div><h1 class="erp-h">Audit Trail${localBadge()}</h1><div class="erp-sub">${audit().length} entr${audit().length === 1 ? 'y' : 'ies'} recorded by Administration, newest first (last 800 kept).${SERVER() ? ' Enquiry, quotation and approval history is kept by the server under Audit &amp; Logs.' : ''}</div></div>
+        <div class="acts"><button class="erp-btn" onclick="ERP._exportAudit()">${ic('download')}Export CSV</button></div></div>
       <div class="erp-toolbar">
-        <div class="erp-field"><svg viewBox="0 0 24 24">${ICON.search}</svg><input class="erp-input" id="audSearch" placeholder="Search action, user, target…" value="${esc(S.auditQ)}"></div>
-        <select class="erp-select" id="audMod">${modOpts}</select>
+        <div class="erp-field"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON.search}</svg><input class="erp-input" id="audSearch" type="search" aria-label="Search the audit trail" placeholder="Search action, user, target…" value="${esc(S.auditQ)}"></div>
+        <select class="erp-select" id="audMod" aria-label="Filter by module">${modOpts}</select>
+        ${S.auditQ || S.auditMod ? '<button type="button" class="erp-btn ghost" onclick="ERP._audClear()">Clear filters</button>' : ''}
+        ${a.length > 200 ? `<span style="font-size:12px;color:var(--faint)">Showing the newest 200 of ${a.length} — export for the full list</span>` : ''}
       </div>
       <div class="erp-card"><div class="erp-tbl-wrap"><table class="erp-tbl">
-        <thead><tr><th class="nosort">Date & Time</th><th class="nosort">Module</th><th class="nosort">Action</th><th class="nosort">By</th><th class="nosort">Before</th><th class="nosort">After</th><th class="nosort">IP · Browser</th></tr></thead>
-        <tbody>${rows || `<tr><td colspan="7"><div class="erp-empty">${ic('audit')}<div>No log entries match</div></div></td></tr>`}</tbody></table></div></div>`;
+        <thead><tr><th class="nosort">Date & Time</th><th class="nosort">Module</th><th class="nosort">Action</th><th class="nosort">By</th><th class="nosort">Before</th><th class="nosort">After</th><th class="nosort">Browser</th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="7"><div class="erp-empty">${ic('audit')}<b>${audit().length ? 'No entries match' : 'Nothing recorded yet'}</b>${audit().length ? 'Try a different search or module.' : 'Changes made in Administration appear here.'}</div></td></tr>`}</tbody></table></div></div>`;
   };
   BIND.audit = function () {
     const s = $('#audSearch'); if (s) s.oninput = e => { S.auditQ = e.target.value; const p = e.target.selectionStart; renderMain(); const n = $('#audSearch'); if (n) { n.focus(); n.setSelectionRange(p, p); } };
@@ -627,12 +716,12 @@
     let n = notifs();
     if (S.notifFilter === 'unread') n = n.filter(x => !x.read);
     const map = { perm: ['var(--accent)', 'perm'], lock: ['var(--red)', 'lock'], tender: ['var(--green)', 'check'], boq: ['var(--blue)', 'dept'], vendor: ['var(--violet)', 'user'], wo: ['var(--accent2)', 'flow'], user: ['var(--blue)', 'user'] };
-    const rows = n.map(x => { const m = map[x.type] || ['var(--faint)', 'bell']; return `<div class="erp-notif ${x.read ? '' : 'unread'}" onclick="ERP._readNotif('${x.id}')"><div class="nd" style="background:color-mix(in srgb,${m[0]} 16%,transparent)">${ic(m[1]).replace('<svg', '<svg style="stroke:' + m[0] + '"')}</div><div style="flex:1"><div class="ttl">${esc(x.title)}${x.read ? '' : '<span class="ud"></span>'}</div><div class="ms">${esc(x.msg)}</div><div class="tm">${ago(x.ts)}</div></div></div>`; }).join('');
+    const rows = n.map(x => { const m = map[x.type] || ['var(--faint)', 'bell']; return `<div class="erp-notif ${x.read ? '' : 'unread'}" role="button" tabindex="0" aria-label="${esc(x.title)}${x.read ? '' : ' (unread)'}" onclick="ERP._readNotif('${x.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}"><div class="nd" style="background:color-mix(in srgb,${m[0]} 16%,transparent)">${ic(m[1]).replace('<svg', '<svg style="stroke:' + m[0] + '"')}</div><div style="flex:1"><div class="ttl">${esc(x.title)}${x.read ? '' : '<span class="ud"></span>'}</div><div class="ms">${esc(x.msg)}</div><div class="tm">${ago(x.ts)}</div></div></div>`; }).join('');
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Notification Center</h1><div class="erp-sub">${notifs().filter(x => !x.read).length} unread · ${notifs().length} total</div></div>
-        <button class="erp-btn" onclick="ERP._readAll()">${ic('check')}Mark all read</button></div>
+      <div class="erp-sec-head"><div><h1 class="erp-h">Notifications${localBadge()}</h1><div class="erp-sub">${notifs().filter(x => !x.read).length} unread of ${notifs().length}. Raised by administrative changes such as locks and new users.</div></div>
+        <div class="acts">${notifs().some(x => !x.read) ? `<button class="erp-btn" onclick="ERP._readAll()">${ic('check')}Mark all read</button>` : ''}</div></div>
       <div class="erp-toolbar"><div class="erp-seg" id="nFilter"><button class="${S.notifFilter === 'all' ? 'on' : ''}" data-f="all">All</button><button class="${S.notifFilter === 'unread' ? 'on' : ''}" data-f="unread">Unread</button></div></div>
-      <div class="erp-card">${rows || `<div class="erp-empty">${ic('bell')}<div>You're all caught up</div></div>`}</div>`;
+      <div class="erp-card">${rows || `<div class="erp-empty">${ic('bell')}<b>${S.notifFilter === 'unread' ? 'No unread notifications' : 'No notifications yet'}</b></div>`}</div>`;
   };
   BIND.notifications = function () { document.querySelectorAll('#nFilter button').forEach(b => b.onclick = () => { S.notifFilter = b.dataset.f; renderMain(); }); };
 
@@ -670,8 +759,67 @@
       h += `</div>`;
     });
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Organization Hierarchy</h1><div class="erp-sub">Company › Branch › Department › Designation › Employee — supports multiple companies</div></div></div>
+      <div class="erp-sec-head"><div><h1 class="erp-h">Organization${localBadge()}</h1><div class="erp-sub">Company › branch › department › people. Expand a level to see who sits under it.</div></div></div>
       <div class="erp-card"><div class="erp-card-body erp-tree">${h}</div></div>`;
+  };
+
+  /* ════════════════════════════════════════════════════════════════════
+     SYSTEM & DATA — one place for tools that already existed elsewhere:
+     workspace backup / restore (its links lived on the old landing page and
+     became unreachable when that page was replaced by the dashboard), Excel
+     import, theme, AI provider settings and login history. Every button
+     calls the existing implementation; nothing is re-done here.
+     ════════════════════════════════════════════════════════════════════ */
+  VIEWS.system = function () {
+    const server = SERVER();
+    const sess = (window.TSApi && window.TSApi.session) || null;
+    let bytes = 0; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); bytes += ((localStorage.getItem(k) || '').length + k.length) * 2; } } catch (e) {}
+    const mb = (bytes / 1048576).toFixed(2);
+    const syncTxt = (document.getElementById('tsSyncTxt') || {}).textContent || '';
+    const light = document.documentElement.getAttribute('data-theme') === 'light';
+    let ai = null; try { ai = (typeof AI !== 'undefined' && AI && typeof AI.hasKey === 'function') ? AI.hasKey() : null; } catch (e) {}
+    const has = (id) => !!document.getElementById(id);
+    const hasBackup = !!(window.TSBackup && window.TSBackup.backup);
+    return `
+      <div class="erp-sec-head"><div><h1 class="erp-h">System &amp; Data</h1><div class="erp-sub">Where data is kept, backups, imports and app preferences.</div></div></div>
+      <div class="erp-grid2">
+        <div>
+          <div class="erp-card"><div class="erp-card-head"><div class="ttl">Storage &amp; sync</div></div>
+            <div class="erp-card-body erp-kv">
+              <div class="r"><span class="k">User accounts &amp; sign-in</span><span class="v">${server ? 'Server' : 'This browser only'}</span></div>
+              <div class="r"><span class="k">Enquiries, quotations, work orders</span><span class="v">${server ? 'Server (cached in this browser)' : 'This browser only'}</span></div>
+              <div class="r"><span class="k">Admin master data &amp; audit trail</span><span class="v">This browser only</span></div>
+              ${server && sess ? `<div class="r"><span class="k">Signed in as</span><span class="v">${esc(sess.name || sess.username || '')}${sess.role ? ' · ' + esc(sess.role) : ''}</span></div>` : ''}
+              ${syncTxt ? `<div class="r"><span class="k">Sync status</span><span class="v">${esc(syncTxt)}</span></div>` : ''}
+              <div class="r"><span class="k">Browser storage used</span><span class="v">${mb} MB</span></div>
+            </div></div>
+          <div class="erp-card"><div class="erp-card-head"><div class="ttl">Backup &amp; restore</div></div>
+            <div class="erp-card-body">
+              <p style="margin:0 0 12px;font-size:12.5px;color:var(--dim);line-height:1.55">Downloads everything this browser holds for the app as a JSON file — including saved settings such as the AI provider key, so keep the file private.${server ? ' Restoring replaces this browser\'s copy; at the next sync it is merged with the server, so restored records can reach the server.' : ' Restoring replaces the data in this browser.'}</p>
+              ${hasBackup ? `<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="erp-btn" onclick="TSBackup.backup()">${ic('download')}Download backup</button><button class="erp-btn" onclick="TSBackup.restore()">Restore from file…</button></div>` : '<div class="erp-fhint">Backup is not available in this build.</div>'}
+            </div></div>
+        </div>
+        <div>
+          <div class="erp-card"><div class="erp-card-head"><div class="ttl">Import</div></div>
+            <div class="erp-card-body">
+              <p style="margin:0 0 12px;font-size:12.5px;color:var(--dim);line-height:1.55">Bring a BOQ in from Excel or CSV. A BOQ can also be opened straight into the BOQ Builder from its File menu.</p>
+              ${has('topImportBtn') ? `<button class="erp-btn" onclick="document.getElementById('topImportBtn').click()">${ic('download')}Import from Excel…</button>` : ''}
+            </div></div>
+          <div class="erp-card"><div class="erp-card-head"><div class="ttl">Preferences</div></div>
+            <div class="erp-card-body erp-kv">
+              <div class="r"><span class="k">Theme <span style="color:var(--faint)">(this browser)</span></span><span class="v"><span class="erp-seg" id="sysTheme" role="group" aria-label="Theme"><button type="button" data-t="light" class="${light ? 'on' : ''}" aria-pressed="${light}">Light</button><button type="button" data-t="dark" class="${light ? '' : 'on'}" aria-pressed="${!light}">Dark</button></span></span></div>
+              ${has('topGemBtn') ? `<div class="r"><span class="k">AI description provider</span><span class="v">${ai == null ? '' : (ai ? '<span class="erp-badge ok">Configured</span> ' : '<span class="erp-badge mute">Not set up</span> ')}<button class="erp-btn sm" onclick="document.getElementById('topGemBtn').click()">Settings…</button></span></div>` : ''}
+              ${window.Auth && typeof window.Auth._hist === 'function' ? `<div class="r"><span class="k">Sign-in history</span><span class="v"><button class="erp-btn sm" onclick="ERP._loginHist()">View…</button></span></div>` : ''}
+            </div></div>
+        </div>
+      </div>`;
+  };
+  BIND.system = function () {
+    document.querySelectorAll('#sysTheme button').forEach(b => b.onclick = () => {
+      const want = b.dataset.t, now = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+      if (want !== now) { const t = document.getElementById('themeTog'); if (t) t.click(); }
+      renderMain();
+    });
   };
 
   /* ════════════════════════════════════════════════════════════════════
@@ -681,7 +829,7 @@
   function buildCmd(q) {
     q = (q || '').toLowerCase().trim();
     const items = [];
-    NAV.filter(n => n.id).forEach(n => { if (!q || (TITLES[n.id] || n.label).toLowerCase().includes(q)) items.push({ g: 'Navigate', label: TITLES[n.id] || n.label, icon: n.icon, fn: () => { closeCmd(); go(n.id); } }); });
+    NAV.filter(n => n.id || n.act || n.ext).forEach(n => { const lbl = n.id ? (TITLES[n.id] === 'Administration' ? 'Admin dashboard' : (TITLES[n.id] || n.label)) : n.label; if (!q || lbl.toLowerCase().includes(q)) items.push({ g: 'Navigate', label: lbl + (n.ext ? ' ↗' : ''), icon: n.icon, fn: () => { closeCmd(); if (n.id) go(n.id); else window.ERP._navAct(n.act || n.ext); } }); });
     const actions = [
       { label: 'Add User', icon: 'plus', fn: () => { closeCmd(); window.ERP.addUser(); } },
       { label: 'New Designation', icon: 'plus', fn: () => { closeCmd(); window.ERP.editDesig(''); } },
@@ -749,6 +897,7 @@
 
     _uPage: (p) => { const f = S.u; const pages = Math.max(1, Math.ceil(filteredUsers().length / f.per)); f.page = Math.max(1, Math.min(pages, p)); renderMain(); },
     _clearSel: () => { S.u.sel = []; renderMain(); },
+    _uClear: () => { Object.assign(S.u, { q: '', dept: '', desig: '', status: '', page: 1 }); renderMain(); },
     _userMenu: (ev, id) => {
       const u = userById(id); const self = id === 'u_admin';
       rowMenu(ev, [
@@ -762,9 +911,12 @@
         ...(self ? [] : [{ act: 'del', icon: 'trash', label: 'Delete user', danger: true, fn: () => window.ERP.delUser(id) }])
       ]);
     },
-    _bulk: (action) => {
+    _bulk: async (action) => {
       const ids = S.u.sel.slice(); if (!ids.length) return;
-      if (action === 'delete' && !confirm('Delete ' + ids.length + ' user(s)? This cannot be undone.')) return;
+      const ask = { delete: ['Delete ' + ids.length + ' user(s)?', 'Their accounts are removed and they can no longer sign in. This cannot be undone.', 'Delete users'],
+        deactivate: ['Deactivate ' + ids.length + ' user(s)?', 'They will not be able to sign in until reactivated.', 'Deactivate'],
+        lock: ['Lock ' + ids.length + ' user(s)?', 'Locked accounts cannot sign in until unlocked.', 'Lock accounts'] }[action];
+      if (ask && !(await confirmBox(ask[0], ask[1], ask[2]))) return;
       if (SERVER()) {
         const run = action === 'delete' ? () => window.TSApi.bulkDelete(ids)
           : action === 'activate' || action === 'deactivate' ? () => window.TSApi.bulkActive(ids, action === 'activate')
@@ -787,9 +939,13 @@
       logAudit({ module: 'Administration', action: 'Bulk ' + action, target: ids.length + ' users', newVal: action });
       S.u.sel = []; toast('✓ ' + ids.length + ' user(s) updated'); renderMain();
     },
-    lockUser: (id) => {
-      const reason = prompt('Lock reason:\n(Employee Resigned · Terminated · Security Investigation · Policy Violation · Other)', 'Security Investigation');
-      if (reason == null) return;
+    lockUser: async (id) => {
+      const u00 = userById(id);
+      const reason = await dialog({ title: 'Lock ' + (u00 ? u00.name : 'account') + '?', sub: 'A locked account cannot sign in until it is unlocked.', ok: 'Lock account', danger: true,
+        html: `<label class="erp-flbl" for="lkReason">Reason</label><select class="erp-fsel" id="lkReason">${['Security Investigation', 'Employee Resigned', 'Terminated', 'Policy Violation', 'Other'].map(r => `<option>${r}</option>`).join('')}</select>
+               <label class="erp-flbl" for="lkNote" style="margin-top:12px">Note <span style="color:var(--faint);font-weight:500">(optional)</span></label><input class="erp-fin" id="lkNote" placeholder="Shown to administrators only">`,
+        validate: (root) => { const r = root.querySelector('#lkReason').value, n = root.querySelector('#lkNote').value.trim(); return n ? r + ' — ' + n : r; } });
+      if (!reason) return;
       if (SERVER()) {
         const u0 = userById(id);
         serverDo(() => setStatus(id, 'suspended'), '🔒 ' + (u0 ? u0.name : 'User') + ' locked', () => ({ id, lockReason: reason }))
@@ -802,15 +958,23 @@
     },
     unlockUser: (id) => { if (SERVER()) { const u0 = userById(id); serverDo(() => setStatus(id, 'active'), '🔓 ' + (u0 ? u0.name : 'User') + ' unlocked', () => ({ id, lockReason: '' })); return; } const u = userById(id); u.status = 'active'; u.lockReason = ''; u.failedLogins = 0; u.active = u.platformAccess !== false; persistUser(u); logAudit({ module: 'Administration', action: 'Account Unlocked', target: u.name, oldVal: 'Locked', newVal: 'Active' }); toast('🔓 ' + u.name + ' unlocked'); renderMain(); },
     resetPw: async (id) => {
-      const u = userById(id); const np = prompt('Set a new password for ' + u.name + ':'); if (np == null) return;
-      if (np.length < (policy().minLen || 8)) { alert('Password too short (min ' + (policy().minLen || 8) + ').'); return; }
+      const u = userById(id); const minL = policy().minLen || 8;
+      const np = await dialog({ title: 'Reset password', sub: u.name + ' (' + u.username + ')', ok: 'Set password',
+        html: `<label class="erp-flbl" for="rpPw">New password <span class="req">*</span></label><input class="erp-fin" id="rpPw" type="password" autocomplete="new-password" placeholder="At least ${minL} characters">
+               <label class="erp-flbl" for="rpPw2" style="margin-top:12px">Confirm password <span class="req">*</span></label><input class="erp-fin" id="rpPw2" type="password" autocomplete="new-password">
+               <div class="erp-fhint">The user is asked to choose their own password at next sign-in. Share this one with them privately.</div>`,
+        validate: (root, msg) => { const a = root.querySelector('#rpPw').value, b = root.querySelector('#rpPw2').value;
+          if (a.length < minL) { msg('Use at least ' + minL + ' characters.'); root.querySelector('#rpPw').focus(); return false; }
+          if (a !== b) { msg('The two passwords do not match.'); root.querySelector('#rpPw2').focus(); return false; } return a; } });
+      if (!np) return;
       if (SERVER()) { serverDo(() => window.TSApi.updateUser(id, { password: np }), '✓ Password reset for ' + u.name + ' — they must change it at next sign-in'); return; }
       const salt = rndSalt(); const { algo, h } = await hash(np, salt); u.salt = salt; u.hash = h; u.algo = algo; u.mustChange = true; persistUser(u);
       logAudit({ module: 'Administration', action: 'Password Reset', target: u.name, newVal: 'Forced change on next login' });
       toast('✓ Password reset for ' + u.name);
     },
-    forceLogout: (id) => { if (SERVER()) { alert('Ending one user\'s sessions is not available from here yet. Resetting their password, or locking the account, signs them out everywhere.'); return; } const u = userById(id); u.sessions = []; persistUser(u); logAudit({ module: 'Administration', action: 'Force Logout', target: u.name, newVal: 'All sessions terminated' }); toast('⎋ ' + u.name + ' logged out everywhere'); renderMain(); },
-    togglePA: (id) => {
+    forceLogout: (id) => { if (SERVER()) { notice('Not available yet', 'Ending one user\'s sessions is not available from here yet. Resetting their password, or locking the account, signs them out everywhere.'); return; } const u = userById(id); u.sessions = []; persistUser(u); logAudit({ module: 'Administration', action: 'Force Logout', target: u.name, newVal: 'All sessions terminated' }); toast('⎋ ' + u.name + ' logged out everywhere'); renderMain(); },
+    togglePA: async (id) => {
+      { const u1 = userById(id); if (u1 && u1.platformAccess !== false && !(await confirmBox('Revoke sign-in for ' + u1.name + '?', 'They will not be able to sign in until access is granted again.', 'Revoke access'))) return; }
       if (SERVER()) { const u0 = userById(id); const on = u0 && u0.platformAccess === false; serverDo(() => window.TSApi.updateUser(id, { active: on }), on ? '✓ Access granted' : '⊘ Access revoked'); return; }
       const u = userById(id); u.platformAccess = u.platformAccess === false; u.active = u.platformAccess && u.status === 'active';
       if (!u.platformAccess) u.sessions = [];
@@ -827,7 +991,7 @@
         toast('Cloned settings — set name, email & username');
       }, 80);
     },
-    delUser: (id) => { if (id === 'u_admin') { alert('The Super Admin account cannot be deleted.'); return; } const u = userById(id); if (!confirm('Delete ' + u.name + '? This cannot be undone.')) return; if (SERVER()) { serverDo(() => window.TSApi.bulkDelete([id]), '🗑 ' + u.name + ' deleted').then(ok => { if (ok) logAudit({ module: 'Administration', action: 'User Deleted', target: u.name }); }); return; } setUsers(users().filter(x => x.id !== id)); logAudit({ module: 'Administration', action: 'User Deleted', target: u.name }); toast('🗑 ' + u.name + ' deleted'); renderMain(); },
+    delUser: async (id) => { if (id === 'u_admin') { notice('Cannot delete', 'The Super Admin account cannot be deleted.'); return; } const u = userById(id); if (!(await confirmBox('Delete ' + u.name + '?', 'Their account is removed and they can no longer sign in. This cannot be undone.', 'Delete user'))) return; if (SERVER()) { serverDo(() => window.TSApi.bulkDelete([id]), '🗑 ' + u.name + ' deleted').then(ok => { if (ok) logAudit({ module: 'Administration', action: 'User Deleted', target: u.name }); }); return; } setUsers(users().filter(x => x.id !== id)); logAudit({ module: 'Administration', action: 'User Deleted', target: u.name }); toast('🗑 ' + u.name + ' deleted'); renderMain(); },
 
     _clearPhoto: () => { draft.photo = null; const el = $('#uPhoto'); if (el) { el.style.backgroundImage = ''; el.style.background = '#ff6a2c'; el.innerHTML = (val('fName').trim().split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() || 'NU') + '<div class="ov">Upload</div>'; } },
     _pwMeter: () => { const v = val('fPw'); const bar = $('#fPwBar'); if (!bar) return; let s = 0; if (v.length >= 8) s++; if (/[A-Z]/.test(v)) s++; if (/[0-9]/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++; const pct = [0, 30, 55, 80, 100][s]; const col = ['', 'var(--red)', 'var(--accent2)', 'var(--blue)', 'var(--green)'][s]; bar.style.width = pct + '%'; bar.style.background = col; },
@@ -926,7 +1090,7 @@
       ]);
     },
     _cloneDesig: (id) => { const d = desigById(id); const ds = desigs(); ds.push(Object.assign({}, JSON.parse(JSON.stringify(d)), { id: uid('dg'), name: d.name + ' (Copy)' })); save(K.desig, ds); logAudit({ module: 'Administration', action: 'Designation Cloned', target: d.name }); toast('✓ Cloned'); renderMain(); },
-    _delDesig: (id) => { const d = desigById(id); const n = userCount(id); if (n) { alert('Cannot delete — ' + n + ' user(s) hold this designation.'); return; } if (!confirm('Delete designation “' + d.name + '”?')) return; save(K.desig, desigs().filter(x => x.id !== id)); logAudit({ module: 'Administration', action: 'Designation Deleted', target: d.name }); toast('🗑 Deleted'); renderNav(); renderMain(); },
+    _delDesig: async (id) => { const d = desigById(id); const n = userCount(id); if (n) { notice('Cannot delete', n + ' user(s) hold the designation “' + d.name + '”. Move them to another designation first.'); return; } if (!(await confirmBox('Delete designation “' + d.name + '”?', 'Its permission settings and approval limits are removed too.', 'Delete'))) return; save(K.desig, desigs().filter(x => x.id !== id)); logAudit({ module: 'Administration', action: 'Designation Deleted', target: d.name }); toast('🗑 Deleted'); renderNav(); renderMain(); },
     _permFor: (id) => { S.permDesig = id; go('permissions'); },
     _compareDesig: () => {
       const ds = desigs();
@@ -955,7 +1119,7 @@
       else dl.push({ id: uid('dp'), name, code: val('dpCode').trim(), status: val('dpStatus') });
       save(K.dept, dl); logAudit({ module: 'Administration', action: editId ? 'Department Edited' : 'Department Created', target: name }); toast('✓ Saved'); closeOv(); renderNav(); renderMain();
     },
-    _delDept: (id) => { const d = depts().find(x => x.id === id); const n = users().filter(u => u.departmentId === id).length; if (n) { alert('Cannot delete — ' + n + ' user(s) in this department.'); return; } if (!confirm('Delete department “' + d.name + '”?')) return; save(K.dept, depts().filter(x => x.id !== id)); toast('🗑 Deleted'); renderNav(); renderMain(); },
+    _delDept: async (id) => { const d = depts().find(x => x.id === id); const n = users().filter(u => u.departmentId === id).length; if (n) { notice('Cannot delete', n + ' user(s) belong to “' + d.name + '”. Move them to another department first.'); return; } if (!(await confirmBox('Delete department “' + d.name + '”?', 'This cannot be undone.', 'Delete'))) return; save(K.dept, depts().filter(x => x.id !== id)); toast('🗑 Deleted'); renderNav(); renderMain(); },
 
     /* project master */
     _saveProject: (editId) => {
@@ -971,10 +1135,10 @@
       else pl.push(Object.assign({ id: uid('pr') }, fields));
       save(K.proj, pl); logAudit({ module: 'Administration', action: editId ? 'Project Edited' : 'Project Created', target: name }); toast('✓ Saved'); closeOv(); renderMain();
     },
-    _delProject: (id) => {
+    _delProject: async (id) => {
       const p = projects().find(x => x.id === id); if (!p) return;
       const n = users().filter(u => typeof u.projectAccess === 'object' && (u.projectAccess.ids || []).includes(id)).length;
-      if (!confirm('Delete project “' + p.name + '”?' + (n ? ' It is individually assigned to ' + n + ' user(s) — they will lose that assignment.' : ''))) return;
+      if (!(await confirmBox('Delete project “' + p.name + '”?', (n ? 'It is individually assigned to ' + n + ' user(s) — they will lose that assignment. ' : '') + 'This cannot be undone.', 'Delete project'))) return;
       save(K.proj, projects().filter(x => x.id !== id));
       const ul = users();
       ul.forEach(u => { if (typeof u.projectAccess === 'object') u.projectAccess.ids = (u.projectAccess.ids || []).filter(x => x !== id); });
@@ -986,7 +1150,10 @@
     _permTog: (mId, act) => { const d = desigById(S.permDesig); d.perms = d.perms || {}; d.perms[mId] = d.perms[mId] || {}; d.perms[mId][act] = d.perms[mId][act] ? 0 : 1; save(K.desig, desigs().map(x => x.id === d.id ? d : x)); logAudit({ module: 'Administration', action: 'Permission Modified', target: d.name, newVal: (modules().find(m => m.id === mId) || {}).name + ': ' + act + ' ' + (d.perms[mId][act] ? 'ON' : 'OFF') }); renderMain(); },
     _permCol: (act) => { const d = desigById(S.permDesig); const mods = modules(); const allOn = mods.every(m => d.perms && d.perms[m.id] && d.perms[m.id][act]); mods.forEach(m => { d.perms = d.perms || {}; d.perms[m.id] = d.perms[m.id] || {}; d.perms[m.id][act] = allOn ? 0 : 1; }); save(K.desig, desigs().map(x => x.id === d.id ? d : x)); renderMain(); },
     _permAll: (on) => { const d = desigById(S.permDesig); const mods = modules(); mods.forEach(m => { d.perms = d.perms || {}; d.perms[m.id] = d.perms[m.id] || {}; ACTIONS.forEach(a => d.perms[m.id][a[0]] = on ? 1 : 0); }); save(K.desig, desigs().map(x => x.id === d.id ? d : x)); logAudit({ module: 'Administration', action: 'Permission Modified', target: d.name, newVal: on ? 'All granted' : 'All cleared' }); toast(on ? 'All granted' : 'All cleared'); renderMain(); },
-    _addModule: () => { const name = prompt('New module name (it will appear in the permission engine):'); if (!name) return; ensureModule(name.trim()); logAudit({ module: 'Administration', action: 'Module Registered', target: name.trim() }); toast('✓ Module added — data-driven engine updated'); renderMain(); },
+    _addModule: async () => { const name = await dialog({ title: 'Register module', sub: 'Adds a row to the designation matrix.', ok: 'Add module',
+        html: '<label class="erp-flbl" for="amName">Module name <span class="req">*</span></label><input class="erp-fin" id="amName" placeholder="e.g. Site Diary">',
+        validate: (root, msg) => { const v = root.querySelector('#amName').value.trim(); if (!v) { msg('Enter a name.'); return false; } if (modules().some(m => m.name.toLowerCase() === v.toLowerCase())) { msg('That module already exists.'); return false; } return v; } });
+      if (!name) return; ensureModule(name.trim()); logAudit({ module: 'Administration', action: 'Module Registered', target: name.trim() }); toast('✓ Module added — data-driven engine updated'); renderMain(); },
 
     /* project access */
     _saveProjAccess: () => {
@@ -997,11 +1164,14 @@
     },
 
     /* workflow + limits */
-    _wfAdd: (wfId) => {
+    _wfAdd: async (wfId) => {
       const w = flows().find(x => x.id === wfId);
-      const opts = desigs().filter(d => !w.steps.includes(d.id)).map(d => d.name).join('\n');
-      const pick = prompt('Add an approval level — type a designation name:\n\n' + opts);
-      if (!pick) return; const d = desigs().find(x => x.name.toLowerCase() === pick.toLowerCase().trim()); if (!d) { alert('No matching designation'); return; }
+      const avail = desigs().filter(d => !w.steps.includes(d.id));
+      if (!avail.length) { notice('Nothing to add', 'Every designation is already a step in “' + w.name + '”.'); return; }
+      const pickId = await dialog({ title: 'Add approval level', sub: w.name + ' — added as step ' + (w.steps.length + 1), ok: 'Add step',
+        html: `<label class="erp-flbl" for="wfPick">Designation</label><select class="erp-fsel" id="wfPick">${avail.map(d => `<option value="${d.id}">${esc(d.name)} · ${esc(deptName(d.departmentId))}</option>`).join('')}</select>`,
+        validate: (root) => root.querySelector('#wfPick').value });
+      if (!pickId) return; const d = desigById(pickId); if (!d) return;
       w.steps.push(d.id); save(K.flow, flows().map(x => x.id === wfId ? w : x)); logAudit({ module: 'Administration', action: 'Workflow Updated', target: w.name, newVal: 'Added ' + d.name }); renderMain();
     },
     _wfRemove: (wfId, i) => { const w = flows().find(x => x.id === wfId); w.steps.splice(i, 1); save(K.flow, flows().map(x => x.id === wfId ? w : x)); renderMain(); },
@@ -1021,17 +1191,18 @@
       save(K.policy, p); logAudit({ module: 'Administration', action: 'Security Policy Updated', newVal: 'Password & session rules changed' }); toast('✓ Security policy saved'); renderMain();
     },
     _killSession: (uid2, sid) => { const u = userById(uid2); u.sessions = (u.sessions || []).filter(s => s.id !== sid); persistUser(u); logAudit({ module: 'Administration', action: 'Session Terminated', target: u.name }); toast('Session ended'); renderMain(); },
-    _killAll: () => { if (!confirm('Terminate ALL active sessions across all users?')) return; const all = users(); all.forEach(u => u.sessions = []); setUsers(all); logAudit({ module: 'Administration', action: 'Force Logout', target: 'All users', newVal: 'All sessions terminated' }); toast('All sessions terminated'); renderMain(); },
+    _killAll: async () => { if (!(await confirmBox('End all sessions?', 'Every signed-in user on this browser\'s session list is signed out.', 'End all sessions'))) return; const all = users(); all.forEach(u => u.sessions = []); setUsers(all); logAudit({ module: 'Administration', action: 'Force Logout', target: 'All users', newVal: 'All sessions terminated' }); toast('All sessions terminated'); renderMain(); },
 
     /* audit + notif */
     _exportAudit: () => { exportCSV('audit-trail', ['Date', 'Module', 'Action', 'Target', 'By', 'Before', 'After', 'Reason', 'IP', 'Browser'], audit().map(x => [new Date(x.ts).toISOString(), x.module, x.action, x.target, x.admin, x.oldVal, x.newVal, x.reason, x.ip, x.browser])); toast('⤓ Audit exported'); },
     _exportUsers: () => { exportCSV('users', ['Emp ID', 'Name', 'Username', 'Email', 'Mobile', 'Designation', 'Department', 'Branch', 'Status', 'Last Login'], users().map(x => [x.empId, x.name, x.username, x.email, x.mobile, desigName(x.designationId), deptName(x.departmentId), branchName(x.branchId), x.status, x.lastLogin ? new Date(x.lastLogin).toISOString() : ''])); toast('⤓ Users exported'); },
-    _importUsers: () => { alert('Bulk import\n\nUpload an Excel/CSV with columns: Name, Email, Mobile, Designation, Department, Branch.\nNew designations/departments are auto-created on import.\n\n(Demo: wire this to your existing Excel import pipeline.)'); },
 
     _readNotif: (id) => { const n = notifs(); const x = n.find(i => i.id === id); if (x) x.read = true; save(K.notif, n); refreshBadge(); renderMain(); },
     _readAll: () => { const n = notifs(); n.forEach(x => x.read = true); save(K.notif, n); refreshBadge(); toast('✓ All marked read'); renderMain(); },
 
-    _orgT: (id) => { orgOpen[id] = !orgOpen[id]; renderMain(); }
+    _orgT: (id) => { orgOpen[id] = !orgOpen[id]; renderMain(); },
+    _audClear: () => { S.auditQ = ''; S.auditMod = ''; renderMain(); },
+    _loginHist: () => { try { window.Auth._hist(); } catch (e) { notice('Not available', 'Sign-in history could not be opened: ' + ((e && e.message) || 'unknown error') + '.'); } }
   });
 
   // keep _editId on draft so quick-designation flow can reopen the right drawer

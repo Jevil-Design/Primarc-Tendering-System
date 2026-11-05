@@ -7878,40 +7878,57 @@ setInterval(()=>{ if(_draftDirty&&typeof cInit!=='undefined'&&cInit&&typeof boq!
   /* ── Backup / Restore entire workspace (all data + settings) to a JSON file ──
      Lets you move your work between computers / locations, or keep a safety copy.
      Backs up every app localStorage key except the transient AI response cache. */
+  /* The ⤓ / ⤒ links lived on the old landing page, which the dashboard now
+     replaces — so they were bound but unreachable. The same two actions are
+     exposed as window.TSBackup for Administration › System & Data; the
+     links still work if that markup is ever shown again. */
   (function(){
     const bBtn=document.getElementById('hfBackup'), rBtn=document.getElementById('hfRestore'), rFile=document.getElementById('hfRestoreFile');
     function snapshot(){
-      const data={}; 
+      const data={};
       for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(!k||k.indexOf('boq_aic_')===0)continue; data[k]=localStorage.getItem(k); }
       return {__app:'PrimarcTenderingSystem',__ver:1,__ts:Date.now(),data};
     }
-    if(bBtn)bBtn.addEventListener('click',e=>{
-      e.preventDefault();
+    function doBackup(e){
+      if(e&&e.preventDefault) e.preventDefault();
       try{
         const blob=new Blob([JSON.stringify(snapshot(),null,2)],{type:'application/json'});
         const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
         a.download='Tendering-Backup-'+new Date().toISOString().slice(0,10)+'.json';
         document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
         showToast('⤓ Backup downloaded — store it safely');
-      }catch(err){ alert('Backup failed: '+err.message); }
-    });
-    if(rBtn)rBtn.addEventListener('click',e=>{ e.preventDefault(); rFile&&rFile.click(); });
-    if(rFile)rFile.addEventListener('change',e=>{
-      const f=e.target.files[0]; if(!f)return;
+      }catch(err){ uiNotify('Backup failed: '+err.message,'err'); }
+    }
+    function onRestoreFile(e){
+      const inp=e.target, f=inp.files[0]; if(!f)return;
       const rd=new FileReader();
       rd.onload=()=>{
-        let parsed; try{ parsed=JSON.parse(rd.result); }catch(x){ alert('That file is not a valid backup (could not parse JSON).'); return; }
-        if(!parsed||parsed.__app!=='PrimarcTenderingSystem'||!parsed.data){ alert('That file is not a Tendering System backup.'); return; }
+        let parsed; try{ parsed=JSON.parse(rd.result); }catch(x){ uiNotify('That file is not a valid backup (could not parse JSON).','err'); inp.value=''; return; }
+        if(!parsed||parsed.__app!=='PrimarcTenderingSystem'||!parsed.data){ uiNotify('That file is not a Tendering System backup.','err'); inp.value=''; return; }
         const when=parsed.__ts?new Date(parsed.__ts).toLocaleString():'unknown date';
-        if(!confirm('Restore this backup from '+when+'?\n\nThis REPLACES all current data in this browser (enquiries, BOQ drafts, vendors, work orders, settings).\n\nTip: take a fresh backup first if unsure.'))  { rFile.value=''; return; }
-        try{
-          Object.keys(parsed.data).forEach(k=>{ localStorage.setItem(k, parsed.data[k]); });  // only writes keys from the backup; never clears others
-          showToast('⤒ Backup restored — reloading…');
-          setTimeout(()=>location.reload(),700);
-        }catch(err){ alert('Restore failed: '+err.message); }
+        const body='Restore the backup from '+when+'? It overwrites the matching data in this browser (enquiries, BOQ drafts, vendors, work orders, settings), then reloads the page. Take a fresh backup first if unsure.';
+        const ask=(typeof BUI!=='undefined'&&BUI.confirm)?BUI.confirm({title:'Restore backup?',body,okText:'Restore',danger:true}):Promise.resolve(confirm(body));
+        ask.then(ok=>{
+          if(!ok){ inp.value=''; return; }
+          try{
+            Object.keys(parsed.data).forEach(k=>{ localStorage.setItem(k, parsed.data[k]); });  // only writes keys from the backup; never clears others
+            showToast('⤒ Backup restored — reloading…');
+            setTimeout(()=>location.reload(),700);
+          }catch(err){ uiNotify('Restore failed: '+err.message,'err'); }
+        });
       };
       rd.readAsText(f);
-    });
+    }
+    function pickRestore(e){
+      if(e&&e.preventDefault) e.preventDefault();
+      let inp=document.getElementById('hfRestoreFile');
+      if(!inp||!inp.isConnected){ inp=document.createElement('input'); inp.type='file'; inp.accept='application/json,.json'; inp.addEventListener('change',onRestoreFile); }
+      inp.click();
+    }
+    if(bBtn)bBtn.addEventListener('click',doBackup);
+    if(rBtn)rBtn.addEventListener('click',pickRestore);
+    if(rFile)rFile.addEventListener('change',onRestoreFile);
+    window.TSBackup={backup:doBackup,restore:pickRestore};
   })();
   (function(){
     let ov=document.getElementById('gsOverlay');
@@ -13213,10 +13230,14 @@ return api;
       if(b.dataset.sb===key) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
     });
     var head=el('pwsHead'); if(!head) return;
-    var crumb=el('pwsCrumb');
-    if(crumb) crumb.innerHTML='<span class="pws-c-brand">Primarc</span><i class="pws-c-sep">/</i><span class="pws-c-grp">'+esc(meta.group||'Workspace')+'</span>';
-    var t=el('pwsTitle'); if(t) t.textContent=meta.label||'';
     var view=document.querySelector('.view.on'), onHome=!!(view && view.id==='home');
+    /* Inside Administration the title is the admin section on screen (the
+       admin page no longer repeats it in a second header bar of its own). */
+    var adm=(view && view.id==='admin') ? document.querySelector('#erpNav a[data-v].on .erp-nav-lbl') : null;
+    var group=adm ? 'Administration' : (meta.group||'Workspace');
+    var crumb=el('pwsCrumb');
+    if(crumb) crumb.innerHTML='<span class="pws-c-brand">Primarc</span><i class="pws-c-sep">/</i><span class="pws-c-grp">'+esc(group)+'</span>';
+    var t=el('pwsTitle'); if(t) t.textContent=adm ? adm.textContent : (meta.label||'');
     /* The dashboard carries its own description block, so the top bar
        shows only its title there rather than saying the same thing twice. */
     var d=onHome?'':(DESC[key]||'');
