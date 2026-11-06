@@ -150,7 +150,7 @@ check('dark theme renders the admin dashboard without errors', errs.length === 0
 await page.evaluate(() => ERP.go('system')); await sleep(300);
 await page.click('#sysTheme button:not(.on)'); await sleep(200);
 await page.evaluate(() => ERP._navAct('roleAccess')); await sleep(800);
-check('Role Access opens the enforced role/permission editor', await page.evaluate(() => { const o = document.getElementById('authModalOv'); return !!o && o.classList.contains('on') && /Access Control/.test(o.innerText); }));
+check('Role Access opens the enforced role/permission editor', await page.evaluate(() => { const o = document.getElementById('authModalOv'); return !!o && o.classList.contains('on') && /access control/i.test(o.innerText)   /* innerText follows CSS text-transform (the heading is uppercase) */; }));
 await page.evaluate(() => document.getElementById('authModalOv').classList.remove('on'));
 
 /* ── command palette ── */

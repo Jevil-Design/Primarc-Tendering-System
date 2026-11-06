@@ -823,6 +823,86 @@
   };
 
   /* ════════════════════════════════════════════════════════════════════
+     MAJOR TERMS — master versions of the 35 standard contract clauses.
+     The data lives in the enquiry database (QM), which is synced to the
+     server, not in this browser's admin storage. An import never edits an
+     existing version: it adds a new one, and every enquiry keeps the version
+     it was created with.
+     ════════════════════════════════════════════════════════════════════ */
+  let mtView = null;            // version being viewed (null = current)
+  const QMok = () => !!(window.QM && typeof window.QM.mtInfo === 'function');
+  VIEWS.majorterms = function () {
+    if (!QMok()) return `<div class="erp-sec-head"><div><h1 class="erp-h">Major Terms</h1></div></div><div class="erp-note warn">${ic('security')}<div>The enquiry module has not loaded, so the master terms cannot be shown. Reload the page and try again.</div></div>`;
+    const info = window.QM.mtInfo();
+    const show = mtView || info.current;
+    const ver = window.QM.mtVersion(show) || window.QM.mtVersion(info.current);
+    const secs = window.QM.mtSections || [];
+    const secOf = (sl) => secs.find(s => sl >= s[2] && sl <= s[3]) || ['O', 'Other clauses', 0, 0];
+    const groups = {}; ver.clauses.forEach(c => { const s = secOf(c.sl); (groups[s[0]] = groups[s[0]] || { s, cs: [] }).cs.push(c); });
+    const rows = info.versions.slice().reverse().map(x => `<tr${x.v === show ? ' class="sel"' : ''}>
+        <td class="mono">v${x.v}</td>
+        <td><div class="nm">${esc(x.source || '—')}</div>${x.title ? `<div class="sub2">${esc(x.title)}</div>` : ''}${x.note ? `<div class="sub2">${esc(x.note)}</div>` : ''}</td>
+        <td style="white-space:nowrap">${x.ts ? fmtDT(x.ts) : 'Built in'}${x.by ? `<div class="sub2">${esc(x.by)}</div>` : ''}</td>
+        <td class="num">${x.count}</td><td class="num">${x.enquiries}</td>
+        <td>${x.v === info.current ? '<span class="erp-badge ok">Current</span>' : '<span class="erp-badge mute">Kept</span>'}</td>
+        <td class="acts"><button type="button" class="erp-btn sm ghost" onclick="ERP._mtShow(${x.v})">${x.v === show ? 'Viewing' : 'View'}</button></td></tr>`).join('');
+    const clauses = Object.keys(groups).map(k => `<details class="erp-card"${k === 'A' ? ' open' : ''}><summary>${k === 'O' ? '' : 'Section ' + k + ' — '}${esc(groups[k].s[1])}<span>${groups[k].cs.length} clauses</span></summary>
+        <div class="erp-tbl-wrap" style="max-height:none"><table class="erp-tbl"><thead><tr><th class="nosort" style="width:44px">#</th><th class="nosort" style="width:220px">Major clause</th><th class="nosort">Primarc standard terms</th><th class="nosort" style="width:160px">Contractor acceptance</th></tr></thead><tbody>
+        ${groups[k].cs.map(c => `<tr><td class="mono">${c.sl}</td><td class="nm" style="white-space:pre-wrap">${esc(c.heading)}</td><td style="white-space:pre-wrap;line-height:1.5;color:var(--ink)">${esc(c.text)}</td><td style="white-space:pre-wrap">${c.acceptance ? esc(c.acceptance) : '<span style="color:var(--faint)">blank</span>'}</td></tr>`).join('')}
+        </tbody></table></div></details>`).join('');
+    return `
+      <div class="erp-sec-head"><div><h1 class="erp-h">Major Terms</h1><div class="erp-sub">The standard contract clauses loaded into every new enquiry, where they can be edited for that enquiry. Importing creates a new version; enquiries already created keep the version they were made with.</div></div>
+        <div class="acts">${window.QM.mtIsAdmin() ? `<label class="erp-btn primary" style="cursor:pointer" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.querySelector('input').click()}">${ic('download')}Import from Excel…<input type="file" id="mtFile" accept=".xlsx,.xls" style="display:none"></label>` : ''}</div></div>
+      <div class="erp-note">${ic('audit')}<div>Expected file: the <b>SUMMARY</b> sheet with columns <b>Sl No</b>, <b>Major Clauses</b>, <b>Primarc Standard Terms</b> and <b>Contractor Acceptance</b> — ${window.QM.mtVersion(1).clauses.length} clauses. You see every addition, change and missing clause before anything is saved. Text is taken exactly as written in the file.</div></div>
+      <div class="erp-card"><div class="erp-card-head"><div class="ttl">Versions<span>newest first</span></div></div>
+        <div class="erp-tbl-wrap" style="max-height:none"><table class="erp-tbl"><thead><tr><th class="nosort">Version</th><th class="nosort">Source</th><th class="nosort">Imported</th><th class="nosort num">Clauses</th><th class="nosort num">Enquiries using it</th><th class="nosort">Status</th><th class="nosort"></th></tr></thead><tbody>${rows}</tbody></table></div></div>
+      <h2 class="erp-h2">Clauses in v${ver.v}${ver.v === info.current ? ' (current)' : ''}</h2><div class="erp-sub">${ver.clauses.length} clauses${ver.title ? ' · ' + esc(ver.title) : ''}</div>
+      ${clauses}`;
+  };
+  BIND.majorterms = function () {
+    const f = $('#mtFile'); if (!f) return;
+    f.onchange = () => { const file = f.files && f.files[0]; f.value = ''; if (file) mtImportPreview(file); };
+  };
+  async function mtImportPreview(file) {
+    if (typeof XLSX === 'undefined') { notice('Excel reader not loaded', 'The spreadsheet library has not loaded yet (it needs internet the first time). Wait a moment and try again.'); return; }
+    let wb;
+    try { wb = XLSX.read(new Uint8Array(await file.arrayBuffer()), { type: 'array' }); }
+    catch (e) { notice('Could not read the file', '“' + file.name + '” could not be read as an Excel workbook: ' + ((e && e.message) || 'unknown error') + '.'); return; }
+    const parsed = window.QM.mtParseWorkbook(wb);
+    const info = window.QM.mtInfo(); const cur = window.QM.mtVersion(info.current);
+    const d = window.QM.mtDiff(parsed.clauses, cur);
+    const nChanges = d.added.length + d.changed.length + d.missing.length;
+    const clip = (s) => { s = String(s || ''); return s.length > 260 ? s.slice(0, 260) + '…' : s; };
+    const changed = d.changed.map(x => `<details class="erp-card"><summary>Clause ${x.c.sl} · ${esc(x.c.heading.trim())}<span>${x.f.join(', ')} changed</span></summary><div class="erp-card-body" style="font-size:12px;display:grid;gap:8px">
+        ${x.f.map(k => `<div><div class="erp-flbl">${k === 'text' ? 'Terms' : k === 'heading' ? 'Heading' : 'Contractor acceptance'}</div><div style="white-space:pre-wrap;color:var(--red);text-decoration:line-through">${esc(clip(x.b[k])) || '<i>blank</i>'}</div><div style="white-space:pre-wrap;color:var(--green);margin-top:3px">${esc(clip(x.c[k])) || '<i>blank</i>'}</div></div>`).join('')}</div></details>`).join('');
+    const list = (arr, lbl) => arr.length ? `<div class="erp-note${lbl === 'Missing from the file' ? ' warn' : ''}">${ic('audit')}<div><b>${lbl}:</b> ${arr.map(c => c.sl + ' ' + esc(c.heading.trim())).join(' · ')}</div></div>` : '';
+    openOv('wide', `
+      <div class="erp-dh"><div><h3>Import preview</h3><div class="sub">${esc(file.name)} · compared with the current master v${cur.v}</div></div><button class="erp-x" onclick="ERP._closeOv()" aria-label="Close">×</button></div>
+      <div class="erp-dbody">
+        ${parsed.errors.length ? `<div class="erp-note warn">${ic('security')}<div><b>This file cannot be imported:</b><ul style="margin:6px 0 0 16px">${parsed.errors.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div></div>` : ''}
+        ${parsed.warnings.map(w => `<div class="erp-note">${ic('audit')}<div>${esc(w)}</div></div>`).join('')}
+        <div class="erp-tiles" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+          <div class="erp-tile"><div class="l">Clauses read</div><div class="n">${parsed.clauses.length}</div></div>
+          <div class="erp-tile"><div class="l">Changed</div><div class="n">${d.changed.length}</div></div>
+          <div class="erp-tile"><div class="l">Added</div><div class="n">${d.added.length}</div></div>
+          <div class="erp-tile"><div class="l">Missing</div><div class="n">${d.missing.length}</div></div>
+        </div>
+        ${list(d.added, 'Added')}${list(d.missing, 'Missing from the file')}
+        ${changed}
+        ${!parsed.errors.length && !nChanges ? `<div class="erp-note">${ic('check')}<div>Identical to the current master v${cur.v} — there is nothing to import.</div></div>` : ''}
+        ${!parsed.errors.length && nChanges ? `<label class="erp-flbl" for="mtNote" style="margin-top:12px">Note for this version <span style="color:var(--faint);font-weight:500">(optional)</span></label><input class="erp-fin" id="mtNote" placeholder="e.g. Revised LD and payment terms for FY 2027">
+          <div class="erp-fhint">Saving creates master v${info.versions.length ? Math.max(...info.versions.map(x => x.v)) + 1 : 2} and makes it current for new enquiries. Existing enquiries and submitted quotations are not changed.</div>` : ''}
+      </div>
+      <div class="erp-dfoot"><span class="msg" id="mtMsg"></span><button class="erp-btn" onclick="ERP._closeOv()">Cancel</button><button class="erp-btn primary" id="mtApply" ${parsed.errors.length || !nChanges ? 'disabled' : ''}>${ic('check')}Create new version</button></div>`);
+    const ap = $('#mtApply');
+    if (ap) ap.onclick = () => {
+      try { const v = window.QM.mtApplyImport(parsed, { file: file.name, note: val('mtNote').trim() }); logAudit({ module: 'Administration', action: 'Major Terms imported', target: 'v' + v, newVal: file.name }); closeOv(); mtView = null; toast('✓ Master terms v' + v + ' is now current'); renderMain(); }
+      catch (e) { const m = $('#mtMsg'); if (m) { m.style.color = 'var(--red)'; m.textContent = e.message; } }
+    };
+  }
+  window.ERP._mtShow = (v) => { mtView = v; renderMain(); };
+
+  /* ════════════════════════════════════════════════════════════════════
      COMMAND PALETTE
      ════════════════════════════════════════════════════════════════════ */
   let cmdIdx = 0, cmdItems = [];

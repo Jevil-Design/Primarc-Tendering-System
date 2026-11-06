@@ -778,6 +778,7 @@
     { id: 'departments', label: 'Departments', icon: 'dept', cnt: () => depts().length },
     { id: 'organization', label: 'Organization', icon: 'org' },
     { id: 'projects', label: 'Projects', icon: 'project', cnt: () => projects().length },
+    { id: 'majorterms', label: 'Major Terms', icon: 'audit' },
     { ext: 'bmaster', label: 'BOQ Master', icon: 'audit', tip: 'Opens the BOQ Master library' },
     { ext: 'vmaster', label: 'Vendor Master', icon: 'user', tip: 'Opens the Vendor Master' },
     { id: 'system', label: 'System & Data', icon: 'settings' },
@@ -786,7 +787,7 @@
     { id: 'notifications', label: 'Notifications', icon: 'bell', cnt: () => notifs().filter(n => !n.read).length, hot: true },
     { ext: 'del', label: 'Deleted Items', icon: 'trash', tip: 'Opens Deleted Items' }
   ];
-  const TITLES = { dashboard: 'Administration', users: 'Users', designations: 'Designations', departments: 'Departments', organization: 'Organization', permissions: 'Designation Matrix', projects: 'Projects', workflow: 'Approval & Limits', security: 'Security Policy', audit: 'Audit Trail', notifications: 'Notifications', system: 'System & Data' };
+  const TITLES = { dashboard: 'Administration', users: 'Users', designations: 'Designations', departments: 'Departments', organization: 'Organization', permissions: 'Designation Matrix', projects: 'Projects', majorterms: 'Major Terms', workflow: 'Approval & Limits', security: 'Security Policy', audit: 'Audit Trail', notifications: 'Notifications', system: 'System & Data' };
 
   const S = {
     view: 'dashboard',
@@ -926,7 +927,7 @@
       designations: 'Job titles, hierarchy and limits', permissions: 'Reference permissions per designation',
       workflow: 'Approval chains and ₹ limits', security: 'Password and session policy',
       departments: 'Department master', organization: 'Company › branch › department tree',
-      projects: 'Project master and user access', bmaster: 'Item library and rate history',
+      projects: 'Project master and user access', majorterms: 'Standard contract clauses and Excel import', bmaster: 'Item library and rate history',
       vmaster: 'Contractor and supplier records', system: 'Backup, import, theme, AI provider',
       audit: 'Who changed what, and when', notifications: 'Administrative alerts', del: 'Restore soft-deleted records'
     };

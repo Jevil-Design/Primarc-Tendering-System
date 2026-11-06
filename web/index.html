@@ -2314,6 +2314,86 @@ html[data-theme="light"] #create{--grp-bg:#f4f7fd; --sel-bg:#ecf2fc}
 .rv-foot .sp{flex:1}
 /* in-app confirm */
 .modal.ui-confirm{width:min(440px,92vw)}
+
+/* vendor portal header: its background was hard-coded dark, so with the
+   light theme the title (ink colour) became unreadable on it */
+html[data-theme="light"] .vp-top{background:var(--panel);border-bottom:1px solid var(--line)}
+html[data-theme="light"] .vp-top .vp-logo path{fill:var(--ink)}
+
+/* ═══ MAJOR TERMS & CONDITIONS ═══════════════════════════════════════════ */
+.mt-ed{margin-top:4px}
+.mt-empty,.mt-note,.mt-recon-info{font-size:12px;color:var(--dim);line-height:1.5;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:6px 0}
+.mt-note{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--warn-bg);border-color:var(--warn-line)}
+.mt-note .btn{margin-left:auto}
+.mt-recon{display:flex;flex-direction:column;gap:6px;margin:6px 0}
+.mt-recon-row{font-size:12px;color:var(--ink);background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:8px;padding:9px 11px;line-height:1.45}
+.mt-recon-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.mt-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 0;position:sticky;top:-18px;z-index:2;background:var(--panel)}
+.mt-count{font-size:12px;color:var(--dim);white-space:nowrap;margin-right:auto}
+.mt-count b{color:var(--ink)} .mt-count .mt-modn{color:var(--accent2)}
+details.mt-sec{border:1px solid var(--line);border-radius:9px;margin:8px 0;background:var(--panel)}
+details.mt-sec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;font-size:12.5px;font-weight:700;color:var(--ink)}
+details.mt-sec>summary::-webkit-details-marker{display:none}
+details.mt-sec>summary::before{content:'';width:7px;height:7px;border-right:2px solid var(--faint);border-bottom:2px solid var(--faint);transform:rotate(-45deg);margin-right:4px;transition:transform .15s;flex-shrink:0}
+details.mt-sec[open]>summary::before{transform:rotate(45deg)}
+details.mt-sec>summary>span:first-child{flex:1}
+details.mt-sec[open]>summary{border-bottom:1px solid var(--line)}
+details.mt-sec>summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:9px}
+.mt-sc{font-size:11px;font-weight:500;color:var(--faint)}
+.mt-row{padding:10px 12px;border-bottom:1px solid var(--line2)}
+.mt-row:last-child{border-bottom:0}
+.mt-row.mod{box-shadow:inset 3px 0 0 var(--accent2);background:var(--warn-bg)}
+.mt-row.off .mtH,.mt-row.off .mtT,.mt-row.off .mtA{opacity:.5}
+.mt-rh{display:flex;align-items:flex-start;gap:8px}
+.mt-rh .mtOn{width:16px;height:16px;margin-top:6px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.mt-sl{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:22px;padding:0 5px;border-radius:6px;background:var(--panel3);color:var(--dim);font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0;margin-top:3px}
+.mt-ed textarea,.mt-ed .mtA{width:100%;box-sizing:border-box;background:var(--field-bg);border:1px solid var(--field-line);border-radius:7px;color:var(--ink);font:inherit;font-size:12.5px;line-height:1.5;padding:6px 9px;resize:vertical}
+.mt-ed .mtH{font-weight:700;flex:1;min-width:0;resize:none;overflow:hidden}
+.mt-ed .mtT{margin-top:7px;white-space:pre-wrap;min-height:38px;overflow:hidden}
+.mt-ed textarea:focus,.mt-ed .mtA:focus{outline:none;border-color:var(--accent);box-shadow:var(--focus-ring)}
+.mt-modtag{display:none;font-size:10.5px;font-weight:700;color:var(--accent2);background:var(--amber-soft);border-radius:9px;padding:1px 8px;margin-top:4px;white-space:nowrap}
+.mt-row.mod .mt-modtag{display:inline-block}
+.mt-row .mtReset{visibility:hidden;margin-top:1px}
+.mt-row.mod .mtReset{visibility:visible}
+.mt-acc{margin-top:7px}
+.mt-acc label,.modal-body .mt-acc label{display:block;font-size:11px;font-weight:600;color:var(--dim);margin:0 0 3px;text-transform:none;letter-spacing:0}
+.modal-body #mtEd .srch input{padding-left:32px}
+.mt-acc label span{font-weight:500;color:var(--faint)}
+.mt-ed .mtA{height:32px;padding:0 9px}
+.mt-nomatch{font-size:12px;color:var(--faint);padding:10px 2px}
+/* vendor portal */
+.mt-portal .mt-ptally{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--dim);margin:8px 0}
+.mt-ok{color:var(--green)} .mt-dev{color:var(--accent2)} .mt-nr{color:var(--faint)}
+.mt-pc{padding:12px 13px;border-bottom:1px solid var(--line2)}
+.mt-pc:last-child{border-bottom:0}
+.mt-pch{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--ink);margin-bottom:7px}
+.mt-pch b{white-space:pre-wrap}
+.mt-lbl{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--faint);margin-bottom:3px}
+.mt-client{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+.mt-ptext{font-size:12.5px;line-height:1.55;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+.mt-pacc{margin-top:8px;font-size:12px;color:var(--dim);white-space:pre-wrap}
+.mt-vresp{margin-top:8px;border:1px dashed var(--field-line);border-radius:8px;padding:9px 11px}
+.mt-vresp.accept{border-style:solid;border-color:var(--green)}
+.mt-vresp.deviation{border-style:solid;border-color:var(--warn-line);background:var(--warn-bg)}
+.mt-seg{display:inline-flex;gap:4px;flex-wrap:wrap;margin-bottom:7px}
+.mt-seg button{font:inherit;font-size:12px;font-weight:600;height:30px;padding:0 12px;border-radius:7px;border:1px solid var(--field-line);background:var(--panel);color:var(--ink);cursor:pointer}
+.mt-seg button.on[data-mts="accept"]{background:var(--green);border-color:var(--green);color:#fff}
+.mt-seg button.on[data-mts="deviation"]{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.mt-seg button.clr{border-color:transparent;background:none;color:var(--dim)}
+.mt-seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mt-vresp textarea{width:100%;box-sizing:border-box;background:var(--field-bg);border:1px solid var(--field-line);border-radius:7px;color:var(--ink);font:inherit;font-size:12.5px;padding:7px 9px;resize:vertical}
+.mt-vresp textarea:focus{outline:none;border-color:var(--accent);box-shadow:var(--focus-ring)}
+.mt-stale,.mt-stale-i{font-size:11px;color:var(--accent2);font-weight:600}
+.mt-stale{margin-bottom:6px}
+.mt-vnote{font-size:11.5px;color:var(--dim);margin-top:3px;white-space:pre-wrap}
+details.mt-allresp{border-top:1px solid var(--line)}
+details.mt-allresp>summary{cursor:pointer;padding:9px 14px;font-size:12px;font-weight:600;color:var(--accent)}
+@media(max-width:640px){
+  .mt-rh{flex-wrap:wrap}
+  .mt-ed .mtH{flex-basis:calc(100% - 60px)}
+  .mt-row .mtReset{visibility:visible}
+  .mt-bar{position:static}
+}
 .ui-confirm .modal-body p{font-size:13px;line-height:1.55;color:var(--ink);margin:0}
 </style>
 </head>
@@ -8893,6 +8973,307 @@ const COMMTERMS=[
   ['escalation','Escalation Clause','e.g. fixed / as per index'],
 ];
 
+/* ════════════ MAJOR TERMS & CONDITIONS ════════════
+   35 contract clauses from “Major Terms.xlsx” (sheet SUMMARY), carried on
+   every enquiry, editable per enquiry, answered clause-by-clause by vendors.
+
+   Data model (all inside DB, so it rides the existing server-synced blob):
+   • MT_V1 — master version 1, embedded verbatim from the workbook. The only
+     normalisation is CR LF → LF. Spelling, spacing, “N/A” and blanks are the
+     workbook's own and are kept as they are.
+   • DB.termsMaster = {current, versions:[…]} — later versions created by an
+     administrator's Excel import. Versions are never edited or deleted, so
+     an enquiry that points at one always resolves to the same text.
+   • q.majorTerms = {master, clauses:[{id, enabled, heading?, text?,
+     acceptance?}], reconciled:{}} — the enquiry stores its master version
+     and ONLY what differs from it; a field that equals the standard is not
+     stored. Re-importing the master therefore never changes an enquiry.
+   • v.mtResp[clauseId] = {s:'accept'|'deviation', note, sig, ts} — the
+     vendor's own answer. No entry means “no response”; opening or
+     submitting never creates one. sig fingerprints the wording answered. */
+const MT_V1={"v":1,"source":"Major Terms.xlsx · SUMMARY","title":"MAJOR TERMS & CONDITIONS FOR PART ROAD WORK AT AARANYA PROJECT","clauses":[{"id":"mt01","sl":1,"heading":"Time line","text":"Commencement Date : 10th Nov, 2026 \nCompletion Date : 31st Jan, 2027 ","acceptance":""},{"id":"mt02","sl":2,"heading":"Mobilization period","text":"4 to 5 days from the date of receipt of LOI /WO","acceptance":""},{"id":"mt03","sl":3,"heading":"Priority of Documents ","text":"i) Conditions of Contract \nii) Drawing\niii) BOQ\niv) Scope of Work \nv) Other correspondences if any\nIn case of any discrepancies and/or conflicts and/or ambiguities in the provisions made within  these documents forming part of  the Contract,  the Project Developer shall be the deciding authority with regard to interpreting the true intent of the provisions with these documents and issue instructions accordingly.","acceptance":""},{"id":"mt04","sl":4,"heading":"Material Free Issue","text":"N/A","acceptance":""},{"id":"mt05","sl":5,"heading":"Permissible Wastage ","text":"N/A","acceptance":""},{"id":"mt06","sl":6,"heading":"Recovery Mechanism\n(For free issue materials)","text":"N/A","acceptance":""},{"id":"mt07","sl":7,"heading":"Labour hutment ","text":"Client will provide room at site. ","acceptance":""},{"id":"mt08","sl":8,"heading":"Storage & site office","text":"Only space to be provided by client free basis within the premises. Temporary construction to be done by contractor at his own cost.","acceptance":""},{"id":"mt09","sl":9,"heading":"Water ","text":"Client will provide water source at a single point at ground level  on free basis and contractor shall make arrangement for distribution at his own cost both for construction and domestic usage .","acceptance":""},{"id":"mt10","sl":10,"heading":"Electricity","text":"Client will provide power source at a single point at ground level on free basis and contractor shall make arrangement  for distribution with  necessary isolator / LCB  etc. at his own cost. For cooking purpose electricity will not be allowed to consume , the contractor needs to arrange Gas for cooking purpose .","acceptance":""},{"id":"mt11","sl":11,"heading":"Defect Liability Period (DLP)","text":"1 year from the date of virtual completion of the work","acceptance":""},{"id":"mt12","sl":12,"heading":"Retention Money","text":"5% of each and every bill value will be hold towards retention money and will be released after successful completion of DLP","acceptance":""},{"id":"mt13","sl":13,"heading":"Extra item","text":"For any non-schedule item , rate will be finalized as per actual Cost of contractor supplied material  + Cost of labour + Cost of Plant & Machinery 10% towards OH & profit + PF & ESIC .\nActual tax as applicable. Contractor to submit supporting documents for the rates of material/labour claiming for the extra items","acceptance":""},{"id":"mt14","sl":14,"heading":"Mobilization Advance ","text":"NA ","acceptance":""},{"id":"mt15","sl":15,"heading":"Payment Terms ","text":"Against RA Bill: The contractcan submit R.A.Bill on monthly basis and client shall disburse amount within 15 days from the date of submission of bill by contractor along with all the relevant supporting documents (like joint measurements, reconciliation, test reports , TDS  etc. and any other relevant document as required by the client in acceptable format by the Contractor.\n\nAgainst Final Bill: The client shall disburse amount within 30  days from the date of submission of Final bill by contractor along with all the relevant supporting documents (like joint measurements, reconciliation, test reports , TDS etc. and any other relevant document as required by the client in acceptable format by the Contractor.\n\nStatutory deductions like Income Tax etc. as applicable shall be made from each & every interim payment at source as per laws enforced by Central/ State Government from time to time\n\nThe contractor should strictly abide by the following:-\n\na)Tax invoice should be issued as per Rule 46 of CGST Rules , 2017\nb) The contractor should furnish GST return on quarterly basis as per applicable norms.\nc) Project Developer  reserves the right to recover the tax amount if the GSTR-1 has not been filed within the due date or the tax has not been paid either by the way of input utilization of Input tax or through Cash Ledger\n","acceptance":""},{"id":"mt16","sl":16,"heading":"Liquidated Damage","text":"At the rate of 0.5% of the contract value shall be charged per week of delay of the project completion with the maximum limit of 5% of the contract value , if the delay is attibutable to the contractor . \nNo interim milestone for  liquidated damages shall be acceptable\n\n","acceptance":""},{"id":"mt17","sl":17,"heading":"Suspension ","text":"The Project Developer shall be at liberty to order a suspension of the work or parts thereof as it deems fit for any of the following reasons:\n\ni. On account of the Contractor’s continued non-compliance of the instruction of the Project Developer and or its nominees/representatives or\nii. Any default on the part of the Contractor, or\niii. For unsafe operations to the work or part thereof, or \niv. Fails to perform as per expectation of Project Developer \nv. Absence of Municipal/Statutory and all other required approvals in whole or in part (As per Project Developer scope is considered), or\nvi. Stoppage of work due to sudden change in Government Policy or requirements of clearance as applicable during the Project Duration/Works Contract Period.    \nIf the reason for suspension is due to reasons (i), (ii) and (iii), then the Contractor shall immediately comply with the instructions issued by the Project Developer and rectify the unsafe operation to the extent necessary.  \nIf the suspension is due to reason (i) above, the Project Developer shall have the right to also suspend payment under the Works Contract for such a time until the default has been rectified. \nNo extension of time shall be granted for suspension of work due to reasons (i) (ii),(iii) and (iv).\nIf the suspension is ordered for reasons (v)/ (vi) above, the Contractor shall be entitled to an extension of time equal to the period of such suspension as the case may be decided & approved by the Project Developer.\nNo compensation and or any idle charges shall be payable to the Contractor for the delay caused to the Works Contract completion time due to suspension of work ordered under above reasons, but only time extension will be granted to the contractor in case of reasons (v) & (vi) mentioned above , if it goes beyond 3 months \nAfter the Project Developer instructs the Contractor to proceed after suspension, the Contractor and the Project Developer shall make a joint inspection of the works affected by the suspension. The Contractor shall then make good any deterioration or defect or loss of works or plants or materials, which has occurred due to such suspension, as per the instructions of the Project Developer\n","acceptance":""},{"id":"mt18","sl":18,"heading":"Foreclosure","text":"At any time after acceptance of the Contractor’s Tender Offer as the Contract Sum (with due adjustments during the negotiation stage), or during the execution stage , the Project Developer may decide to abandon or reduce the scope of works for any reasons whatsoever and hence may require that the whole or any part of the works are not carried out. In such case, the Project Developer shall inform the Contractor in writing to that effect and the Contractor shall have no claim to any payment or compensation or whatsoever on account of any profit or advantage which he might have derived from the execution of the works in full.\nThe Contractor shall be paid in full for the work executed at the site prior to the foreclosure at the Contract rates and a reasonable amount, as certified by the Project Developer, for materials delivered to site under the Works Contract, if any. No further compensation for loss of profit, loss of business opportunity etc. shall be payable by the Project Developer to the Contractor. However, that the Project Developer shall have in all such cases, the right to purchase these materials at their purchase price or at current local rates whichever may be less.\n","acceptance":""},{"id":"mt19","sl":19,"heading":"Termination by Employer ","text":"In case the Contractor \n(i) abandons the Works, or  \n(ii) dies or becomes insane or is imprisoned, or\n(iii) is adjudged bankrupt or insolvent, or \n(iv) makes a general assignment for the benefit of his creditors, or \n(v) files a petition to take advantage of any debtor’s act or to reorganize under bankruptcy or similar laws, or \n(vi) persistently fails to supply sufficiently skilled personnel and /or workmen or suitable materials or equipment, or \n(vii) performance of the Work is unnecessarily or unreasonably delayed or\n(viii)  consistently fails to adhere to the requirements of quality standards, project quality plan or safety requirements or any other provisions of this contract or\n(ix) persistently fails to make prompt payments to sub-contractors or for labour, materials or equipment, or \n(x) disregards laws, ordinances, rules, regulations or orders of any public body having jurisdiction, or \n(xi) disregards the authority of the Project Developer or neglects to execute the Work in accordance with the contract documents including requirements of the progress schedule, or \n(xii) fails to promptly comply with the requirements of any amendment order, or \n(xiii) assigns this contract agreement otherwise than herein provided, or  \n(xiv) fails to comply with legal obligations under the contract in spite of reminder from Project Developer\n(xv) Charged by the authorities of being involved any anti-national activities\n(xvi) Indulging in corrupt practices\nThen the Project Developer may, without prejudice to any of their/ it’s right or remedy and by means of a written notice to the Contractor and his surety, instruct the Contractor to discontinue all Work of the Contract. The Contractor shall be entitled for payment for the certified Work done at the Contract rates, the extra items after deducting all advances and monies due from the Contractor, punitive damages, taxes, duties, levies, royalties etc. No compensation on account of loss of profit, opportunity costs, overheads etc. shall be paid.\n","acceptance":""},{"id":"mt20","sl":20,"heading":"Extension of Time ","text":"If the contractor shall desire an extension of time for delay in completion of work or section thereof due to any of the following reasons:\n\na. Force majeure (Acts of God);\nb. Extra or additional work of any kind.\nc. The Contractor not having received in due time necessary instructions, details or levels for which the Contractor has specifically applied in writing provided such application is made at a reasonable time and with reasonable period for the instructions, details, etc. to be issued;\nd. Delay on the part of other Contractors in respect of the Project;\ne. The carrying out by the authorities or statutory undertaker of work in pursuance of its statutory obligations, or the failure to do so;\nf. Deferment by the Project Developer in giving possession of the site/or any part thereof to the Contractor;\ng. Non-availability of materials/stores/tools/plants to be supplied by the Project Developer;\nThe Contractor shall apply in writing to the Project Developer days of hindrance on account of which he desires such extension as aforesaid. This application shall be accompanied by sufficient documentation giving reasons for seeking such extension. No application for such extension shall be entertained if it is not received in sufficient time to allow the Project Developer to consider it. However, the Project Developer will grant such extension of time for completion of the Contract as it may think proper and sufficient in consequence of such delay. The contractor shall have no claim for idling of resources for this extended period.\n              \nThe Project Developer shall have the right to order discontinuance of the work, in whole or in part, for such time as may be necessary, should the condition of the weather or of flood or other contingencies make it desirable to do so in order that the works shall be well and properly executed. The contractor shall have no claim for this.\n","acceptance":""},{"id":"mt21","sl":21,"heading":"PF & ESIC compliance ","text":"To be fulfilled by the contractor . Challans to be submitted along with bills","acceptance":""},{"id":"mt22","sl":22,"heading":"Labour License ","text":"N/A","acceptance":""},{"id":"mt23","sl":23,"heading":"Safety compliance ","text":"The contractor shall comply all kind of EHS , local & authority norms in relation with this contract . PPE for workmen to be provided by contractor.","acceptance":""},{"id":"mt24","sl":24,"heading":"Material Security","text":"Security of material (eiter client supplied or contarctor's own material) will be in contractor's scope","acceptance":""},{"id":"mt25","sl":25,"heading":"Layout","text":"Will be in the scope of contractor .  Client's engineer will check the same .","acceptance":""},{"id":"mt26","sl":26,"heading":"Escalation","text":"No escalation till completion of work ","acceptance":""},{"id":"mt27","sl":27,"heading":"Quantity variation","text":"Contractor shall have no extra claim for any increase/decrease in the quantities of BOQ. The client shall have the right to remove/reduce/increase any/certain item/s or quantities up to any extent from the scope of the contractor during progression of the work. The contractor shall not have any extra claim for the decrease/increase/removal of the scope of the work","acceptance":""},{"id":"mt28","sl":28,"heading":"List of Make ","text":"N/A","acceptance":""},{"id":"mt29","sl":29,"heading":"Labour Cess","text":"The contract amount is exclusive of Labour Cess as the same will be under the scope of Client / Project Developer .","acceptance":""},{"id":"mt30","sl":30,"heading":"Insurance ","text":"CAR policy will be taken by Client for it's own property and machienries . The Contractor must abide by statutory compliance with regards to Workmen’s Compensation Policy , Contarctor's owned/hired plant , machineries & vehicles, Labour License etc. \nIn case the Contractor fails to obtain the WCP, the Client shall arrange the same on behalf of the Contractor, and the applicable WCP premium/deduction shall be recovered from the Contractor's bills as per the Company's prevailing policy.","acceptance":""},{"id":"mt31","sl":31,"heading":"General submission by the contarctor ","text":"The contractor has to submit Organization chart and Site organogram , Plant & Machineries list , construction schedule , construction methodology and sequence  to the client  for approval before execution within 7 days from the date of receipt of LOI. ","acceptance":""},{"id":"mt32","sl":32,"heading":"Contarctor's organogram ","text":"The Contractor will provide a full time duly qualified and experienced Engineer/Supervisor duly authorised, to take all techno-commercial decisions at site.","acceptance":""},{"id":"mt33","sl":33,"heading":"Plant & Machineries / Tools & Tackels ","text":"The contractor shall deploy all the plant & machineries/equipments  in absolutely good condition. All equipment & machineries age will be within 5 years . If any equipments or machineries are more than 5 years then it is required to take approval from client and If those are not up to standard in the opinion of the client, the contractor will replace the same immediately without any additional cost. Health certificate and calibration certificate of plants & equipments to be submitted by the contractor for approval of client .\n3rd party testing of plant & machineries as per direction needs  to be done by the contractor at it;s own cost .","acceptance":""},{"id":"mt34","sl":34,"heading":"Non- execution of work ","text":"If the contractor does not execute any work as per contarct BOQ , then the client reserves the right to get it executed by othher agency and the differential cost will be adjusted from contarctor's bill or any due payment .","acceptance":""},{"id":"mt35","sl":35,"heading":"Arbitration","text":"The arbitral tribunal shall be constituted and consist of a sole arbitrator mutually agreed between the Parties. The arbitration shall take place in Kolkata , India in accordance with the provisions of the Arbitration and Conciliation Act, 1996.","acceptance":""}]};
+const MT_SECTIONS=[['A','General & Site Conditions',1,10],['B','Contract, Payment & Time',11,20],['C','Statutory, Safety & Site Execution',21,30],['D','Contractor Obligations & Dispute Resolution',31,35]];
+/* legacy commercial-term fields whose meaning matches a major clause */
+const MT_LEGACY={paymentTerms:'mt15',warranty:'mt11',escalation:'mt26'};
+function mtVersion(n){n=+n||1;if(n===1)return MT_V1;const s=DB.termsMaster;return (s&&Array.isArray(s.versions)&&s.versions.find(x=>x.v===n))||null;}
+function mtCurrent(){const s=DB.termsMaster;return mtVersion((s&&s.current)||1)||MT_V1;}
+function mtNew(){const m=mtCurrent();return {master:m.v,clauses:m.clauses.map(c=>({id:c.id,enabled:true})),reconciled:{}};}
+function mtSig(heading,text){const s=String(heading||'')+'\u0001'+String(text||'');let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return h.toString(36);}
+/* resolved clause list for an enquiry (sorted by Sl No), or null if it has none */
+function mtResolve(q){
+  if(q&&Array.isArray(q.mtResolved))return q.mtResolved;          // remote portal: delivered pre-resolved
+  const t=q&&q.majorTerms;if(!t||!Array.isArray(t.clauses))return null;
+  const m=mtVersion(t.master)||MT_V1;const by={};m.clauses.forEach(c=>{by[c.id]=c;});
+  return t.clauses.map(c=>{
+    const s=by[c.id]||{sl:c.sl||999,heading:'',text:'',acceptance:''};
+    const r={id:c.id,sl:s.sl!=null?s.sl:c.sl,enabled:c.enabled!==false,
+      heading:c.heading!=null?c.heading:s.heading,text:c.text!=null?c.text:s.text,acceptance:c.acceptance!=null?c.acceptance:s.acceptance,
+      std:{heading:s.heading,text:s.text,acceptance:s.acceptance}};
+    r.modified=r.heading!==s.heading||r.text!==s.text||r.acceptance!==s.acceptance;
+    r.sig=mtSig(r.heading,r.text);
+    return r;
+  }).sort((a,b)=>a.sl-b.sl);
+}
+function mtEnabled(q){return (mtResolve(q)||[]).filter(c=>c.enabled);}
+function mtSecOf(sl){const s=MT_SECTIONS.find(x=>sl>=x[2]&&sl<=x[3]);return s||['O','Other clauses',0,0];}
+/* store a field only when it differs from the standard */
+function mtSetField(c,f,val,std){if(val===std)delete c[f];else c[f]=val;}
+/* vendor response tallies over the enabled clauses */
+function mtTally(q,v){const en=mtEnabled(q);const r=(v&&v.mtResp)||{};let a=0,d=0,n=0,stale=0;en.forEach(c=>{const x=r[c.id];if(!x||!x.s)n++;else{if(x.s==='accept')a++;else d++;if(x.sig&&x.sig!==c.sig)stale++;}});return {total:en.length,accept:a,deviation:d,none:n,stale};}
+function mtAsk(o){return (typeof BUI!=='undefined'&&BUI.confirm)?BUI.confirm(o):Promise.resolve(confirm((o.title||'')+'\n\n'+(o.body||'')));}
+
+/* ── editor (inside Create / Edit Enquiry) ── */
+let mtUI={q:'',open:{A:true}};
+let mtStd={};          // clauseId → standard {heading,text,acceptance}, for the open editor
+function mtEditorHtml(q){
+  const t=q.majorTerms;
+  const head=(extra)=>`<h3 style="font-size:13px;margin:22px 0 6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">Major Terms &amp; Conditions ${extra||''}</h3>`;
+  if(!t)return `<section class="mt-ed" id="mtEd">${head()}<div class="mt-empty">This enquiry was saved before Major Terms &amp; Conditions were available, so it has none — nothing is added to an existing enquiry automatically.<br><button type="button" class="btn" data-mt="add" style="margin-top:10px">＋ Add the ${mtCurrent().clauses.length} standard clauses</button></div></section>`;
+  const rs=mtResolve(q);mtStd={};rs.forEach(c=>{mtStd[c.id]=c.std;});
+  const m=mtVersion(t.master)||MT_V1, cur=mtCurrent();
+  const groups={};rs.forEach(c=>{const s=mtSecOf(c.sl);(groups[s[0]]=groups[s[0]]||{s,cs:[]}).cs.push(c);});
+  const order=MT_SECTIONS.map(s=>s[0]).concat(['O']).filter(k=>groups[k]);
+  return `<section class="mt-ed" id="mtEd">
+    ${head(`<span style="font-size:10px;color:var(--faint);font-weight:500">Standard terms v${m.v}${m.source?' · '+esc(m.source):''}. Edit for this enquiry only — the master is not changed.</span>`)}
+    ${cur.v!==m.v?`<div class="mt-note">A newer master (v${cur.v}) exists. This enquiry keeps v${m.v} until you choose otherwise.<button type="button" class="btn sm" data-mt="upgrade">Switch to v${cur.v}…</button></div>`:''}
+    <div class="mt-bar">
+      <div class="srch" style="flex:1 1 220px;min-width:180px"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input id="mtSearch" type="search" placeholder="Search clauses by name or keyword…" aria-label="Search clauses" value="${esc(mtUI.q)}" autocomplete="off"></div>
+      <span class="mt-count" id="mtCount" aria-live="polite"></span>
+      <button type="button" class="btn sm ghost" data-mt="expand">Expand all</button>
+      <button type="button" class="btn sm ghost" data-mt="collapse">Collapse all</button>
+      <button type="button" class="btn sm" data-mt="all">Include all</button>
+      <button type="button" class="btn sm" data-mt="none">Exclude all</button>
+      <button type="button" class="btn sm" data-mt="resetall">Restore all to standard…</button>
+    </div>
+    ${order.map(k=>{const g=groups[k];return `<details class="mt-sec" data-sec="${k}"${mtUI.open[k]?' open':''}><summary><span>${k==='O'?'':'Section '+k+' — '}${esc(g.s[1])}</span><span class="mt-sc" data-sc="${k}"></span></summary>${g.cs.map(mtRowHtml).join('')}</details>`;}).join('')}
+    <div class="mt-nomatch" id="mtNoMatch" hidden>No clause matches “<span></span>”.</div>
+  </section>`;
+}
+function mtRowHtml(c){
+  return `<div class="mt-row${c.enabled?'':' off'}${c.modified?' mod':''}" data-id="${c.id}">
+    <div class="mt-rh">
+      <input type="checkbox" class="mtOn" ${c.enabled?'checked':''} aria-label="Include clause ${c.sl} in this enquiry" title="Include this clause in the enquiry">
+      <span class="mt-sl">${c.sl}</span>
+      <textarea class="mtH mt-auto" rows="1" aria-label="Clause ${c.sl} heading">${esc(c.heading)}</textarea>
+      <span class="mt-modtag">Modified</span>
+      <button type="button" class="btn sm ghost mtReset" title="Restore the standard heading, terms and acceptance note for this clause">Reset to standard</button>
+    </div>
+    <textarea class="mtT mt-auto" rows="2" aria-label="Clause ${c.sl} — Primarc standard terms">${esc(c.text)}</textarea>
+    <div class="mt-acc"><label>Contractor acceptance <span>optional — status, comments or agreed deviations</span></label><input class="mtA" value="${esc(c.acceptance)}" placeholder="Blank = not yet agreed (blank is never read as acceptance)" aria-label="Clause ${c.sl} contractor acceptance"></div>
+  </div>`;
+}
+/* read the clause editor back into edit.majorTerms (called by _collect) */
+function mtCollect(){
+  const t=edit&&edit.majorTerms;const root=$('#mtEd');if(!t||!root)return;
+  root.querySelectorAll('details.mt-sec').forEach(d=>{mtUI.open[d.dataset.sec]=d.open;});
+  const s=$('#mtSearch');if(s)mtUI.q=s.value;
+  const byId={};t.clauses.forEach(c=>{byId[c.id]=c;});
+  root.querySelectorAll('.mt-row').forEach(row=>{
+    const c=byId[row.dataset.id];const std=mtStd[row.dataset.id];if(!c||!std)return;
+    c.enabled=row.querySelector('.mtOn').checked;
+    mtSetField(c,'heading',row.querySelector('.mtH').value,std.heading);
+    mtSetField(c,'text',row.querySelector('.mtT').value,std.text);
+    mtSetField(c,'acceptance',row.querySelector('.mtA').value,std.acceptance);
+  });
+}
+function mtAutosize(el){if(!el||!el.offsetParent)return;el.style.height='auto';el.style.height=(el.scrollHeight+2)+'px';}
+function mtRefresh(){
+  const root=$('#mtEd');if(!root)return;
+  const rows=[...root.querySelectorAll('.mt-row')];
+  rows.forEach(r=>{const std=mtStd[r.dataset.id];if(!std)return;
+    const mod=r.querySelector('.mtH').value!==std.heading||r.querySelector('.mtT').value!==std.text||r.querySelector('.mtA').value!==std.acceptance;
+    r.classList.toggle('mod',mod);r.classList.toggle('off',!r.querySelector('.mtOn').checked);});
+  const on=rows.filter(r=>!r.classList.contains('off')).length, mod=rows.filter(r=>r.classList.contains('mod')).length;
+  const cnt=$('#mtCount');if(cnt)cnt.innerHTML=`<b>${on}</b> of ${rows.length} included${mod?` · <b class="mt-modn">${mod}</b> modified`:''}`;
+  root.querySelectorAll('details.mt-sec').forEach(d=>{const rr=[...d.querySelectorAll('.mt-row')];const sc=d.querySelector('.mt-sc');if(sc)sc.textContent=rr.filter(r=>!r.classList.contains('off')).length+'/'+rr.length+' included'+(rr.some(r=>r.classList.contains('mod'))?' · modified':'');});
+}
+function mtFilter(){
+  const root=$('#mtEd');if(!root)return;const q=(($('#mtSearch')||{}).value||'').trim().toLowerCase();mtUI.q=q;
+  let hits=0;
+  root.querySelectorAll('details.mt-sec').forEach(d=>{let n=0;
+    d.querySelectorAll('.mt-row').forEach(r=>{const txt=(r.querySelector('.mt-sl').textContent+' '+r.querySelector('.mtH').value+' '+r.querySelector('.mtT').value).toLowerCase();const ok=!q||txt.includes(q);r.hidden=!ok;if(ok)n++;});
+    d.hidden=!n;if(q&&n)d.open=true;hits+=n;});
+  const nm=$('#mtNoMatch');if(nm){nm.hidden=!(q&&!hits);const sp=nm.querySelector('span');if(sp)sp.textContent=q;}
+  root.querySelectorAll('details.mt-sec[open] .mt-auto').forEach(mtAutosize);
+}
+function mtBindEditor(ov){
+  if(ov.dataset.mtBound)return;ov.dataset.mtBound='1';
+  ov.addEventListener('input',e=>{
+    if(e.target.id==='mtSearch'){mtFilter();return;}
+    if(e.target.closest('#mtEd')&&e.target.matches('.mtH,.mtT,.mtA')){if(e.target.classList.contains('mt-auto'))mtAutosize(e.target);mtRefresh();}
+  });
+  ov.addEventListener('change',e=>{if(e.target.classList.contains('mtOn'))mtRefresh();});
+  ov.addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.classList.contains('mt-sec')){mtUI.open[d.dataset.sec]=d.open;if(d.open)d.querySelectorAll('.mt-auto').forEach(mtAutosize);}},true);
+  ov.addEventListener('click',e=>{
+    const rb=e.target.closest('.mtReset');
+    if(rb){const row=rb.closest('.mt-row');const std=mtStd[row.dataset.id];if(!std)return;row.querySelector('.mtH').value=std.heading;row.querySelector('.mtT').value=std.text;row.querySelector('.mtA').value=std.acceptance;row.querySelectorAll('.mt-auto').forEach(mtAutosize);mtRefresh();showToast('Clause '+row.querySelector('.mt-sl').textContent+' restored to the standard terms');return;}
+    const rc=e.target.closest('[data-mtr]');
+    if(rc){mtReconcile(rc.dataset.mtr,rc.dataset.k);return;}
+    const b=e.target.closest('[data-mt]');if(!b||!b.closest('#mtEd'))return;
+    const act=b.dataset.mt, root=$('#mtEd');
+    if(act==='add'){_collect();edit.majorTerms=mtNew();mtUI.open={A:true};renderEditor(ov);showToast('Standard clauses added — review them, then save the enquiry');return;}
+    if(act==='expand'||act==='collapse'){root.querySelectorAll('details.mt-sec').forEach(d=>{if(!d.hidden)d.open=act==='expand';});return;}
+    if(act==='all'||act==='none'){root.querySelectorAll('.mt-row:not([hidden]) .mtOn').forEach(c=>{c.checked=act==='all';});mtRefresh();return;}
+    if(act==='resetall'){mtAsk({title:'Restore all clauses to standard?',body:'Every heading, clause text and acceptance note in this enquiry goes back to the standard v'+edit.majorTerms.master+' wording. Included / excluded choices are kept. Nothing is saved until you save the enquiry.',okText:'Restore all'}).then(ok=>{if(!ok)return;root.querySelectorAll('.mt-row').forEach(row=>{const std=mtStd[row.dataset.id];if(!std)return;row.querySelector('.mtH').value=std.heading;row.querySelector('.mtT').value=std.text;row.querySelector('.mtA').value=std.acceptance;});root.querySelectorAll('.mt-auto').forEach(mtAutosize);mtRefresh();});return;}
+    if(act==='upgrade'){const cur=mtCurrent();mtAsk({title:'Switch to standard terms v'+cur.v+'?',body:'Clauses you have not edited take the v'+cur.v+' wording; clauses you edited keep your text. Clauses new in v'+cur.v+' are added (included). Nothing is saved until you save the enquiry.',okText:'Switch'}).then(ok=>{if(!ok)return;_collect();const t=edit.majorTerms;const old={};t.clauses.forEach(c=>{old[c.id]=c;});
+      const next=cur.clauses.map(c=>Object.assign({id:c.id,enabled:true},old[c.id]||{}));
+      t.clauses.forEach(c=>{if(!cur.clauses.some(x=>x.id===c.id)&&(c.heading!=null||c.text!=null))next.push(c);});   // keep removed clauses only if edited here
+      t.clauses=next;t.master=cur.v;renderEditor(ov);});return;}
+  });
+}
+function mtAfterRender(){mtRefresh();mtFilter();}
+
+/* ── legacy commercial-term fields that overlap a major clause ── */
+function mtReconHtml(q){
+  const t=q.majorTerms;if(!t)return '';const rs=mtResolve(q)||[];const by={};rs.forEach(c=>{by[c.id]=c;});
+  const tt=q.terms||{};const rows=[];
+  Object.keys(MT_LEGACY).forEach(k=>{const c=by[MT_LEGACY[k]];const val=(tt[k]||'').trim();
+    if(!c||!c.enabled||!val||(t.reconciled||{})[k]||val===c.text.trim())return;
+    const lbl=(COMMTERMS.find(x=>x[0]===k)||[])[1]||k;
+    rows.push(`<div class="mt-recon-row"><div><b>${esc(lbl)}</b> field says “${esc(val)}” — Major Clause ${c.sl} (${esc(c.heading.trim())}) has different wording.</div>
+      <div class="mt-recon-acts"><button type="button" class="btn sm" data-mtr="clear" data-k="${k}">Use the clause · clear the field</button><button type="button" class="btn sm" data-mtr="append" data-k="${k}">Add field text to the clause</button><button type="button" class="btn sm ghost" data-mtr="keep" data-k="${k}">Keep both · clause governs</button></div></div>`);
+  });
+  const mapped=Object.keys(MT_LEGACY).map(k=>{const c=by[MT_LEGACY[k]];return c&&c.enabled?((COMMTERMS.find(x=>x[0]===k)||[])[1]+' → Clause '+c.sl):'';}).filter(Boolean);
+  return (mapped.length?`<div class="mt-recon-info">Overlapping fields: ${esc(mapped.join(' · '))}. Where both are filled, the major-clause wording is the contractual text shown to vendors.</div>`:'')
+    +(rows.length?`<div class="mt-recon" role="group" aria-label="Differences to reconcile">${rows.join('')}</div>`:'');
+}
+function mtReconcile(act,k){
+  _collect();const t=edit.majorTerms;if(!t)return;t.reconciled=t.reconciled||{};
+  const id=MT_LEGACY[k];const c=t.clauses.find(x=>x.id===id);const val=((edit.terms||{})[k]||'').trim();
+  if(act==='clear'){edit.terms[k]='';}
+  else if(act==='keep'){t.reconciled[k]=true;}
+  else if(act==='append'&&c){const std=mtStd[id]||{};const cur=c.text!=null?c.text:std.text;mtSetField(c,'text',(cur?cur.replace(/\s+$/,'')+'\n\n':'')+val,std.text);t.reconciled[k]=true;}
+  renderEditor($('#qmEditorOv'));
+}
+
+/* ── vendor portal: read-only client terms + the vendor's own response ── */
+function mtPortalHtml(q,v,editable){
+  const en=mtEnabled(q);if(!en.length)return '';
+  v.mtResp=v.mtResp||{};const tl=mtTally(q,v);
+  const groups={};en.forEach(c=>{const s=mtSecOf(c.sl);(groups[s[0]]=groups[s[0]]||{s,cs:[]}).cs.push(c);});
+  const clause=c=>{const r=v.mtResp[c.id]||{};const stale=r.s&&r.sig&&r.sig!==c.sig;
+    return `<div class="mt-pc" data-id="${c.id}">
+      <div class="mt-pch"><span class="mt-sl">${c.sl}</span><b>${esc(c.heading)}</b></div>
+      <div class="mt-client"><span class="mt-lbl">Client terms (fixed)</span><div class="mt-ptext">${esc(c.text)}</div>${(c.acceptance||'').trim()?`<div class="mt-pacc"><span class="mt-lbl">Client note on acceptance</span>${esc(c.acceptance)}</div>`:''}</div>
+      <div class="mt-vresp ${r.s||'none'}"><span class="mt-lbl">Your response</span>${stale?'<div class="mt-stale">The clause wording changed after you answered — please review.</div>':''}
+        ${editable?`<div class="mt-seg" role="group" aria-label="Response to clause ${c.sl}"><button type="button" data-mts="accept" class="${r.s==='accept'?'on':''}" aria-pressed="${r.s==='accept'}">Accept</button><button type="button" data-mts="deviation" class="${r.s==='deviation'?'on':''}" aria-pressed="${r.s==='deviation'}">Propose deviation</button>${r.s?'<button type="button" data-mts="" class="clr">Clear</button>':''}</div>
+          <textarea class="mtNote" rows="2" placeholder="${r.s==='deviation'?'Describe the deviation you propose (required)':'Comments (optional)'}" aria-label="Comments on clause ${c.sl}">${esc(r.note||'')}</textarea>`
+        :`<div>${r.s==='accept'?'<b class="mt-ok">Accepted</b>':r.s==='deviation'?'<b class="mt-dev">Deviation proposed</b>':'<span class="mt-nr">No response</span>'}${r.note?`<div class="mt-vnote">${esc(r.note)}</div>`:''}</div>`}
+      </div></div>`;};
+  return `<div class="vp-card mt-portal" id="mtPortal"><h3>Major Terms &amp; Conditions</h3>
+    <div class="hint">These terms are set by ${esc(q.client||'the client')} and cannot be edited here. Record against each clause whether you accept it or propose a deviation. A clause you leave unanswered is recorded as <b>no response</b> — it is not treated as accepted.</div>
+    <div class="mt-ptally" id="mtTally">${mtTallyHtml(tl)}</div>
+    ${editable&&tl.none?'<button type="button" class="btn sm" data-mts-all="1" style="margin:6px 0 4px">Accept all unanswered clauses…</button>':''}
+    ${MT_SECTIONS.map(s=>s[0]).concat(['O']).filter(k=>groups[k]).map(k=>`<details class="mt-sec" open><summary><span>${k==='O'?'':'Section '+k+' — '}${esc(groups[k].s[1])}</span></summary>${groups[k].cs.map(clause).join('')}</details>`).join('')}
+  </div>`;
+}
+function mtTallyHtml(t){return `<span><b>${t.total}</b> clauses</span><span class="mt-ok"><b>${t.accept}</b> accepted</span><span class="mt-dev"><b>${t.deviation}</b> deviation${t.deviation===1?'':'s'}</span><span class="mt-nr"><b>${t.none}</b> no response</span>`;}
+function mtBindPortal(q,v){
+  const root=$('#mtPortal');if(!root)return;
+  const byId={};mtEnabled(q).forEach(c=>{byId[c.id]=c;});
+  const set=(id,patch)=>{v.mtResp=v.mtResp||{};const c=byId[id];const r=Object.assign({},v.mtResp[id]||{},patch,{sig:c?c.sig:'',ts:now()});if(!r.s&&!(r.note||'').trim())delete v.mtResp[id];else v.mtResp[id]=r;const tl=$('#mtTally');if(tl)tl.innerHTML=mtTallyHtml(mtTally(q,v));debSave(q,v);};
+  root.addEventListener('click',e=>{
+    const all=e.target.closest('[data-mts-all]');
+    if(all){mtAsk({title:'Accept all unanswered clauses?',body:'Every clause you have not answered yet is recorded as accepted. Clauses you already answered are not changed.',okText:'Accept unanswered'}).then(ok=>{if(!ok)return;Object.keys(byId).forEach(id=>{if(!(v.mtResp[id]&&v.mtResp[id].s))set(id,{s:'accept'});});savePortal(q,v,true);renderForm($('#qmPortal'),q,v,portalCtx&&portalCtx.admin);});return;}
+    const b=e.target.closest('[data-mts]');if(!b)return;const pc=b.closest('.mt-pc');
+    set(pc.dataset.id,{s:b.dataset.mts});
+    const r=v.mtResp[pc.dataset.id]||{};
+    pc.querySelectorAll('[data-mts]').forEach(x=>{const on=x.dataset.mts&&x.dataset.mts===r.s;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on?'true':'false');});
+    const vr=pc.querySelector('.mt-vresp');vr.className='mt-vresp '+(r.s||'none');
+    const seg=pc.querySelector('.mt-seg');let clr=seg.querySelector('.clr');if(r.s&&!clr){seg.insertAdjacentHTML('beforeend','<button type="button" data-mts="" class="clr">Clear</button>');}else if(!r.s&&clr)clr.remove();
+    const ta=pc.querySelector('.mtNote');ta.placeholder=r.s==='deviation'?'Describe the deviation you propose (required)':'Comments (optional)';if(r.s==='deviation')ta.focus();
+  });
+  root.addEventListener('input',e=>{if(!e.target.classList.contains('mtNote'))return;const pc=e.target.closest('.mt-pc');set(pc.dataset.id,{note:e.target.value});});
+}
+/* deviations need a description before submitting */
+function mtSubmitCheck(q,v){const bad=mtEnabled(q).filter(c=>{const r=(v.mtResp||{})[c.id];return r&&r.s==='deviation'&&!(r.note||'').trim();});return bad.map(c=>c.sl);}
+/* what each revision keeps: the clause configuration answered + the answers */
+function mtRevisionRecord(q,v){return q.majorTerms?{majorTerms:JSON.parse(JSON.stringify(q.majorTerms)),mtResp:JSON.parse(JSON.stringify(v.mtResp||{}))}:(Array.isArray(q.mtResolved)?{mtResolved:JSON.parse(JSON.stringify(q.mtResolved)),mtResp:JSON.parse(JSON.stringify(v.mtResp||{}))}:{});}
+
+/* ── staff: vendor responses side by side (Comparative Statement) ── */
+function mtResponsesTable(q){
+  const en=mtEnabled(q);if(!en.length||!q.vendors.length)return '';
+  const cell=(v,c)=>{const r=(v.mtResp||{})[c.id];if(!r||!r.s)return '<span class="mt-nr">No response</span>';const stale=r.sig&&r.sig!==c.sig;return (r.s==='accept'?'<b class="mt-ok">Accepted</b>':'<b class="mt-dev">Deviation</b>')+(stale?' <span class="mt-stale-i" title="Answered against earlier wording">earlier wording</span>':'')+(r.note?`<div class="mt-vnote">${esc(r.note)}</div>`:'');};
+  const flagged=en.filter(c=>q.vendors.some(v=>{const r=(v.mtResp||{})[c.id];return r&&(r.s==='deviation'||(r.note||'').trim());}));
+  const row=c=>`<tr style="cursor:default"><td class="mono" style="white-space:nowrap">${c.sl}</td><td style="font-weight:600;color:var(--ink);min-width:180px">${esc(c.heading)}</td>${q.vendors.map(v=>`<td style="font-size:12px;min-width:150px">${cell(v,c)}</td>`).join('')}</tr>`;
+  const head=`<thead><tr><th>#</th><th>Clause</th>${q.vendors.map(v=>`<th>${esc(v.name)}</th>`).join('')}</tr></thead>`;
+  return `<div class="qm-sec-card"><div class="qm-sec-head"><h3 class="qm-sec-title"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>Major Terms — Vendor Responses</h3></div>
+    <div class="qm-scrollx" style="border:none;border-radius:0"><table class="qm-tbl">${head}<tbody>
+      <tr style="cursor:default"><td></td><td style="font-weight:600;color:var(--dim)">Summary · ${en.length} clauses</td>${q.vendors.map(v=>{const t=mtTally(q,v);return `<td style="font-size:12px"><span class="mt-ok">${t.accept} accepted</span> · <span class="mt-dev">${t.deviation} deviation${t.deviation===1?'':'s'}</span> · <span class="mt-nr">${t.none} no response</span>${t.stale?`<div class="mt-stale-i">${t.stale} answered against earlier wording</div>`:''}</td>`;}).join('')}</tr>
+      ${flagged.length?flagged.map(row).join(''):`<tr style="cursor:default"><td></td><td colspan="${q.vendors.length+1}" style="color:var(--faint);font-size:12px">No deviations or comments recorded yet.</td></tr>`}
+    </tbody></table></div>
+    <details class="mt-allresp"><summary>All ${en.length} clauses</summary><div class="qm-scrollx" style="border:none;border-radius:0"><table class="qm-tbl">${head}<tbody>${en.map(row).join('')}</tbody></table></div></details></div>`;
+}
+
+/* ── PDF: full applicable clause text (+ the vendor's response) ── */
+function mtPdfSection(doc,q,v,startY,opts){
+  const en=mtEnabled(q);if(!en.length)return startY;
+  const H=doc.internal.pageSize.getHeight(), pw=doc.internal.pageSize.getWidth(), M=opts.M;
+  let y=startY+8;if(y>H-40){doc.addPage();y=opts.top;}
+  doc.setFillColor(...opts.ACC);doc.rect(M,y-3.4,2.4,5,'F');
+  doc.setFontSize(10.5);doc.setTextColor(...opts.INK);doc.setFont('helvetica','bold');doc.text('MAJOR TERMS & CONDITIONS',M+5,y);
+  doc.setFontSize(7.6);doc.setFont('helvetica','normal');doc.setTextColor(...opts.SUB);
+  doc.text('Client terms are fixed. Vendor responses are the vendor\'s own; a blank response means no response, not acceptance.',M+5,y+4.6);
+  const resp=c=>{if(!v)return '';const r=(v.mtResp||{})[c.id];if(!r||!r.s)return 'No response';return (r.s==='accept'?'Accepted':'Deviation proposed')+(r.note?'\n'+r.note:'');};
+  const body=[];
+  en.forEach(c=>{const s=mtSecOf(c.sl);
+    if(!body.length||body[body.length-1]._sec!==s[0]){const sr=[{content:(s[0]==='O'?'':'Section '+s[0]+' — ')+s[1],colSpan:v?4:3,styles:{fontStyle:'bold',fillColor:[238,242,248],textColor:opts.INK}}];sr._sec=s[0];body.push(sr);}
+    const row=[String(c.sl),c.heading,c.text+((c.acceptance||'').trim()?'\n\nClient note on acceptance: '+c.acceptance:'')];if(v)row.push(resp(c));row._sec=s[0];body.push(row);});
+  doc.autoTable({startY:y+8,head:[v?['#','Clause','Client terms (fixed)','Vendor response']:['#','Clause','Terms']],body,
+    styles:{fontSize:7.6,cellPadding:{top:1.8,bottom:1.8,left:2.2,right:2.2},overflow:'linebreak',valign:'top',textColor:[45,50,58],lineColor:[224,227,232],lineWidth:0.1},
+    headStyles:{fillColor:opts.INK,textColor:255,fontStyle:'bold',fontSize:7.8},
+    columnStyles:v?{0:{cellWidth:9,textColor:opts.SUB},1:{cellWidth:34,fontStyle:'bold'},2:{cellWidth:'auto'},3:{cellWidth:38}}:{0:{cellWidth:9,textColor:opts.SUB},1:{cellWidth:40,fontStyle:'bold'},2:{cellWidth:'auto'}},
+    margin:{left:M,right:M,top:opts.top},didDrawPage:opts.didDrawPage});
+  return doc.lastAutoTable.finalY;
+}
+
+/* ── master versions: administrator import from the workbook ── */
+function mtNorm(v){return v==null?'':String(v).replace(/\r\n?/g,'\n');}
+/* Parse the SUMMARY sheet. Returns {clauses, errors, warnings, title}. */
+function mtParseWorkbook(wb){
+  const res={clauses:[],errors:[],warnings:[],title:''};
+  const name=(wb.SheetNames||[]).find(n=>n.trim().toUpperCase()==='SUMMARY');
+  if(!name){res.errors.push('No worksheet named “SUMMARY” — found: '+((wb.SheetNames||[]).join(', ')||'none')+'.');return res;}
+  const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,defval:'',raw:true});
+  const want={sl:/^sl\.?\s*no\.?$/i,heading:/^major\s+clauses?$/i,text:/^primarc\s+standard\s+terms?$/i,acc:/^contractor\s+acceptance$/i};
+  let hr=-1,col={};
+  for(let r=0;r<Math.min(rows.length,15)&&hr<0;r++){const c={};rows[r].forEach((v,i)=>{const s=String(v).trim();Object.keys(want).forEach(k=>{if(c[k]==null&&want[k].test(s))c[k]=i;});});if(c.sl!=null&&c.heading!=null&&c.text!=null){hr=r;col=c;}}
+  if(hr<0){res.errors.push('Could not find the header row. The SUMMARY sheet needs the columns “Sl No”, “Major Clauses” and “Primarc Standard Terms” (and optionally “Contractor Acceptance”).');return res;}
+  if(col.acc==null)res.warnings.push('No “Contractor Acceptance” column — acceptance notes will be blank.');
+  for(let r=0;r<hr;r++){const t=rows[r].map(x=>String(x).trim()).filter(Boolean).join(' ');if(t){res.title=t;break;}}
+  const seen={};
+  for(let r=hr+1;r<rows.length;r++){const row=rows[r];const slRaw=String(row[col.sl]).trim();const heading=mtNorm(row[col.heading]),text=mtNorm(row[col.text]);
+    if(!slRaw&&!heading.trim()&&!text.trim())continue;
+    const sl=Number(slRaw);
+    if(!slRaw||!Number.isInteger(sl)||sl<1){res.errors.push('Row '+(r+1)+': Sl No “'+slRaw+'” is not a whole number.');continue;}
+    if(seen[sl]){res.errors.push('Sl No '+sl+' appears more than once (rows '+seen[sl]+' and '+(r+1)+') — clause IDs must be unique.');continue;}
+    seen[sl]=r+1;
+    if(!heading.trim())res.errors.push('Row '+(r+1)+' (Sl No '+sl+'): the clause heading is blank.');
+    res.clauses.push({id:'mt'+String(sl).padStart(2,'0'),sl,heading,text,acceptance:col.acc!=null?mtNorm(row[col.acc]):''});}
+  const n=MT_V1.clauses.length;
+  for(let s=1;s<=n;s++)if(!seen[s])res.errors.push('Clause '+s+' is missing (expected Sl No 1–'+n+').');
+  res.clauses.sort((a,b)=>a.sl-b.sl);
+  return res;
+}
+/* compare a parsed clause list with a master version */
+function mtDiff(parsed,base){
+  const by={};base.clauses.forEach(c=>{by[c.id]=c;});const seen={};const out={added:[],changed:[],same:[],missing:[]};
+  parsed.forEach(c=>{const b=by[c.id];seen[c.id]=1;if(!b)out.added.push(c);else{const f=['heading','text','acceptance'].filter(k=>(b[k]||'')!==(c[k]||''));if(f.length)out.changed.push({c,b,f});else out.same.push(c);}});
+  base.clauses.forEach(c=>{if(!seen[c.id])out.missing.push(c);});
+  return out;
+}
+function mtIsAdmin(){try{return !window.Auth||!window.Auth.can||window.Auth.can('users');}catch(e){return false;}}
+function mtApplyImport(parsed,meta){
+  if(!mtIsAdmin())throw new Error('Only an administrator can change the master terms.');
+  if(parsed.errors&&parsed.errors.length)throw new Error('The workbook has errors — fix them and import again.');
+  if(!DB.termsMaster||typeof DB.termsMaster!=='object')DB.termsMaster={current:1,versions:[]};
+  if(!Array.isArray(DB.termsMaster.versions))DB.termsMaster.versions=[];
+  const s=DB.termsMaster;const v=Math.max(1,...s.versions.map(x=>x.v))+1;
+  s.versions.push({v,ts:now(),by:curUser(),source:(meta&&meta.file)||'Excel import',title:parsed.title||'',note:(meta&&meta.note)||'',clauses:parsed.clauses.map(c=>({id:c.id,sl:c.sl,heading:c.heading,text:c.text,acceptance:c.acceptance}))});
+  s.current=v;saveDB();
+  return v;
+}
+
 let DB=loadDB();
 function loadDB(){try{const r=JSON.parse(localStorage.getItem(QKEY));if(r&&r.quotations){r.deleted=r.deleted||[];r.vendorMaster=r.vendorMaster||[];r.workOrders=r.workOrders||[];r.masterCustom=r.masterCustom||[];r.quotations.forEach(q=>{q.versions=q.versions||[];qMigrate(q);});[].concat(r.quotations,r.deleted||[]).forEach(q=>{if(q&&typeof q.base==='string'&&q.base.indexOf('QTN/')===0)q.base='ENQ/'+q.base.slice(4);});return r;}}catch(e){}return {quotations:[],notifications:[],seq:{},deleted:[],vendorMaster:[],workOrders:[],masterCustom:[]};}
 function saveDB(){ if(window.safeSetItem){ safeSetItem(QKEY,JSON.stringify(DB)); } else { try{localStorage.setItem(QKEY,JSON.stringify(DB));}catch(e){showToast('⚠ Storage full');} } try{ if(window.TSApi&&window.TSApi.active&&window.TSApi.push)window.TSApi.push(); }catch(e){} }
@@ -9624,11 +10005,22 @@ function bindShortAutofill(ov){
 }
 function openEditor(id){
   if(id){const q=DB.quotations.find(x=>x.id===id);qEnsureIds(q);edit=JSON.parse(JSON.stringify(q));qMigrate(edit);}
-  else edit={id:null,ref:'AAD',projectName:PROJREF.AAD,client:'',subject:'',date:today(),dueDate:'',validity:'30 days',terms:{},docs:[],items:[{id:uid(),short:'',desc:'',qty:1,uom:'',spec:'',drawing:'',type:'item',level:0}],vendors:[],notes:[]};
+  else edit={id:null,ref:'AAD',projectName:PROJREF.AAD,client:'',subject:'',date:today(),dueDate:'',validity:'30 days',terms:{},docs:[],items:[{id:uid(),short:'',desc:'',qty:1,uom:'',spec:'',drawing:'',type:'item',level:0}],vendors:[],notes:[],majorTerms:mtNew()};
+  mtUI={q:'',open:{A:true}};
   let ov=$('#qmEditorOv');
   if(!ov){ov=document.createElement('div');ov.id='qmEditorOv';ov.className='modal-overlay';document.body.appendChild(ov);
-    ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('on');});}
+    ov.addEventListener('click',e=>{if(e.target===ov)closeEditorGuarded();});}
   renderEditor(ov);ov.classList.add('on');
+  _collect();editBaseline=JSON.stringify(edit);
+}
+/* Closing the editor (Cancel, ×, backdrop) with unsaved edits asks first —
+   it used to discard everything silently, including clause edits. */
+let editBaseline='';
+function closeEditorGuarded(){
+  const ov=$('#qmEditorOv');if(!ov||!ov.classList.contains('on'))return;
+  try{_collect();}catch(e){}
+  if(JSON.stringify(edit)===editBaseline){ov.classList.remove('on');return;}
+  mtAsk({title:'Discard unsaved changes?',body:'This enquiry has changes that have not been saved. Close it and lose them?',okText:'Discard changes',danger:true}).then(ok=>{if(ok)ov.classList.remove('on');});
 }
 function renderEditor(ov){
   const q=edit;const isNew=!q.id;
@@ -9661,6 +10053,8 @@ function renderEditor(ov){
       <div class="qm-row" style="flex-wrap:wrap;gap:12px 16px">
         ${(()=>{const t=q.terms||{};return COMMTERMS.map(([k,l,ph])=>`<div class="qm-field" style="flex:1 1 240px;min-width:220px"><label>${l}</label><input id="et_${k}" value="${esc(t[k]||'')}" placeholder="${ph} — or leave blank for contractor"></div>`).join('');})()}
       </div>
+      ${mtReconHtml(q)}
+      ${mtEditorHtml(q)}
       <h3 style="font-size:13px;margin:22px 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">Attachments <span style="font-size:10px;color:var(--faint);font-weight:500">Drawings, specs or datasheets — sent to every vendor with this enquiry (max ~3.5 MB each).</span>
         <label class="btn" style="font-size:11px;color:var(--accent);cursor:pointer">＋ Add File<input type="file" accept=".pdf,.dwg,.dxf,.xls,.xlsx,.csv,.doc,.docx,.png,.jpg,.jpeg,.zip" multiple style="display:none" onchange="QM._addDoc(this)"></label>
       </h3>
@@ -9671,6 +10065,7 @@ function renderEditor(ov){
   </div>`;
   ov.innerHTML=h;
   buildShortIndex();bindShortAutofill(ov);
+  mtBindEditor(ov);mtAfterRender();
   /* drag & drop reorder of enquiry rows (mirrors the BOQ grid) */
   if(!ov.dataset.dragBound){
     ov.dataset.dragBound='1';
@@ -9762,6 +10157,7 @@ function _collect(){
   });
   qNormalizeLevels(items);
   edit.items=items;
+  mtCollect();
 }
 
 /* ════════════ COMPARATIVE STATEMENT ════════════ */
@@ -9934,6 +10330,7 @@ function renderCS(m){
   /* commercial comparison */
   h+=techTable(q);
   h+=commercialTable(q);
+  h+=mtResponsesTable(q);
   h+=`</div>`;
   m.innerHTML=h;bindCS(m);
 }
@@ -10073,6 +10470,7 @@ function remoteVendor(token,info,draft,items){
     attachments:(draft&&draft.attachments)||[],revisions:[]};
   if(!Array.isArray(v.commercial.custom))v.commercial.custom=[];
   if(!v.termRemarks||typeof v.termRemarks!=='object')v.termRemarks=(draft&&draft.termRemarks)||{};
+  v.mtResp=(draft&&draft.mtResp&&typeof draft.mtResp==='object')?draft.mtResp:{};
   return v;
 }
 async function bootRemotePortal(token,endpoint){
@@ -10088,6 +10486,7 @@ async function bootRemotePortal(token,endpoint){
     const q={id:'remote_'+token,__remote:true,base:r.rfqNo||r.base||'RFQ',projectName:r.project||'',ref:r.ref||'',
       client:r.client||'',subject:r.subject||'',dueDate:r.dueDate||'',validity:r.validity||'',
       items,vendors:[v],cloud:{published:true},audit:[]};
+    if(Array.isArray(r.majorTerms))q.mtResolved=r.majorTerms.map(c=>({id:c.id,sl:+c.sl||0,enabled:true,heading:String(c.heading||''),text:String(c.text||''),acceptance:String(c.acceptance||''),sig:c.sig||mtSig(c.heading,c.text)}));
     qMigrate(q);
     // expose to findByToken without persisting into a real QS workspace
     DB.quotations=DB.quotations.filter(x=>!x.__remote);DB.quotations.push(q);
@@ -10102,6 +10501,7 @@ function buildQuotePayload(q,v){
     lines:q.items.map((it,i)=>({rate:num(v.lines[i]&&v.lines[i].rate),gst:num(v.lines[i]&&v.lines[i].gst),remarks:(v.lines[i]&&v.lines[i].remarks)||''})),
     commercial:Object.assign({},v.commercial),
     termRemarks:Object.assign({},v.termRemarks||{}),
+    mtResp:Object.assign({},v.mtResp||{}),
     attachments:(v.attachments||[]).map(a=>({name:a.name,type:a.type,size:a.size})),
     base:vendorBase(q,v),grand:vendorTotal(q,v),
     device:detectDevice().dev,submittedTs:now()
@@ -10318,6 +10718,8 @@ function portalPdf(q,v){
       margin:{left:M,right:M}});
     y=doc.lastAutoTable.finalY;
   }
+  /* ── major terms & conditions (full applicable text + this vendor's answers) ── */
+  y=mtPdfSection(doc,q,v,y,{M,ACC,INK,SUB,top:HB+6,didDrawPage:function(){if(doc.internal.getNumberOfPages()>1){doc.setFillColor(...INK);doc.rect(0,0,pw,HB-16,'F');doc.setFillColor(...ACC);doc.rect(0,HB-16,pw,1,'F');doc.setTextColor(196,202,212);doc.setFontSize(7.6);doc.setFont('helvetica','normal');doc.text('Vendor Quotation  ·  '+vendorId(q,v),pw-M,11,{align:'right'});}}});
   /* ── attachments note ── */
   if((v.attachments||[]).length){
     let ay=y+8;if(ay>H-24){doc.addPage();ay=HB+6;}
@@ -10349,6 +10751,7 @@ function renderLocked(el,q,v){
       ${meta('Enquiry ID',vendorId(q,v))}${meta('Base Value',money(vendorBase(q,v)))}${meta('Incl. GST',money(vendorTotal(q,v)))}${meta('Items quoted',v.lines.filter(l=>num(l.rate)>0).length+'/'+qCountItems(q))}
     </div>
     ${(portalCtx&&portalCtx.admin)||(v.status!=='approved'&&!isExpired(q))?`<div style="margin-top:18px"><button class="btn" onclick="QM._reviseOpen('${v.token}')">Submit a revision (R${v.rev+1})</button></div>`:`<div style="margin-top:14px;font-size:12px;color:var(--faint)">${v.status==='approved'?'This bid has been awarded — revisions are closed.':'The submission deadline has passed — revisions are closed.'}</div>`}</div>
+    ${mtPortalHtml(q,v,false)}
   </div>`);
 }
 function renderForm(el,q,v,admin){
@@ -10380,6 +10783,7 @@ function renderForm(el,q,v,admin){
     return `<div style="background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:11px 13px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px"><label style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.4px">${l}</label>${clientVal?'':'<span style="font-size:9.5px;color:var(--accent);font-weight:600">To be provided by you</span>'}</div>
       ${valPart}
+      ${(()=>{const id=MT_LEGACY[k];const c=id&&mtEnabled(q).find(x=>x.id===id);return c?`<div style="font-size:11px;color:var(--dim);margin-top:6px">Contractual wording: Major Clause ${c.sl} (${esc(c.heading.trim())}) below.</div>`:'';})()}
       <input class="vpR" data-r="${k}" value="${esc(tmr[k]||'')}" placeholder="Remarks on this term (optional)" style="width:100%;margin-top:7px;background:transparent;border:1px dashed var(--line);border-radius:7px;padding:7px 10px;color:var(--ink);font-size:12px;box-sizing:border-box">
     </div>`;
   };
@@ -10404,6 +10808,7 @@ function renderForm(el,q,v,admin){
       <div id="vpCustom">${custom}</div>
       <div class="vp-cust-add"><input id="vpNewCustL" placeholder="New term label"><input id="vpNewCustV" placeholder="Value"><button class="btn" onclick="QM._addCustom()">＋ Add</button></div>
     </div>
+    ${mtPortalHtml(q,v,true)}
     <div class="vp-card"><h3>Attachments</h3><div class="hint">Upload supporting PDF, Excel or images (stored with your submission).</div>
       <label class="vp-file">📁 Click to upload a file<input type="file" id="vpFile" accept=".pdf,.xls,.xlsx,.csv,.png,.jpg,.jpeg" style="display:none"></label>
       <div id="vpFiles">${files}</div>
@@ -10417,7 +10822,7 @@ function renderForm(el,q,v,admin){
     <button class="btn primary" style="padding:12px 22px" onclick="QM._submitVendor('${v.token}')">${v.rev>0?'Submit Revision R'+v.rev:'Submit Enquiry'}</button>
   </div>`;
   el.innerHTML=portalShell(q,v,inner);
-  bindPortalForm(q,v);
+  bindPortalForm(q,v);mtBindPortal(q,v);
   if(portalTimer)clearInterval(portalTimer);
   if(!admin)portalTimer=setInterval(()=>{savePortal(q,v,true);},30000);
 }
@@ -11345,10 +11750,10 @@ function woPdf(id){
 }
 
 function filterStatus(s){listFilter={q:'',ref:'',status:s,page:1,pageSize:listFilter.pageSize||10};section='list';curId=null;render();const mm=$('#qmMain');if(mm)mm.scrollTop=0;}
-function snapshot(q){return {ref:q.ref,projectName:q.projectName,client:q.client,subject:q.subject,date:q.date,dueDate:q.dueDate,validity:q.validity,items:JSON.parse(JSON.stringify(q.items))};}
-function diffSummary(o,q){const ch=[];[['projectName','Project'],['client','Client'],['subject','Subject'],['date','Date'],['dueDate','Due'],['validity','Validity']].forEach(([k,l])=>{if(o[k]!==q[k])ch.push(l);});if(o.items.length!==q.items.length)ch.push('items '+o.items.length+'→'+q.items.length);else{let n=0;q.items.forEach((it,i)=>{const oo=o.items[i];if(!oo||oo.desc!==it.desc||oo.qty!==it.qty||oo.uom!==it.uom)n++;});if(n)ch.push(n+' item(s) changed');}return ch.join(', ')||'minor edit';}
+function snapshot(q){const s={ref:q.ref,projectName:q.projectName,client:q.client,subject:q.subject,date:q.date,dueDate:q.dueDate,validity:q.validity,items:JSON.parse(JSON.stringify(q.items))};if(q.majorTerms)s.majorTerms=JSON.parse(JSON.stringify(q.majorTerms));return s;}
+function diffSummary(o,q){const ch=[];[['projectName','Project'],['client','Client'],['subject','Subject'],['date','Date'],['dueDate','Due'],['validity','Validity']].forEach(([k,l])=>{if(o[k]!==q[k])ch.push(l);});if(o.items.length!==q.items.length)ch.push('items '+o.items.length+'→'+q.items.length);else{let n=0;q.items.forEach((it,i)=>{const oo=o.items[i];if(!oo||oo.desc!==it.desc||oo.qty!==it.qty||oo.uom!==it.uom)n++;});if(n)ch.push(n+' item(s) changed');}if(JSON.stringify(o.majorTerms||null)!==JSON.stringify(q.majorTerms||null))ch.push('major terms');return ch.join(', ')||'minor edit';}
 function pushVersion(q,summary,snap){q.versions=q.versions||[];q.versions.push({v:q.versions.length+1,ts:now(),by:'Admin',summary,snapshot:snap});}
-function rollback(qid,idx){const q=DB.quotations.find(x=>x.id===qid);if(!q||!q.versions[idx])return;if(!confirm('Roll back to version '+(idx+1)+'? The current state is kept as a new version.'))return;const cur=snapshot(q);const snap=q.versions[idx].snapshot;const items=JSON.parse(JSON.stringify(snap.items));remapLines(q,items);Object.assign(q,{ref:snap.ref,projectName:snap.projectName,client:snap.client,subject:snap.subject,date:snap.date,dueDate:snap.dueDate,validity:snap.validity,items});qEnsureIds(q);syncLines(q);pushVersion(q,'Rolled back to v'+(idx+1),cur);audit(q,'Rolled back to v'+(idx+1));saveDB();render();showToast('Rolled back to v'+(idx+1));}
+function rollback(qid,idx){const q=DB.quotations.find(x=>x.id===qid);if(!q||!q.versions[idx])return;if(!confirm('Roll back to version '+(idx+1)+'? The current state is kept as a new version.'))return;const cur=snapshot(q);const snap=q.versions[idx].snapshot;const items=JSON.parse(JSON.stringify(snap.items));remapLines(q,items);Object.assign(q,{ref:snap.ref,projectName:snap.projectName,client:snap.client,subject:snap.subject,date:snap.date,dueDate:snap.dueDate,validity:snap.validity,items});if(snap.majorTerms)q.majorTerms=JSON.parse(JSON.stringify(snap.majorTerms));qEnsureIds(q);syncLines(q);pushVersion(q,'Rolled back to v'+(idx+1),cur);audit(q,'Rolled back to v'+(idx+1));saveDB();render();showToast('Rolled back to v'+(idx+1));}
 function deleteQ(id){const i=DB.quotations.findIndex(x=>x.id===id);if(i<0)return;const q=DB.quotations[i];if(!confirm('Are you sure you want to delete enquiry '+q.base+'?\n\nIt will be moved to Deleted Enquiries and can be restored.'))return;const reason=prompt('Reason for deletion (optional):')||'';q.delBy='Admin';q.delTs=now();q.delReason=reason;audit(q,'Enquiry deleted',{txt:reason||'no reason given'});DB.deleted.unshift(q);DB.quotations.splice(i,1);if(curId===id)curId=null;saveDB();render();showToast('Moved to Deleted Enquiries');}
 function restoreQ(id){const i=(DB.deleted||[]).findIndex(x=>x.id===id);if(i<0)return;const q=DB.deleted[i];delete q.delBy;delete q.delTs;delete q.delReason;audit(q,'Enquiry restored');DB.deleted.splice(i,1);DB.quotations.push(q);saveDB();render();showToast('Restored '+q.base);}
 function permDelete(id){const i=(DB.deleted||[]).findIndex(x=>x.id===id);if(i<0)return;if(!confirm('Permanently delete this enquiry? This cannot be undone.'))return;DB.deleted.splice(i,1);saveDB();render();showToast('Permanently deleted');}
@@ -11452,7 +11857,8 @@ async function cloudPublish(qid){
   showToast('☁ Publishing…');
   const payload={action:'publish',qid:q.id,base:q.base,project:q.projectName,client:q.client||'',subject:q.subject||'',dueDate:q.dueDate||'',validity:q.validity||'',
     items:q.items.map(it=>({id:it.id,desc:it.desc||'',short:it.short||'',qty:num(it.qty)||0,uom:it.uom||'',type:it.type||'item',level:it.level||0})),
-    vendors:q.vendors.map(v=>({token:v.token,name:v.name,vno:v.vno}))};
+    vendors:q.vendors.map(v=>({token:v.token,name:v.name,vno:v.vno})),
+    majorTerms:mtEnabled(q).map(c=>({id:c.id,sl:c.sl,heading:c.heading,text:c.text,acceptance:c.acceptance,sig:c.sig}))};
   try{
     const r=await cloudPost(payload);
     if(!r||!r.ok){showToast('⚠ Publish failed: '+((r&&r.error)||'unknown'));return;}
@@ -11505,6 +11911,7 @@ function mergeSubmission(s){
   const c=s.commercial||{};
   Object.keys(CLOUD_COMM_MAP).forEach(k=>{if(c[k])v.commercial[CLOUD_COMM_MAP[k]]=c[k];});
   if(c.general||s.generalRemarks)v.commercial.other=c.general||s.generalRemarks;
+  if(s.mtResp&&typeof s.mtResp==='object')v.mtResp=s.mtResp;   // clause answers, when the cloud flow returns them
   // extra terms → custom rows so they appear in the Commercial Comparison
   v.commercial.custom=Object.keys(CLOUD_COMM_LABELS).filter(k=>c[k]).map(k=>({label:CLOUD_COMM_LABELS[k],value:c[k]}));
   // contractor identity + per-item meta
@@ -11513,7 +11920,7 @@ function mergeSubmission(s){
   else{if(v.status==='sent')v.status='opened';if(!v.openedTs)v.openedTs=now();v.updatedTs=s.updatedTs||now();}
   if(isNewSubmit){
     v.revisions=v.revisions||[];
-    v.revisions.push({r:v.rev,ts:v.submittedTs,remarks:'Submitted online via cloud link',lines:JSON.parse(JSON.stringify(v.lines)),commercial:JSON.parse(JSON.stringify(v.commercial)),total:vendorBase(q,v),changed:[]});
+    v.revisions.push(Object.assign({r:v.rev,ts:v.submittedTs,remarks:'Submitted online via cloud link',lines:JSON.parse(JSON.stringify(v.lines)),commercial:JSON.parse(JSON.stringify(v.commercial)),total:vendorBase(q,v),changed:[]},mtRevisionRecord(q,v)));
     audit(q,'Online submission received',{by:s.contractorName||v.name,txt:money(vendorBase(q,v))});
     notify('submit',(s.contractorName||v.name)+' submitted online — '+vendorId(q,v)+' · '+money(vendorBase(q,v)),q.id);
   }
@@ -11697,8 +12104,13 @@ const api={
     };
   },
   openQ,openEditor,editQ(id){openEditor(id);},
+  /* major terms — master versions (Administration › Major Terms) */
+  mtInfo(){const s=DB.termsMaster;const vs=[MT_V1].concat((s&&Array.isArray(s.versions))?s.versions:[]);const cur=mtCurrent();const use={};DB.quotations.forEach(q=>{if(q.majorTerms){const k=q.majorTerms.master||1;use[k]=(use[k]||0)+1;}});return {current:cur.v,versions:vs.map(x=>({v:x.v,ts:x.ts||null,by:x.by||'',source:x.source||'',title:x.title||'',note:x.note||'',count:x.clauses.length,enquiries:use[x.v]||0}))};},
+  mtVersion(n){const x=mtVersion(n);return x?JSON.parse(JSON.stringify(x)):null;},
+  mtParseWorkbook,mtDiff,mtApplyImport,mtIsAdmin,mtSections:MT_SECTIONS,
+  mtResolve(qid){const q=DB.quotations.find(x=>x.id===qid);return q?mtResolve(q):null;},
   _applyListFilters:applyListFilters,_resetListFilters:resetListFilters,_sortList:sortList,_setListPage:setListPage,_setPageSize:setPageSize,
-  _closeEditor(){$('#qmEditorOv').classList.remove('on');},
+  _closeEditor(){closeEditorGuarded();},
   _addItem(){_collect();edit.items.push({id:uid(),type:'item',level:0,short:'',desc:'',qty:1,uom:'',spec:'',drawing:''});qNormalizeLevels(edit.items);renderEditor($('#qmEditorOv'));},
   _addHeader(){_collect();edit.items.push({id:uid(),type:'header',level:0,short:'',desc:'',qty:0,uom:'',spec:'',drawing:''});qNormalizeLevels(edit.items);renderEditor($('#qmEditorOv'));},
   _addNote(){_collect();edit.items.push({id:uid(),type:'note',level:0,short:'',desc:'',qty:0,uom:'',spec:'',drawing:''});qNormalizeLevels(edit.items);renderEditor($('#qmEditorOv'));},
@@ -11757,11 +12169,11 @@ const api={
     edit.items=edit.items.filter(it=>qIsSection(it)?((it.short||'').trim()||(it.desc||'').trim()):(qIsNote(it)?(it.desc||'').trim():((it.desc||'').trim()||(it.short||'').trim())));
     qNormalizeLevels(edit.items);
     if(!edit.items.some(qQuotable)){alert('Add at least one line item (with a description).');return;}
-    if(edit.id){const q=DB.quotations.find(x=>x.id===edit.id);const oldS=snapshot(q);remapLines(q,edit.items);Object.assign(q,{ref:edit.ref,projectName:edit.projectName,client:edit.client,subject:edit.subject,date:edit.date,dueDate:edit.dueDate,validity:edit.validity,terms:edit.terms||{},docs:edit.docs||[],items:edit.items});syncLines(q);const summary=diffSummary(oldS,q);pushVersion(q,summary,oldS);audit(q,'Enquiry edited',{txt:summary});showToast('Saved · '+summary);}
+    if(edit.id){const q=DB.quotations.find(x=>x.id===edit.id);const oldS=snapshot(q);remapLines(q,edit.items);Object.assign(q,{ref:edit.ref,projectName:edit.projectName,client:edit.client,subject:edit.subject,date:edit.date,dueDate:edit.dueDate,validity:edit.validity,terms:edit.terms||{},docs:edit.docs||[],items:edit.items});if(edit.majorTerms)q.majorTerms=edit.majorTerms;syncLines(q);const summary=diffSummary(oldS,q);pushVersion(q,summary,oldS);audit(q,'Enquiry edited',{txt:summary});showToast('Saved · '+summary);}
     else{
       const dup=DB.quotations.find(x=>x.projectName.toLowerCase().trim()===edit.projectName.toLowerCase().trim()&&(x.subject||'').toLowerCase().trim()===(edit.subject||'').toLowerCase().trim()&&edit.subject);
       if(dup){if(confirm('⚠ A similar enquiry already exists:\n'+dup.base+' — '+dup.projectName+'\n\nOK = open the existing one  ·  Cancel = continue creating a new one')){$('#qmEditorOv').classList.remove('on');openQ(dup.id);return;}}
-      const serial=nextSerial(edit.ref);const q={id:uid(),ref:edit.ref,projectName:edit.projectName,client:edit.client,subject:edit.subject,year:YEAR,serial,base:baseNo(edit.ref,serial),date:edit.date,dueDate:edit.dueDate,validity:edit.validity,terms:edit.terms||{},docs:edit.docs||[],items:edit.items,vendors:[],notes:[],createdBy:'Admin',createdTs:now(),audit:[],versions:[]};pushVersion(q,'Created',snapshot(q));audit(q,'Enquiry created',{txt:q.base});DB.quotations.push(q);curId=q.id;section='list';showToast('Created '+q.base);}
+      const serial=nextSerial(edit.ref);const q={id:uid(),ref:edit.ref,projectName:edit.projectName,client:edit.client,subject:edit.subject,year:YEAR,serial,base:baseNo(edit.ref,serial),date:edit.date,dueDate:edit.dueDate,validity:edit.validity,terms:edit.terms||{},docs:edit.docs||[],items:edit.items,vendors:[],notes:[],majorTerms:edit.majorTerms||mtNew(),createdBy:'Admin',createdTs:now(),audit:[],versions:[]};pushVersion(q,'Created',snapshot(q));audit(q,'Enquiry created',{txt:q.base});DB.quotations.push(q);curId=q.id;section='list';showToast('Created '+q.base);}
     saveDB();$('#qmEditorOv').classList.remove('on');render();
   },
   addVendorPrompt(qid){const q=DB.quotations.find(x=>x.id===qid);if(!q)return;
@@ -11803,7 +12215,9 @@ const api={
   _submitVendor(token){
     const f=findByToken(token);const {q,v}=f;
     if(!hasQuote(v)){alert('Enter at least one unit rate before submitting.');return;}
-    if(!confirm('Submit your enquiry? Once submitted it will be locked for evaluation.'))return;
+    const _mtBad=mtSubmitCheck(q,v);if(_mtBad.length){alert('Please describe the deviation you propose for clause'+(_mtBad.length>1?'s ':' ')+_mtBad.join(', ')+' (Major Terms & Conditions), or change the response.');return;}
+    const _mtT=mtTally(q,v);
+    if(!confirm('Submit your enquiry? Once submitted it will be locked for evaluation.'+(_mtT.total?'\n\nMajor Terms: '+_mtT.accept+' accepted, '+_mtT.deviation+' deviation(s), '+_mtT.none+' with no response'+(_mtT.none?' (recorded as no response — not as accepted)':'')+'.':'')))return;
     if(q.__remote){remoteSubmit(q,v);return;}
     v.submittedTs=now();v.updatedTs=now();v.locked=true;
     v.duration=portalCtx?Math.round((now()-portalCtx.openedAt)/1000):0;
@@ -11811,7 +12225,7 @@ const api={
     const prevSnap=v.revisions[v.revisions.length-1];
     const changed=[];if(prevSnap){q.items.forEach((it,i)=>{if(num(prevSnap.lines[i]&&prevSnap.lines[i].rate)!==num(v.lines[i].rate))changed.push(i+1);});}
     let remarks='';if(v.rev>0)remarks=prompt('Revision remarks (what changed in R'+v.rev+'?):')||'';
-    v.revisions.push({r:v.rev,ts:now(),remarks,lines:JSON.parse(JSON.stringify(v.lines)),commercial:JSON.parse(JSON.stringify(v.commercial)),total:vendorBase(q,v),changed});
+    v.revisions.push(Object.assign({r:v.rev,ts:now(),remarks,lines:JSON.parse(JSON.stringify(v.lines)),commercial:JSON.parse(JSON.stringify(v.commercial)),total:vendorBase(q,v),changed},mtRevisionRecord(q,v)));
     v.status=v.rev>0?'revised':'submitted';
     audit(q,v.rev>0?'Revision R'+v.rev+' submitted':'Enquiry submitted',{by:v.name,txt:money(vendorBase(q,v))+(changed.length?' · changed items: '+changed.join(','):'')});
     notify('submit',v.name+' submitted '+vendorId(q,v)+' — '+money(vendorBase(q,v)),q.id);
