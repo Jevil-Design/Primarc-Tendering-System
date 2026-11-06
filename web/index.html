@@ -99,43 +99,9 @@
      bar (both are visible again inside their own screens) -- drop them
      first on narrower windows so the user chip and action icons, which
      have nowhere else to go, keep their room. */
-  @media (max-width:1400px){ .topspace .tstat{display:none} }
 
   .view{flex:1;overflow:hidden;display:none}
   .view.on{display:flex}
-
-  /* ===== HOME ===== */
-  /* justify-content:center here used to hide the top of the page above the
-     fold on any window shorter than the content: a flex container centers
-     overflowing content by pushing half of it out of both ends equally, and
-     the top half isn't reachable by scrolling back up past the topbar. Pins
-     to the top instead -- always fully visible/scrollable, never clipped. */
-  #home{flex-direction:column;align-items:center;justify-content:flex-start;gap:0;overflow:auto;position:relative}
-  .home-bg{position:absolute;inset:0;background:
-    radial-gradient(800px 400px at 20% 10%, rgba(255,106,44,.07), transparent),
-    radial-gradient(700px 400px at 85% 90%, rgba(94,155,240,.06), transparent);pointer-events:none}
-  .home-inner{position:relative;text-align:center;padding:40px 24px;max-width:1140px}
-  .home-kicker{font-family:'Spline Sans Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:14px}
-  .home-inner h2{font-size:46px;font-weight:900;letter-spacing:-1.5px;line-height:1.02;margin-bottom:14px}
-  .home-inner h2 em{font-style:normal;color:var(--accent)}
-  .home-inner p.sub{font-size:15px;color:var(--dim);max-width:560px;margin:0 auto 40px;line-height:1.6}
-  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:left}
-  .card{background:linear-gradient(165deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:16px;padding:26px;transition:.18s;position:relative;overflow:hidden}
-  .card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 14px 40px rgba(0,0,0,.4)}
-  .card .ic{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
-  .card .ic svg{width:24px;height:24px;stroke-width:1.8}
-  .card.c1 .ic{background:rgba(255,106,44,.14)} .card.c1 .ic svg{stroke:var(--accent)}
-  .card.c2 .ic{background:rgba(94,155,240,.14)} .card.c2 .ic svg{stroke:var(--blue)}
-  .card.c3 .ic{background:rgba(52,211,153,.14)} .card.c3 .ic svg{stroke:var(--green)}
-  .card.c3 .go{color:var(--green)}
-  .card h3{font-size:20px;font-weight:800;margin-bottom:8px}
-  .card p{font-size:13px;color:var(--dim);line-height:1.6;margin-bottom:18px}
-  .card .go{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13px;color:var(--accent)}
-  .card.c2 .go{color:var(--blue)}
-  .card .go svg{width:16px;height:16px;stroke-width:2.4;transition:.15s}
-  .card:hover .go svg{transform:translateX(4px)}
-  .home-foot{margin-top:34px;font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:var(--faint)}
-  .home-foot b{color:var(--accent2)}
 
   /* ===== SHARED CONTROL BAR ===== */
   .ctrl{background:var(--panel);border-bottom:1px solid var(--line);padding:7px 12px;display:flex;gap:7px;align-items:center;flex-wrap:wrap;flex-shrink:0}
@@ -428,64 +394,7 @@
   .cm-cat span{font-size:9.5px;border:1px solid var(--line);padding:2px 6px;border-radius:4px;color:var(--faint);white-space:nowrap}
   .cm-proj{font-size:10.5px;color:var(--dim);line-height:1.35}
 
-  /* ===== COMPARISON SHEET BUILDER ===== */
-  #cbuild{flex-direction:column}
-  .cb-setup{background:var(--panel);border-bottom:1px solid var(--line);padding:11px 16px;display:flex;flex-direction:column;gap:9px;flex-shrink:0}
-  .cb-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
-  .cb-ref{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:9px 11px;color:var(--ink);font-size:13px;min-width:200px;flex:0 1 280px}
-  .cb-ref:focus{outline:none;border-color:var(--accent)}
-  .cb-spacer{flex:1}
-  .cb-vrow{padding-top:2px}
-  .cb-lbl{font-family:'Spline Sans Mono',monospace;font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:1px}
-  .cb-chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-  .vchip{display:inline-flex;align-items:center;gap:6px;background:var(--panel3);border:1px solid var(--line);border-radius:20px;padding:5px 6px 5px 11px;font-size:12px;font-weight:600}
-  .vchip .vc-i{width:18px;height:18px;border-radius:50%;font-size:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Spline Sans Mono',monospace}
-  .vchip .vc-x{background:none;border:none;color:var(--faint);font-size:15px;line-height:1;padding:0 2px;border-radius:4px}
-  .vchip .vc-x:hover{color:var(--red)}
-  .cb-newtag{font-size:8.5px;background:rgba(52,211,153,.18);color:var(--green);padding:1px 5px;border-radius:3px;font-family:'Spline Sans Mono',monospace}
-
-  .cb-scroll{flex:1;overflow:auto}
-  table.cbt{width:100%;border-collapse:collapse;min-width:680px}
-  table.cbt th{position:sticky;top:0;background:#11141a;color:var(--dim);text-align:left;padding:9px 9px;font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600;border-bottom:2px solid var(--line);z-index:2;white-space:nowrap}
-  table.cbt th.vhead{text-align:right}
-  table.cbt th .vh-i{display:inline-block;width:14px;height:14px;border-radius:50%;color:#fff;font-size:9px;text-align:center;line-height:14px;margin-right:4px;font-family:'Spline Sans Mono',monospace;vertical-align:middle}
-  table.cbt td{padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top;font-size:12px}
-  table.cbt tr:hover td{background:var(--hi)}
-  .cb-sl{color:var(--faint);font-family:'Spline Sans Mono',monospace;font-size:11px;text-align:center;width:32px}
-  .cb-iname{font-weight:600;line-height:1.3}
-  .cb-idesc{color:var(--dim);font-size:10.5px;line-height:1.4;margin-top:2px}
-  .cb-uom{font-family:'Spline Sans Mono',monospace;color:var(--blue);font-size:11px;text-align:center}
-  .cbq{width:58px;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:5px 6px;color:var(--ink);font-family:'Spline Sans Mono',monospace;font-size:12px;text-align:right}
-  .cbq:focus{outline:none;border-color:var(--accent)}
-  .vcell{text-align:right;white-space:nowrap}
-  .vcell input{width:78px;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:5px 6px;color:var(--ink);font-family:'Spline Sans Mono',monospace;font-size:12px;text-align:right}
-  .vcell input:focus{outline:none;border-color:var(--accent);background:var(--panel3)}
-  .vcell.l1 input{border-color:var(--green);background:rgba(52,211,153,.10)}
-  .vcell .vc-amt{font-family:'Spline Sans Mono',monospace;font-size:10px;color:var(--faint);margin-top:3px}
-  .vcell .lrank{font-family:'Spline Sans Mono',monospace;font-size:8.5px;padding:0 4px;border-radius:3px;margin-bottom:3px;display:inline-block}
-  .lrank.r1{background:rgba(52,211,153,.18);color:var(--green)}
-  .lrank.r2{background:rgba(94,155,240,.18);color:var(--blue)}
-  .lrank.r3{background:rgba(255,210,63,.18);color:var(--accent2)}
-  .lrank.r4,.lrank.r5{background:rgba(154,163,178,.16);color:var(--dim)}
-  .cb-del{background:none;border:none;color:var(--faint);font-size:16px;line-height:1;padding:3px 6px;border-radius:4px}
-  .cb-del:hover{color:var(--red);background:rgba(248,113,113,.12)}
-  .cbt tfoot td{position:sticky;bottom:0;background:#11141a;border-top:2px solid var(--accent);padding:9px;font-weight:600;font-size:12px;z-index:2}
-  .cbt tfoot .tot{font-family:'Spline Sans Mono',monospace;text-align:right}
-  .cbt tfoot .tot.win{color:var(--green)}
-  .cb-need{padding:40px 30px;text-align:center;color:var(--faint)}
-  .cb-need svg{width:42px;height:42px;stroke:var(--line);margin-bottom:12px;stroke-width:1.3}
-  .cb-need h4{font-size:15px;color:var(--dim);margin-bottom:5px;font-weight:700}
-  /* hierarchy + section UI */
-  .cbt tr.cb-parent td{background:rgba(94,155,240,.08);border-top:2px solid var(--line)}
-  .cb-pname{font-weight:700;font-size:13px;color:var(--ink)}
-  .cbt tr.cb-sub .cb-sl{color:var(--blue)}
-  .cbt tr.cb-sub td:nth-child(2){padding-left:18px;border-left:2px solid rgba(94,155,240,.25)}
-  .cb-addsub{margin-top:5px;background:var(--panel3);border:1px solid var(--line);color:var(--blue);font-size:10.5px;font-family:'Spline Sans Mono',monospace;padding:3px 8px;border-radius:5px}
-  .cb-addsub:hover{border-color:var(--blue);background:rgba(94,155,240,.12)}
-  .cb-armbanner{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(94,155,240,.12);border-bottom:1px solid var(--line);padding:7px 12px;font-size:11.5px;color:var(--ink)}
-  .cb-armbanner b{color:var(--blue)}
-  .cb-armbanner button{background:var(--blue);border:none;color:#fff;font-size:11px;padding:4px 12px;border-radius:5px;font-weight:600}
-  table.cbt thead th[rowspan]{vertical-align:middle}
+  /* ===== BOQ MASTER cells ===== */
   .cm-uom{font-family:'Spline Sans Mono',monospace;color:var(--blue);font-size:11px;text-align:center}
   .vend{display:flex;flex-direction:column;gap:2px;border-radius:5px;padding:2px 4px;margin:-2px -4px}
   .vend.vmatch{background:rgba(255,210,63,.14);outline:1px solid rgba(255,210,63,.4)}
@@ -563,8 +472,6 @@
   #loader p{font-family:'Spline Sans Mono',monospace;font-size:11px;color:var(--faint);letter-spacing:1.5px}
 
   @media(max-width:860px){
-    .cards{grid-template-columns:1fr}
-    .home-inner h2{font-size:32px}
     .lib{width:100%;min-width:0}
     .create-body{flex-direction:column}
   }
@@ -630,42 +537,7 @@
   .rs-quote-wo{font-family:'Spline Sans Mono',monospace;color:var(--blue);font-size:10px}
   .rs-quote-proj{color:var(--faint);font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-  /* ═══ VENDOR LOGO (comparison sheet) ═══ */
-  .vchip-logo-wrap{width:22px;height:22px;border-radius:3px;overflow:hidden;background:var(--panel3);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative;border:1px solid var(--line)}
-  .vchip-logo-wrap img{width:100%;height:100%;object-fit:contain}
-  .vchip-logo-wrap .vl-placeholder{font-size:8px;color:var(--faint)}
-  .vchip-logo-wrap:hover{border-color:var(--accent)}
-  .vchip-logo-wrap input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-
-  /* ═══ TENDER ANALYSIS DASHBOARD ═══ */
-  #tender{flex-direction:column;overflow:hidden}
-  .ta-ctrl{background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
-  .ta-body{flex:1;overflow:auto;padding:20px 22px 40px}
-  .ta-empty{text-align:center;padding:80px 20px;color:var(--faint)}
-  .ta-empty svg{width:46px;height:46px;stroke:var(--line);margin-bottom:14px;stroke-width:1.5;display:block;margin:0 auto 14px}
-  .ta-empty h4{font-size:15px;color:var(--dim);margin-bottom:6px;font-weight:700}
-  .ta-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:22px}
-  .ta-kpi{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:12px;padding:14px 16px;transition:.15s}
-  .ta-kpi:hover{border-color:rgba(255,255,255,.12)}
-  .ta-kpi-label{font-size:9.5px;text-transform:uppercase;letter-spacing:1px;color:var(--faint);margin-bottom:8px;font-weight:600}
-  .ta-kpi-val{font-family:'Spline Sans Mono',monospace;font-size:19px;font-weight:700;color:var(--accent2);line-height:1.2;word-break:break-all}
-  .ta-grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-  .ta-section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
-  .ta-sec-head{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
-  .ta-table{width:100%;border-collapse:collapse}
-  .ta-table td{padding:7px 8px;border-bottom:1px solid var(--line);font-size:12px;vertical-align:middle}
-  .ta-table tr:last-child td{border-bottom:none}
-  .ta-bar-chart{display:flex;flex-direction:column;gap:10px;padding:4px 0}
-  .ta-bar-row{display:grid;grid-template-columns:150px 1fr 130px;align-items:center;gap:12px}
-  .ta-bar-label{font-size:12px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .ta-bar-track{height:22px;background:var(--panel3);border-radius:5px;overflow:hidden}
-  .ta-bar-fill{height:100%;border-radius:5px;transition:width .6s ease}
-  .ta-bar-val{font-family:'Spline Sans Mono',monospace;font-size:11px;color:var(--accent2);text-align:right}
-
   /* ═══ IMPORT MODAL ═══ */
-  .import-tabs{display:flex;gap:6px;margin-bottom:16px}
-  .import-tab{flex:1;background:var(--panel2);border:1px solid var(--line);color:var(--dim);padding:8px;border-radius:7px;cursor:pointer;text-align:center;font-size:12px;transition:.12s}
-  .import-tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
   .import-drop{border:2px dashed var(--line);border-radius:10px;padding:28px 20px;text-align:center;color:var(--dim);cursor:pointer;transition:.15s;margin-bottom:12px;position:relative}
   .import-drop:hover{border-color:var(--accent);color:var(--ink)}
   .import-drop svg{width:32px;height:32px;stroke:currentColor;stroke-width:1.5;margin-bottom:8px;display:block;margin:0 auto 8px}
@@ -1086,25 +958,6 @@
   /* ── Modal / overlay entrance ── */
   .modal-overlay.on{animation:enhFade .2s ease}
   .modal-overlay.on .modal{animation:enhModalIn .34s cubic-bezier(.2,.85,.25,1)}
-
-  /* ── Home hero: staggered card entrance + ambient background drift ── */
-  #home .home-bg{will-change:transform;animation:enhDrift 22s ease-in-out infinite alternate}
-  #home.on .home-kicker{animation:enhViewIn .5s .02s both cubic-bezier(.22,.61,.36,1)}
-  #home.on .home-inner h2{animation:enhViewIn .55s .08s both cubic-bezier(.22,.61,.36,1)}
-  #home.on .home-inner p.sub{animation:enhViewIn .55s .15s both cubic-bezier(.22,.61,.36,1)}
-  #home.on .card{animation:enhCardUp .55s both cubic-bezier(.22,.61,.36,1)}
-  #home.on .card:nth-child(1){animation-delay:.20s}
-  #home.on .card:nth-child(2){animation-delay:.30s}
-  #home.on .card:nth-child(3){animation-delay:.40s}
-  #home.on .home-foot{animation:enhViewIn .6s .5s both ease}
-  /* icon lift + light sweep on card hover */
-  .card{--enh:0}
-  .card .ic{transition:transform .22s cubic-bezier(.2,.8,.2,1),background .18s}
-  .card:hover .ic{transform:translateY(-2px) scale(1.06)}
-  .card::after{content:"";position:absolute;top:0;left:0;width:60%;height:100%;
-    background:linear-gradient(105deg,transparent,rgba(255,255,255,.06),transparent);
-    transform:translateX(-140%);pointer-events:none;opacity:0}
-  .card:hover::after{opacity:1;animation:enhSheen .9s ease}
 
   /* ── Dashboard widgets: staggered entrance + hover lift ── */
   .qm-cards .qm-w{animation:enhCardUp .5s both cubic-bezier(.22,.61,.36,1);
@@ -2510,8 +2363,6 @@ window.__authCover=(function(){
         <span id="tsSyncDot" style="width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0"></span>
         <span id="tsSyncTxt" style="color:var(--dim)">Saved</span>
       </div>
-      <div class="tstat"><div class="n" id="ts1">0</div><div class="l">Catalog Items</div></div>
-      <div class="tstat"><div class="n" id="ts2">0</div><div class="l">Compared Items</div></div>
     </div>
     <div style="display:flex;gap:6px;align-items:center;margin-left:8px">
       <button class="top-gear" id="navAdminBtn" title="Administration — Users, Roles &amp; Access" aria-label="Administration">
@@ -2534,38 +2385,6 @@ window.__authCover=(function(){
 
   <!-- HOME -->
   <div class="view on" id="home">
-    <div class="home-bg"></div>
-    <div class="home-inner">
-      <svg class="home-logo" viewBox="0 0 307 48" xmlns="http://www.w3.org/2000/svg" aria-label="Primarc"><g><path fill-rule="evenodd" d="m0.31 1.44h15.85c8.73 0 15.87 6.86 15.87 15.26 0 8.37-7.14 15.21-15.87 15.21h-6.78v14.67h-9.07zm22.65 15.18c0-3.42-3.05-6.19-6.8-6.19h-6.78v12.49l6.78 0.02c3.75 0.03 6.8-2.82 6.8-6.32z"/><path fill-rule="evenodd" d="m67.47 46.58l-14.36-21.34v21.34h-9.07l-0.03-45.14h14.73c8.42 0 15.34 6.5 15.34 14.62 0 5.79-3.5 10.86-8.34 12.57l12.82 17.95zm-14.39-24.81l5.82 0.03c3.08 0.03 5.83-2.47 5.83-5.69 0-3.22-2.78-5.68-5.83-5.68h-5.82z"/><path fill-rule="evenodd" d="m98.82 1.44v45.14h-9.07v-45.14z"/><path d="m157.76 0.32v46.26h-9.08v-19.66l-12.99 18.9h-0.05l-13.02-18.9v19.66h-9.08v-46.26h0.51l21.61 29.82 21.59-29.82z"/><path fill-rule="evenodd" d="m247.42 46.58l-14.36-21.34v21.34h-9.07l-0.03-45.14h14.73c8.43 0 15.34 6.5 15.34 14.62 0 5.79-3.5 10.86-8.34 12.57l12.82 17.95zm-14.39-24.81l5.82 0.03c3.08 0.03 5.83-2.47 5.83-5.69 0-3.22-2.77-5.68-5.83-5.68h-5.82z"/><path d="m267.74 24.04c0-12.74 10.73-23.52 23.44-23.52 5.88 0.08 11.09 2.41 15.82 6.97l-5.24 7.14c-3.08-3.02-6.77-4.87-10.66-4.87-7.26 0-14.17 6.44-14.17 14.33 0 8.04 7.17 14.26 14.14 14.26 4.14 0 7.73-2.22 10.72-5.16l5.21 7.34c-3.98 3.95-8.82 6.92-15.65 6.92-13.02 0-23.61-10.73-23.61-23.41z"/><path d="m190.98 0.32h-0.28l-21.56 46.26h17.85v-7.74h-4.5l8.38-18.36 8.36 18.36h-4.51v7.74h17.85z"/></g></svg>
-      <div class="home-kicker">Construction Estimating Toolkit</div>
-      <h2>Build a BOQ.<br>Compare <em>vendor</em> rates.</h2>
-      <p class="sub">Pick line items from your master library, drop their descriptions straight into a fresh Bill of Quantities, and compare what every vendor charges — ranked L1, L2, L3.</p>
-      <div class="cards">
-        <div class="card c1" id="goCreate">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M9 11H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-4M12 3v8m0 0 3-3m-3 3L9 8"/></svg></div>
-          <h3>Create BOQ</h3>
-          <p>Search your catalog, group items into sections, set quantities &amp; rates, and watch the total build live. Export when done.</p>
-          <span class="go">Start building <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </div>
-        <div class="card c3" id="goQuote">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M9 7h6m-6 4h6m-6 4h4M16 3l4 4-9 9H7v-4z"/></svg></div>
-          <h3>Enquiry Management</h3>
-          <p>Issue project-coded RFQs to multiple vendors, collect quotes through secure vendor links, then auto-rank L1–L5 with comparative statements &amp; bid analysis.</p>
-          <span class="go">Open enquiries <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </div>
-        <div class="card c2" id="goCompare">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/></svg></div>
-          <h3>BOQ Master</h3>
-          <p>Browse every item quoted by two or more vendors from history, ranked lowest-to-highest. Add new master items here. Search by project or vendor.</p>
-          <span class="go">Open BOQ Master <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </div>
-      </div>
-      <div class="home-foot">Master library: <b id="hf1">0</b> unique items &nbsp;·&nbsp; Multi-vendor comparisons: <b id="hf2">0</b> items
-        &nbsp;·&nbsp; <a href="#" id="hfBackup" style="color:var(--accent2);text-decoration:none">⤓ Backup all data</a>
-        &nbsp;·&nbsp; <a href="#" id="hfRestore" style="color:var(--accent2);text-decoration:none">⤒ Restore</a>
-        <input type="file" id="hfRestoreFile" accept="application/json,.json" style="display:none">
-      </div>
-    </div>
   </div>
 
   <!-- CREATE BOQ -->
@@ -2866,14 +2685,10 @@ window.__authCover=(function(){
 <div class="modal-overlay" id="importOverlay">
   <div class="modal">
     <div class="modal-head">
-      <h3>Import from Excel</h3>
+      <h3>Import BOQ from Excel</h3>
       <button class="modal-x" id="importClose">×</button>
     </div>
     <div class="modal-body">
-      <div class="import-tabs">
-        <button class="import-tab on" data-itype="boq">📋 Import BOQ</button>
-        <button class="import-tab" data-itype="quote">📊 Import Vendor Enquiry</button>
-      </div>
       <div id="importBoqPanel">
         <div class="import-drop">
           <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -2889,18 +2704,6 @@ window.__authCover=(function(){
           Qty / Quantity / Nos → Quantity<br>
           Rate / Price / Cost → Rate (₹)<br>
           Category / Cat / Work → Work Category
-        </div>
-      </div>
-      <div id="importQuotePanel" style="display:none">
-        <div class="import-drop">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <div>Click to select a Vendor Enquiry Excel file</div>
-          <div style="font-size:10.5px;color:var(--faint);margin-top:4px">Adds items to the Comparison Sheet (last added vendor)</div>
-          <input type="file" id="importQuoteFile" accept=".xlsx,.xls,.csv">
-        </div>
-        <div class="import-info">
-          <b>Auto-mapped columns:</b> Item / Name · Unit / UOM · Rate / Price / Amount · Description<br>
-          Rates are applied to the <b>last vendor</b> in the comparison sheet. Add your vendor first.
         </div>
       </div>
     </div>
@@ -3189,14 +2992,6 @@ COMP.forEach(c=>{
   (c[4]||[]).forEach(v=>{ vm.set((v[0]||'').toLowerCase().trim(), v[1]); });
   COMP_VENDOR_MAP.set((c[0]||'').toLowerCase().trim(), vm);
 });
-function cbAutoFill(row){
-  const vm=COMP_VENDOR_MAP.get((row.name||'').toLowerCase().trim()); if(!vm)return;
-  cbVendors.forEach((v,vi)=>{
-    if(row.rates[vi]!==''&&row.rates[vi]!=null)return; // keep manual entries
-    const r=vm.get((v.name||'').toLowerCase().trim());
-    if(r!=null) row.rates[vi]=String(r);
-  });
-}
 function projRefHtml(name){const rp=COMP_PROJ_MAP.get((name||'').toLowerCase().trim())||[];if(!rp.length)return '';let s='<div class="bq-projref">';rp.slice(0,3).forEach(p=>{s+='<span class="tag proj">'+esc(p)+'</span>';});if(rp.length>3)s+='<span class="tag proj">+'+( rp.length-3)+'</span>';return s+'</div>';}
 const PROJECTS=DATA.projects||[];
 
@@ -3597,17 +3392,17 @@ function mtplUpload(){
 }
 
 function refreshFilterSelects(){
-  [['#cCat',CATS],['#cbCat',CATS],['#mCat',CATS]].forEach(([sel,arr])=>{
+  [['#cCat',CATS],['#mCat',CATS]].forEach(([sel,arr])=>{
     const el=$(sel); if(!el)return; const cur=el.value;
     el.innerHTML='<option value="">All Categories</option>'+arr.map((v,i)=>`<option value="${i}">${esc(v)}</option>`).join('');
     el.value=cur;
   });
-  [['#cUom',UOMS],['#cbUom',UOMS],['#mUom',UOMS]].forEach(([sel,arr])=>{
+  [['#cUom',UOMS],['#mUom',UOMS]].forEach(([sel,arr])=>{
     const el=$(sel); if(!el)return; const cur=el.value;
     el.innerHTML='<option value="">All Units</option>'+arr.map((v,i)=>`<option value="${i}">${esc(v)}</option>`).join('');
     el.value=cur;
   });
-  buildWorkGroupSelect('#cWGroup'); buildWorkGroupSelect('#cbWGroup');
+  buildWorkGroupSelect('#cWGroup');
   const ms=$('#mSubcat');
   if(ms){ const cur=ms.value; ms.innerHTML='<option value="">All Sub-Categories</option>'+SUBCATS.map(s=>`<option value="${esc(s).replace(/"/g,'&quot;')}">${esc(s)}</option>`).join(''); ms.value=cur; }
 }
@@ -3694,8 +3489,6 @@ function expandTerm(t){
 }
 
 /* stats */
-$('#ts1').textContent=inr(CATALOG.length);$('#ts2').textContent=inr(COMP.length);
-$('#hf1').textContent=inr(CATALOG.length);$('#hf2').textContent=inr(COMP.length);
 
 /* fill filters */
 function fillSel(sel,arr){arr.forEach((v,i)=>{const o=document.createElement('option');o.value=i;o.textContent=v;sel.appendChild(o)})}
@@ -3711,9 +3504,6 @@ function setMode(m){
   if(m==='quote'){ if(typeof QM!=='undefined') QM.open(); }
 }
 document.querySelectorAll('#modes button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.m)));
-$('#goCreate').addEventListener('click',()=>setMode('create'));
-$('#goCompare').addEventListener('click',()=>setMode('compare'));
-$('#goQuote').addEventListener('click',()=>setMode('quote'));
 
 /* ============ SHARED NOTES ENGINE ============ */
 const NOTE_PRESETS=['Payment Terms','Work Duration / Completion Period','Material Base Rate','Taxes & Duties','Warranty / Defect Liability Period','AMC Terms','Exclusions','Special Conditions','Mobilization Advance','Safety Compliance'];
@@ -5627,484 +5417,6 @@ function exportCmpPdf(){
   btn.disabled=false;btn.innerHTML='<svg viewBox="0 0 24 24" fill="none"><path d="M14 3v4a1 1 0 0 0 1 1h4M5 3h9l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM8 13h2a1.5 1.5 0 0 1 0 3H8v-3zm0 0v5m5-5h2m-2 0v5m0-2.5h1.5"/></svg>PDF';
 }
 
-/* ============ COMPARISON SHEET BUILDER ============ */
-let cbInit=false, cbVendors=[], cbRows=[], cbSeq=0, cbFiltered=[], cbAddMode='line', cbArmedParent=null;
-let cbNotes=[]; // Comparison sheet terms & conditions / notes
-const CB_COLORS=['#34d399','#5e9bf0','#f2b705','#a78bfa','#ff6a2c','#f87171'];
-const cbScroll=$('#cbScroll');
-
-// auto SL numbering: parents = 1,2,3…  sub-lines under a parent = 1.1,1.2…  orphan lines = own integer
-function cbNumbering(){
-  const nums={}; let pcount=0, orphan=0, sub=0;
-  cbRows.forEach(r=>{
-    if(r.kind==='parent'){ pcount++; sub=0; nums[r.sid]=String(pcount); }
-    else if(r.kind==='sub'){ sub++; nums[r.sid]=pcount? (pcount+'.'+sub) : ('•'); }
-    else { pcount++; sub=0; nums[r.sid]=String(pcount); } // standalone line numbered like a parent
-  });
-  return nums;
-}
-// index of the parent row that a given position belongs under (nearest preceding parent)
-function cbParentBefore(idx){
-  for(let i=idx;i>=0;i--){ if(cbRows[i] && cbRows[i].kind==='parent') return i; }
-  return -1;
-}
-
-function initCbuild(){
-  if(typeof populateCmpDatalists==='function') populateCmpDatalists();
-  renderCbVendors(); renderCbTable();
-  initNotes('cb', cbNotes, ()=>{});
-  let d;$('#cbSearch').addEventListener('input',()=>{clearTimeout(d);d=setTimeout(cbSearch,130)});
-  if($('#cbWGroup')){
-    $('#cbWGroup').addEventListener('change',()=>{ cascadeGroupToCat('#cbWGroup','#cbCat'); cbSearch(); });
-  }
-  if($('#cbCat')) $('#cbCat').addEventListener('change',cbSearch);
-  if($('#cbUom')) $('#cbUom').addEventListener('change',cbSearch);
-  document.querySelectorAll('#cbScope button').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('#cbScope button').forEach(x=>x.classList.remove('on'));
-    b.classList.add('on'); cbScopeMode=b.dataset.s; cbSearch();
-  }));
-  cbSearch();
-  $('#cbList').addEventListener('click',e=>{
-    const row=e.target.closest('.libitem'); if(!row)return;
-    cbAddItem(+row.dataset.id);
-  });
-  $('#cbAddVend').addEventListener('click',cbAddVendor);
-  $('#cbVendInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();cbAddVendor();}});
-  $('#cbAddProj').addEventListener('click',cbNewProject);
-  $('#cbClear').addEventListener('click',()=>{
-    if((cbRows.length||cbVendors.length)&&!confirm('Clear the whole comparison sheet?'))return;
-    cbRows=[];cbVendors=[];$('#cbProj').value='';$('#cbRef').value='';
-    renderCbVendors();renderCbTable();
-  });
-  $('#cbAddRow').addEventListener('click',()=>{
-    const newRow={sid:++cbSeq,cid:0,kind:'line',name:'',desc:'',uom:'',hist:null,qty:1,rates:cbVendors.map(()=>'')};
-    cbRows.push(newRow);
-    renderCbTable(); cbSearch();
-    // focus the name input of the new row
-    const allCbNames=cbScroll.querySelectorAll('.cbnamein');
-    if(allCbNames.length) allCbNames[allCbNames.length-1].focus();
-  });
-  $('#cbExpCsv').addEventListener('click',cbExportCsv);
-  $('#cbExpXls').addEventListener('click',cbExportXls);
-  $('#cbExpPdf').addEventListener('click',cbExportPdf);
-  document.querySelectorAll('#cbMode button').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('#cbMode button').forEach(x=>x.classList.remove('on'));
-    b.classList.add('on'); cbAddMode=b.dataset.am;
-  }));
-  cbScroll.addEventListener('input',cbOnInput);
-  cbScroll.addEventListener('click',e=>{
-    if(e.target.classList.contains('cb-del')){
-      const sid=+e.target.closest('tr').dataset.sid;
-      const row=cbRows.find(r=>r.sid===sid);
-      // removing a parent also removes its sub-lines
-      if(row && row.kind==='parent'){
-        const pIdx=cbRows.findIndex(r=>r.sid===sid);
-        let end=pIdx+1; while(end<cbRows.length && cbRows[end].kind==='sub') end++;
-        cbRows.splice(pIdx, end-pIdx);
-        if(cbArmedParent===sid){cbArmedParent=null;cbArmBanner();}
-      } else {
-        const ix=cbRows.findIndex(r=>r.sid===sid); if(ix>=0)cbRows.splice(ix,1);
-      }
-      renderCbTable(); cbSearch();
-      return;
-    }
-    if(e.target.classList.contains('cb-addsub')){
-      const psid=+e.target.dataset.psid;
-      cbArmedParent = (cbArmedParent===psid)?null:psid;
-      cbArmBanner();
-    }
-  });
-}
-
-/* --- item library (top-N search, fast) --- */
-let cbScopeMode='name';
-function cbSearch(){
-  const q=$('#cbSearch').value.trim().toLowerCase();
-  const cat=$('#cbCat')&&$('#cbCat').value!==''?+$('#cbCat').value:null;
-  const uom=$('#cbUom')&&$('#cbUom').value!==''?+$('#cbUom').value:null;
-  const wg=$('#cbWGroup')?$('#cbWGroup').value:'';
-  const wgIdxs=wg?WORK_GROUPS.get(wg):null;
-  const terms=q.split(/\s+/).filter(Boolean);
-  const hasFilter=terms.length||cat!=null||uom!=null||wgIdxs;
-  if(!hasFilter){ cbFiltered=CATALOG.slice(0,80); }
-  else {
-    cbFiltered=CATALOG.filter(it=>{
-      if(wgIdxs&&!wgIdxs.includes(it[4]))return false;
-      if(cat!=null&&it[4]!==cat)return false;
-      if(uom!=null&&it[3]!==uom)return false;
-      if(!terms.length)return true;
-      const hay=cbScopeMode==='work'?(it[4]>=0?CATS[it[4]]:'').toLowerCase()
-               :cbScopeMode==='all'?((it[1]||'')+' '+(it[2]||'')).toLowerCase()
-               :(it[1]||'').toLowerCase();
-      return terms.every(t=>hay.includes(t));
-    });
-    if(cbFiltered.length>200) cbFiltered=cbFiltered.slice(0,200);
-  }
-  $('#cbFound').textContent=inr(cbFiltered.length)+(cbFiltered.length>=200?'+':'');
-  const cbq=$('#cbSearch').value.trim();
-  $('#cbList').innerHTML=cbFiltered.map(it=>{
-    const uom=it[3]>=0?UOMS[it[3]]:'', cat=it[4]>=0?CATS[it[4]]:'';
-    const isCustom=CUSTOM_ITEMS.has(it[0]);
-    const projs2=COMP_PROJ_MAP.get((it[1]||'').toLowerCase().trim())||[];
-    const projHtml2=projs2.length?`<div class="li-projs">${projs2.slice(0,3).map(p=>`<span class="tag proj">${esc(p)}</span>`).join(' ')}${projs2.length>3?`<span class="tag proj">+${projs2.length-3}</span>`:''}</div>`:'';
-    return `<div class="libitem" data-id="${it[0]}">
-      <div class="add">＋</div>
-      <div class="li-main">
-        <div class="li-name">${hl(it[1],cbq)}${isCustom?' <span class="tag custom">CUSTOM</span>':''}</div>
-        <div class="li-desc">${esc((it[2]||'').slice(0,150))}</div>
-        <div class="li-meta">${uom?`<span class="tag uom">${esc(uom)}</span>`:''}${it[5]!=null?`<span class="tag rate">hist ₹${inr(it[5])}</span>`:''}${cat?`<span class="tag cat">${esc(cat)}</span>`:''}</div>
-        ${projHtml2}
-      </div></div>`;
-  }).join('') || '<div style="padding:30px;text-align:center;color:var(--faint)">No matches</div>';
-}
-
-/* --- vendors --- */
-function cbAddVendor(){
-  const inp=$('#cbVendInput'); let name=inp.value.trim();
-  if(!name){inp.focus();return;}
-  const existing=VENDORS.find(v=>v.toLowerCase()===name.toLowerCase());
-  let isNew=false;
-  if(existing){ name=existing; }
-  else { VENDORS.push(name); populateCmpDatalists(); isNew=true; }
-  if(cbVendors.some(v=>v.name.toLowerCase()===name.toLowerCase())){ alert('"'+name+'" is already in this comparison.'); inp.value=''; return; }
-  if(cbVendors.length>=6){ alert('You can compare up to 6 vendors at once.'); return; }
-  cbVendors.push({name, isNew});
-  cbRows.forEach(r=>{ if(!r.rates)return; while(r.rates.length<cbVendors.length) r.rates.push(''); });
-  // auto-fill historical rates for newly-added vendor
-  const _newVi=cbVendors.length-1, _vLow=name.toLowerCase().trim();
-  cbRows.forEach(r=>{
-    if(r.kind==='parent')return;
-    const vm=COMP_VENDOR_MAP.get((r.name||'').toLowerCase().trim()); if(!vm)return;
-    const rt=vm.get(_vLow);
-    if(rt!=null&&(r.rates[_newVi]==null||r.rates[_newVi]==='')) r.rates[_newVi]=String(rt);
-  });
-  inp.value='';
-  renderCbVendors(); renderCbTable(); cbSearch();
-}
-function cbNewProject(){
-  const typed=$('#cbProj').value.trim();
-  const name=(prompt('Add a new project name:', typed)||'').trim();
-  if(!name)return;
-  if(!PROJECTS.some(p=>p.toLowerCase()===name.toLowerCase())){ PROJECTS.push(name); PROJECTS.sort((a,b)=>a.toLowerCase()<b.toLowerCase()?-1:1); populateCmpDatalists(); }
-  $('#cbProj').value=name;
-}
-function renderCbVendors(){
-  const wrap=$('#cbChips');
-  if(!cbVendors.length){ wrap.innerHTML='<span style="color:var(--faint);font-size:12px">none yet — add vendors to compare →</span>'; return; }
-  wrap.innerHTML=cbVendors.map((v,i)=>`<span class="vchip"><span class="vc-i" style="background:${CB_COLORS[i%CB_COLORS.length]}">${i+1}</span>${esc(v.name)}${v.isNew?'<span class="cb-newtag">NEW</span>':''}<button class="vc-x" data-i="${i}" title="Remove">×</button></span>`).join('');
-  wrap.querySelectorAll('.vc-x').forEach(b=>b.addEventListener('click',()=>{
-    cbVendors.splice(+b.dataset.i,1);
-    // drop that vendor's rates from rows
-    cbRows.forEach(r=>{ if(r.rates) r.rates.splice(+b.dataset.i,1); });
-    renderCbVendors(); renderCbTable(); cbSearch();
-  }));
-}
-
-/* --- items / rows --- */
-function cbAddItem(id){
-  const it=CATALOG.find(x=>x[0]===id);
-  if(!it)return;
-  if(cbArmedParent!=null && cbRows.some(r=>r.sid===cbArmedParent && r.kind==='parent')){
-    cbAddSubUnder(cbArmedParent, id);
-    return;
-  }
-  if(cbAddMode==='parent'){
-    cbRows.push({sid:++cbSeq,cid:id,kind:'parent',name:it[1],desc:it[2]});
-  } else {
-    const _cbNewRow={sid:++cbSeq,cid:id,kind:'line',name:it[1],desc:it[2],uom:it[3]>=0?UOMS[it[3]]:'',hist:it[5],qty:1,rates:cbVendors.map(()=>'')};
-    cbRows.push(_cbNewRow); cbAutoFill(_cbNewRow);
-  }
-  renderCbTable(); cbSearch();
-}
-// add a sub-line directly under a specific parent (from the parent row's ＋ button)
-function cbAddSubUnder(parentSid, id){
-  const it=CATALOG.find(x=>x[0]===id); if(!it)return;
-  const pIdx=cbRows.findIndex(r=>r.sid===parentSid); if(pIdx<0)return;
-  let ins=pIdx+1;
-  while(ins<cbRows.length && cbRows[ins].kind==='sub') ins++;
-  const _cbSubRow={sid:++cbSeq,cid:id,kind:'sub',name:it[1],desc:it[2],uom:it[3]>=0?UOMS[it[3]]:'',hist:it[5],qty:1,rates:cbVendors.map(()=>'')};
-  cbAutoFill(_cbSubRow); cbRows.splice(ins,0,_cbSubRow);
-  renderCbTable(); cbSearch();
-}
-function cbArmBanner(){
-  let b=$('#cbArmBanner');
-  if(cbArmedParent!=null){
-    const p=cbRows.find(r=>r.sid===cbArmedParent);
-    const nums=cbNumbering();
-    const lbl=p?('section '+(nums[p.sid]||'')+' — '+(p.name||'')):'';
-    if(!b){ b=document.createElement('div'); b.id='cbArmBanner'; b.className='cb-armbanner';
-      $('#cbuild').querySelector('.lib-head').after(b); }
-    b.innerHTML=`<span>↳ Adding sub-lines to <b>${esc(lbl)}</b> — click items on the left</span><button id="cbDisarm">Done</button>`;
-    b.style.display='flex';
-    $('#cbDisarm').onclick=()=>{cbArmedParent=null;cbArmBanner();};
-  } else if(b){ b.style.display='none'; }
-}
-
-function cbRowRanks(rates){
-  // returns array of rank (1=lowest) per vendor index; '' rates ignored
-  const vals=rates.map((r,i)=>({i,v:bNum(r)})).filter(x=>!isNaN(x.v)&&x.v>0);
-  vals.sort((a,b)=>a.v-b.v);
-  const rank={}; let last=null,r=0;
-  vals.forEach((x,k)=>{ if(last===null||x.v>last){r=k+1;last=x.v;} rank[x.i]=r; });
-  return rank;
-}
-
-function renderCbTable(){
-  const costed=cbRows.filter(r=>r.kind!=='parent');
-  $('#cbCount').textContent=cbRows.length;
-  $('#cbVcount').textContent=cbVendors.length;
-  if(!cbVendors.length || !cbRows.length){
-    $('#cbFoot').style.display='none';
-    cbScroll.innerHTML=`<div class="boq-empty"><svg viewBox="0 0 24 24" fill="none"><path d="M9 7h6m-6 4h6m-6 4h4M5 3h14a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg><h4>${cbVendors.length?'Add items to compare':'Add vendors first'}</h4><div>${cbVendors.length?'Search the library on the left and click ＋ to add items, then enter each vendor\u2019s rate.':'Use the Vendors row above to select or create the vendors you\u2019re comparing.'}</div></div>`;
-    return;
-  }
-  $('#cbFoot').style.display='flex';
-  const nums=cbNumbering();
-  const ncols = 5 + cbVendors.length*2 + 1; // SL,Item,Desc,Unit,Qty + (Rate,Amt)*V + del
-  const vtot=cbVendors.map(()=>0);
-  const vfilled=cbVendors.map(()=>true);
-  let rows='';
-  cbRows.forEach((row,ri)=>{
-    if(row.kind==='parent'){
-      rows+=`<tr class="cb-parent" data-sid="${row.sid}">
-        <td class="cb-sl"><b>${nums[row.sid]}</b></td>
-        <td colspan="${cbVendors.length*2+3}">
-          <input class="cbnamein pnamein" data-f="name" value="${esc(row.name)}" placeholder="Section name…" style="width:100%">
-          <div class="cb-idesc">${esc((row.desc||'').slice(0,260))}</div>
-          <button class="cb-addsub" data-psid="${row.sid}" title="Add a sub-line under this section">＋ sub-line</button>
-        </td>
-        <td><button class="cb-del" title="Remove section">×</button></td>
-      </tr>`;
-      return;
-    }
-    const rank=cbRowRanks(row.rates);
-    const qty=bNum(row.qty)||0;
-    let cells='';
-    cbVendors.forEach((v,vi)=>{
-      const rate=row.rates[vi]==null?'':row.rates[vi];
-      const rnum=bNum(rate);
-      const amt=(!isNaN(rnum)&&rnum>0)?qty*rnum:null;
-      if(amt!=null) vtot[vi]+=amt; else vfilled[vi]=false;
-      const rk=rank[vi];
-      const rankBadge=rk?`<span class="lrank r${rk}">L${rk}</span>`:'';
-      cells+=`<td class="vcell${rk===1?' l1':''}">${rankBadge}<br><input data-sid="${row.sid}" data-vi="${vi}" value="${esc(String(rate))}" placeholder="rate" inputmode="decimal"><div class="vc-amt">${amt!=null?'₹'+inr(amt):''}</div></td>`;
-    });
-    const isSub=row.kind==='sub';
-    rows+=`<tr data-sid="${row.sid}" class="${isSub?'cb-sub':''}">
-      <td class="cb-sl">${nums[row.sid]}</td>
-      <td style="max-width:200px"><input class="cbnamein" data-f="name" value="${esc(row.name)}" placeholder="Item name…" style="${isSub?'font-size:11px;opacity:.9':''}">${descField('cbdescin', row.desc)}</td>
-      <td class="cb-uom"><input class="cbuomin" data-f="uom" value="${esc(row.uom)}" placeholder="Unit"></td>
-      <td><input class="cbq" data-sid="${row.sid}" value="${esc(String(row.qty??''))}" inputmode="decimal"></td>
-      ${cells}
-      <td><button class="cb-del" title="Remove">×</button></td>
-    </tr>`;
-  });
-  let vheads=''; cbVendors.forEach((v,i)=>{ vheads+=`<th class="vhead" colspan="2"><span class="vh-i" style="background:${CB_COLORS[i%CB_COLORS.length]}">${i+1}</span>${esc(v.name)}</th>`; });
-  let vsub=''; cbVendors.forEach(()=>{ vsub+=`<th class="vhead">Rate ₹</th><th class="vhead">Amount ₹</th>`; });
-  let minTot=Infinity, minIx=-1;
-  vtot.forEach((t,i)=>{ if(vfilled[i] && t>0 && t<minTot){minTot=t;minIx=i;} });
-  let foot=`<td colspan="4" style="text-align:right">TOTAL AMOUNT (Qty × Rate) =</td>`;
-  cbVendors.forEach((v,i)=>{ foot+=`<td></td><td class="tot${i===minIx?' win':''}">${vtot[i]>0?'₹'+inr(vtot[i]):'—'}${i===minIx?' ✓':''}</td>`; });
-  foot+=`<td></td>`;
-
-  cbScroll.innerHTML=`<table class="cbt">
-    <thead>
-      <tr><th rowspan="2">#</th><th rowspan="2">Item / Section</th><th rowspan="2">Unit</th><th rowspan="2">Qty</th>${vheads}<th rowspan="2"></th></tr>
-      <tr>${vsub}</tr>
-    </thead>
-    <tbody>${rows}</tbody>
-    <tfoot><tr>${foot}</tr></tfoot>
-  </table>`;
-  rzInstall(cbScroll,'cbt'); rzApplyWidths(cbScroll,'cbt');
-  if(minIx>=0) $('#cbBest').textContent=cbVendors[minIx].name+' · ₹'+inr(minTot);
-  else $('#cbBest').textContent='—';
-}
-
-function cbOnInput(e){
-  const inp=e.target;
-  if(inp.classList.contains('cbq')){
-    const sid=+inp.dataset.sid; const r=cbRows.find(x=>x.sid===sid); if(r){r.qty=inp.value; renderCbTable(); restoreFocus(sid,'q');}
-    return;
-  }
-  if(inp.dataset.vi!==undefined){
-    const sid=+inp.dataset.sid, vi=+inp.dataset.vi;
-    const r=cbRows.find(x=>x.sid===sid); if(r){r.rates[vi]=inp.value; renderCbTable(); restoreFocus(sid,vi);}
-    return;
-  }
-  // inline editable fields (name, desc, uom) — save without re-render
-  if(inp.dataset.f){
-    const tr=inp.closest('tr[data-sid]'); if(!tr)return;
-    const sid=+tr.dataset.sid;
-    const r=cbRows.find(x=>x.sid===sid); if(r) r[inp.dataset.f]=inp.value;
-    return;
-  }
-}
-function restoreFocus(sid,key){
-  // re-focus the edited input after re-render
-  let sel;
-  if(key==='q') sel=`.cbq[data-sid="${sid}"]`;
-  else sel=`input[data-sid="${sid}"][data-vi="${key}"]`;
-  const el=cbScroll.querySelector(sel);
-  if(el){ el.focus(); const v=el.value; el.setSelectionRange(v.length,v.length); }
-}
-
-/* --- builder exports (reference tender-comparison layout) --- */
-function cbMeta(){return {proj:$('#cbProj').value||'(no project)',ref:$('#cbRef').value||'BOQ Comparison',wo:$('#cbWO').value||''};}
-function cbCanExport(){ if(!cbVendors.length){alert('Add at least one vendor first.');return false;} if(!cbRows.some(r=>r.kind!=='parent')){alert('Add at least one costed line item first.');return false;} return true; }
-function cbStamp(){const d=new Date();return d.getFullYear()+('0'+(d.getMonth()+1)).slice(-2)+('0'+d.getDate()).slice(-2)}
-function cbFname(){const m=cbMeta();return ((m.proj.replace(/[^a-z0-9]+/gi,'_'))||'Comparison')+'_compare_'+cbStamp();}
-
-// Build the reference matrix: returns header rows, body rows (with kind), totals, winner.
-function cbBuildRef(){
-  const nums=cbNumbering();
-  const V=cbVendors.length;
-  const vtot=cbVendors.map(()=>0), vfilled=cbVendors.map(()=>true);
-  const body=[]; // each: {kind, cells:[...]} cells aligned to columns: SL,Item,Desc,Unit,Qty, then per vendor [Rate,Amount], then L1
-  cbRows.forEach(row=>{
-    if(row.kind==='parent'){
-      const c=[nums[row.sid], row.name, row.desc, '', ''];
-      for(let i=0;i<V;i++){c.push('','');} c.push('');
-      body.push({kind:'parent',cells:c});
-      return;
-    }
-    const qty=bNum(row.qty)||0;
-    const rank=cbRowRanks(row.rates);
-    const c=[nums[row.sid], (row.kind==='sub'?'':row.name), row.desc, row.uom, row.qty];
-    const bestV=[];
-    cbVendors.forEach((v,vi)=>{
-      const rn=bNum(row.rates[vi]); const ok=!isNaN(rn)&&rn>0;
-      const amt=ok?qty*rn:'';
-      c.push(ok?rn:''); c.push(amt===''?'':amt);
-      if(ok){vtot[vi]+=amt; if(rank[vi]===1)bestV.push(v.name);} else vfilled[vi]=false;
-    });
-    c.push(bestV.join(' / '));
-    body.push({kind:row.kind,cells:c});
-  });
-  let minTot=Infinity,minIx=-1; vtot.forEach((t,i)=>{if(vfilled[i]&&t>0&&t<minTot){minTot=t;minIx=i;}});
-  const tot=['','TOTAL AMOUNT =','','',''];
-  cbVendors.forEach((v,i)=>{ tot.push(''); tot.push(vtot[i]||''); });
-  tot.push(minIx>=0?cbVendors[minIx].name:'');
-  return {body, tot, vtot, minIx, minTot, V, nums};
-}
-
-function cbExportCsv(){
-  if(!cbCanExport())return;
-  const m=cbMeta(); const {body,tot}=cbBuildRef();
-  const e2=csvCell;
-  let csv=e2('Project Name:')+','+e2(m.proj)+'\n'+e2(m.ref)+'\n'+(m.wo?e2('WO No:')+','+e2(m.wo)+'\n':'')+'\n';
-  // two header rows
-  const h1=['SL No.','Item name','Description','Unit','Qty'];
-  cbVendors.forEach(v=>{h1.push(v.name);h1.push('');});
-  h1.push('L1 (Lowest)');
-  const h2=['','','','',''];
-  cbVendors.forEach(()=>{h2.push('Rate');h2.push('Amount');});
-  h2.push('');
-  csv+=h1.map(e2).join(',')+'\n'+h2.map(e2).join(',')+'\n';
-  body.forEach(r=>csv+=r.cells.map(e2).join(',')+'\n');
-  csv+=tot.map(e2).join(',')+'\n';
-  if(cbNotes.length){ csv+='\n'+e2('TERMS & CONDITIONS / NOTES')+'\n'; cbNotes.forEach(n=>csv+=e2('• '+n)+'\n'); }
-  dl(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}),cbFname()+'.csv');
-}
-
-function cbExportXls(){
-  if(!cbCanExport())return;
-  if(typeof XLSX==='undefined'){alert('Excel library not loaded (needs internet on first load). Use CSV instead.');return;}
-  const m=cbMeta(); const {body,tot,minIx,V}=cbBuildRef();
-  const aoa=[];
-  aoa.push(['Project Name:',m.proj]);
-  aoa.push([m.ref]);
-  if(m.wo)aoa.push(['WO No:',m.wo]);
-  aoa.push([]);
-  const hdrTop=aoa.length; // 1-based row of first header row (dynamic: wo row may shift)
-  // header row 1 (vendor names spanning 2 cols)
-  const r1=['SL No.','Item name','Description','Unit','Qty'];
-  cbVendors.forEach(v=>{r1.push(v.name);r1.push(null);});
-  r1.push('L1 (Lowest)');
-  // header row 2
-  const r2=['','','','',''];
-  cbVendors.forEach(()=>{r2.push('Rate');r2.push('Amount');});
-  r2.push('');
-  aoa.push(r1); aoa.push(r2);
-  const firstData=aoa.length; // 0-based index where body starts
-  body.forEach(r=>aoa.push(r.cells));
-  aoa.push(tot);
-  const ws=XLSX.utils.aoa_to_sheet(aoa);
-  // notes appended below the totals row
-  if(cbNotes.length){
-    let nr=aoa.length+1; // 1 blank line after totals
-    XLSX.utils.sheet_add_aoa(ws,[['TERMS & CONDITIONS / NOTES']],{origin:'A'+(nr+1)}); nr++;
-    cbNotes.forEach(n=>{ nr++; XLSX.utils.sheet_add_aoa(ws,[['• '+n]],{origin:'A'+nr}); });
-  }
-  // merges: title across all cols; each vendor name across its 2 cols on header row1
-  const totalCols=5+V*2+1;
-  const merges=[{s:{r:0,c:1},e:{r:0,c:Math.min(4,totalCols-1)}}, {s:{r:1,c:0},e:{r:1,c:totalCols-1}}];
-  // vendor name merges on row index hdrTop-1 (0-based = 3)
-  const hr=hdrTop;
-  for(let i=0;i<V;i++){ const c=5+i*2; merges.push({s:{r:hr,c},e:{r:hr,c:c+1}}); }
-  // merge SL/Item/Desc/Unit/Qty/L1 across the 2 header rows
-  [0,1,2,3,4,totalCols-1].forEach(c=>merges.push({s:{r:hr,c},e:{r:hr+1,c}}));
-  ws['!merges']=merges;
-  const cols=[{wch:7},{wch:26},{wch:55},{wch:7},{wch:9}];
-  cbVendors.forEach(()=>{cols.push({wch:11});cols.push({wch:14});});
-  cols.push({wch:20}); ws['!cols']=cols;
-  ws['!freeze']={xSplit:0,ySplit:hr+2};
-  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Comparison');
-  XLSX.writeFile(wb,cbFname()+'.xlsx');
-}
-
-function cbExportPdf(){
-  if(!cbCanExport())return;
-  const js=window.jspdf&&window.jspdf.jsPDF;
-  if(!js){alert('PDF library not loaded (needs internet on first load). Use CSV or Excel instead.');return;}
-  const m=cbMeta(); const {body,tot,minIx,V}=cbBuildRef();
-  const doc=new js({orientation:'landscape',unit:'mm',format:'a4'});
-  const {startY,chrome,finish,pw:W,H,M,B}=pdfHeader(doc,{title:'VENDOR COST COMPARISON',subtitle:'Project: '+m.proj,rightTop:m.ref||'',rightBot:m.wo?'WO No: '+m.wo:'',footer:'Primarc · Cost Comparison',running:m.proj});
-  const showAmt = V<=3; // include amount columns only when 3 or fewer vendors, else rate-only for width
-  // two-row header for autoTable
-  const top=[{content:'SL',rowSpan:2},{content:'Item / Description',rowSpan:2},{content:'Unit',rowSpan:2},{content:'Qty',rowSpan:2}];
-  cbVendors.forEach(v=>top.push({content:v.name,colSpan:showAmt?2:1,styles:{halign:'center'}}));
-  top.push({content:'L1',rowSpan:2});
-  const sub=[]; cbVendors.forEach(()=>{ sub.push('Rate'); if(showAmt)sub.push('Amt'); });
-  const bodyRows=body.map(r=>{
-    if(r.kind==='parent'){
-      const span=2+(showAmt?V*2:V)+1; // Unit..L1 merged into description
-      return [{content:r.cells[0],styles:{fontStyle:'bold',fillColor:B.SEC}},
-              {content:(r.cells[1]||'')+(r.cells[2]?'  —  '+r.cells[2]:''),colSpan:span,styles:{fontStyle:'bold',fillColor:B.SEC,textColor:B.BLUE}}];
-    }
-    const out=[r.cells[0], (r.cells[1]?r.cells[1]+'\n':'')+(r.cells[2]||''), r.cells[3], r.cells[4]];
-    cbVendors.forEach((v,vi)=>{ const rate=r.cells[5+vi*2], amt=r.cells[6+vi*2];
-      out.push(rate===''?'':pdfRs(rate)); if(showAmt)out.push(amt===''?'':pdfRs(amt)); });
-    out.push(r.cells[r.cells.length-1]);
-    return out;
-  });
-  const footRow=[{content:'TOTAL AMOUNT =',colSpan:4,styles:{halign:'right',fontStyle:'bold'}}];
-  cbVendors.forEach((v,vi)=>{ if(showAmt)footRow.push(''); footRow.push({content:tot[6+vi*2]===''?'—':pdfRs(tot[6+vi*2]),styles:{halign:'right',fontStyle:'bold'}}); });
-  footRow.push({content:minIx>=0?cbVendors[minIx].name:'',styles:{fontStyle:'bold'}});
-  doc.autoTable(Object.assign(pdfTableBase(chrome,M),{
-    head:[top,sub], body:bodyRows, foot:[footRow], startY,
-    styles:{fontSize:6.6,cellPadding:1.2,overflow:'linebreak',valign:'top',lineColor:B.LINE,lineWidth:0.1,textColor:[45,50,58]},
-    headStyles:{fillColor:B.INK,textColor:255,fontSize:6.8,halign:'center',fontStyle:'bold'},
-    footStyles:{fillColor:[232,246,238],textColor:B.GREEN,fontStyle:'bold'},
-    alternateRowStyles:{fillColor:B.ZEBRA},
-    columnStyles:{0:{cellWidth:11,halign:'center',textColor:B.SUB},1:{cellWidth:showAmt?70:90},2:{cellWidth:12,halign:'center'},3:{cellWidth:14,halign:'right'}},
-    didParseCell:function(d){ if(d.section==='body'&&d.column.index>=4){ d.cell.styles.halign='right'; } }
-  }));
-  if(cbNotes.length){
-    let y=doc.lastAutoTable.finalY+9;
-    if(y>H-30){ doc.addPage(); y=18; }
-    doc.setFillColor(...B.ACC);doc.rect(M,y-4,2.2,5,'F');
-    doc.setFontSize(11);doc.setTextColor(...B.INK);doc.setFont('helvetica','bold');
-    doc.text('Terms & Conditions / Notes',M+4.5,y); y+=6;
-    doc.setFontSize(9);doc.setTextColor(60,66,74);doc.setFont('helvetica','normal');
-    cbNotes.forEach(n=>{
-      const lines=doc.splitTextToSize('•  '+n, W-2*M);
-      if(y+lines.length*5>H-14){ doc.addPage(); y=18; }
-      doc.text(lines,M,y); y+=lines.length*5+1.5;
-    });
-  }
-  finish(cbFname()+'.pdf');
-}
-
 /* ============ NEW MASTER ITEM MODAL ============ */
 function openNewItem(){
   $('#uomDatalist').innerHTML=UOMS.map(u=>`<option value="${esc(u).replace(/"/g,'&quot;')}">`).join('');
@@ -7471,159 +6783,6 @@ function patchMBodyRows(){
   const mb=$('#mBody');if(mb)obs.observe(mb,{childList:true,subtree:false});
 }
 
-/* ── Vendor logo upload ───────────────────────────────── */
-let VENDOR_LOGOS={};
-const VL_KEY='boq_vendor_logos';
-function loadVendorLogos(){try{VENDOR_LOGOS=JSON.parse(localStorage.getItem(VL_KEY)||'{}');}catch(e){VENDOR_LOGOS={};}}
-function saveVendorLogos(){try{localStorage.setItem(VL_KEY,JSON.stringify(VENDOR_LOGOS));}catch(e){}}
-function getVendorLogo(name){return VENDOR_LOGOS[(name||'').toLowerCase().trim()]||null;}
-function setVendorLogo(name,dataURL){VENDOR_LOGOS[(name||'').toLowerCase().trim()]=dataURL;saveVendorLogos();}
-
-/* Patch vchip rendering to include logo upload area.
-   We hook into the existing cbChips update cycle. */
-function renderVendorLogoBadge(vendorName){
-  const logo=getVendorLogo(vendorName);
-  return`<div class="vchip-logo-wrap" title="Click to upload logo for ${esc(vendorName)}">
-    ${logo?`<img src="${logo}" alt="logo">`:`<span class="vl-placeholder">📷</span>`}
-    <input type="file" accept="image/*" class="vl-file" data-vl="${esc(vendorName).replace(/"/g,'&quot;')}">
-  </div>`;
-}
-
-/* Delegate logo upload from cbChips */
-document.getElementById('cbChips')?.addEventListener('change',e=>{
-  const inp=e.target.closest('.vl-file');if(!inp)return;
-  const vname=inp.dataset.vl;if(!vname||!e.target.files[0])return;
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    setVendorLogo(vname,ev.target.result);
-    showToast('Logo saved for '+vname);
-    // Refresh the chip display
-    const chip=inp.closest('.vchip');if(!chip)return;
-    const wrap=chip.querySelector('.vchip-logo-wrap');
-    if(wrap)wrap.innerHTML=`<img src="${ev.target.result}" alt="logo"><input type="file" accept="image/*" class="vl-file" data-vl="${esc(vname)}">`;
-  };
-  reader.readAsDataURL(e.target.files[0]);
-});
-
-/* Inject logo areas into existing chips after cbuild init */
-function injectVendorLogoBadges(){
-  document.querySelectorAll('#cbChips .vchip').forEach(chip=>{
-    if(chip.querySelector('.vchip-logo-wrap'))return;// already done
-    const nameEl=chip.querySelector('.vc-name,.vchip-name');
-    const name=(nameEl?.textContent||chip.dataset.vi||'').trim();
-    if(!name)return;
-    const div=document.createElement('div');
-    div.innerHTML=renderVendorLogoBadge(name);
-    chip.insertBefore(div.firstElementChild,chip.firstChild);
-  });
-}
-
-/* ── Tender Analysis Dashboard ────────────────────────── */
-function renderTenderAnalysis(){
-  const body=$('#taBody');if(!body)return;
-  if(typeof cbVendors==='undefined'||!cbVendors.length||typeof cbRows==='undefined'||!cbRows.length){
-    body.innerHTML=`<div class="ta-empty">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M9 19v-6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2zm0 0V9a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v10m-6 0a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2m0 0V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v14a2 2 0 0 0-2 2h-2a2 2 0 0 0-2-2z"/></svg>
-      <h4>No comparison data yet</h4>
-      <div>Build a Comparison Sheet first, then return here for the full tender analysis.</div></div>`;
-    return;
-  }
-  const fmt=n=>n?('₹'+Number(n).toLocaleString('en-IN',{maximumFractionDigits:0})):'₹0';
-  const lineRows=cbRows.filter(r=>r.kind!=='parent');
-  // Vendor totals
-  const vTotals=cbVendors.map((v,vi)=>{
-    let tot=0,filled=true;
-    lineRows.forEach(row=>{const rt=bNum(row.rates?.[vi]),qty=bNum(row.qty)||0;if(rt>0)tot+=rt*qty;else filled=false;});
-    return{name:v.name,total:tot,filled};
-  }).sort((a,b)=>(b.filled-a.filled)||(a.total-b.total));
-  /* A vendor who left lines blank is not comparable on total (same rule as the Builder). */
-  const _pool=vTotals.some(v=>v.filled)?vTotals.filter(v=>v.filled):vTotals;
-  const l1=_pool[0]||{name:'—',total:0},lN=_pool.reduce((a,b)=>b.total>a.total?b:a,_pool[0]||{name:'—',total:0});
-  const savings=lN.total-l1.total,savPct=lN.total>0?((savings/lN.total)*100).toFixed(1):0;
-  const itemCount=lineRows.length;
-  // Category breakdown from section parents
-  const catMap={};let curCat='Uncategorised';
-  cbRows.forEach(row=>{
-    if(row.kind==='parent'){curCat=row.name||'Section';return;}
-    catMap[curCat]=(catMap[curCat]||0)+(parseFloat(row.rates?.[0])||0)*(parseFloat(row.qty)||1);
-  });
-  // Rank rows
-  const rankHtml=vTotals.map((v,i)=>{
-    const cls=i===0?'r1':i===1?'r2':i===2?'r3':'r4';
-    const diff=i===0?'L1 — Lowest':(l1.total>0?'+'+((v.total-l1.total)/l1.total*100).toFixed(1)+'%':'—');
-    const dcol=i===0?'var(--green)':'var(--red)';
-    return`<tr><td><span class="lbadge ${cls}">L${i+1}</span></td>
-      <td style="font-weight:600">${esc(v.name)}</td>
-      <td style="text-align:right;font-family:'Spline Sans Mono',monospace;color:var(--accent2)">${fmt(v.total)}</td>
-      <td style="text-align:right;font-size:11px;color:${dcol}">${diff}</td></tr>`;
-  }).join('');
-  // Category rows
-  const catHtml=Object.entries(catMap).sort((a,b)=>b[1]-a[1]).map(([c,v])=>`<tr>
-    <td style="font-weight:500">${esc(c)}</td>
-    <td style="text-align:right;font-family:'Spline Sans Mono',monospace;color:var(--accent2)">${fmt(v)}</td></tr>`).join('');
-  // Bar chart
-  const maxT=vTotals[vTotals.length-1]?.total||1;
-  const barsHtml=vTotals.map((v,i)=>{
-    const pct=(v.total/maxT*100).toFixed(1);
-    const col=i===0?'var(--green)':i===vTotals.length-1?'var(--red)':'var(--blue)';
-    return`<div class="ta-bar-row">
-      <div class="ta-bar-label">${esc(v.name)}</div>
-      <div class="ta-bar-track"><div class="ta-bar-fill" style="width:${pct}%;background:${col}"></div></div>
-      <div class="ta-bar-val">${fmt(v.total)}</div></div>`;
-  }).join('');
-  // Vendor performance (items where each vendor is L1)
-  const vendL1=cbVendors.map(v=>({name:v.name,l1:0}));
-  lineRows.forEach(row=>{
-    const rates=cbVendors.map((_,vi)=>parseFloat(row.rates?.[vi])||Infinity);
-    const minRate=Math.min(...rates.filter(r=>r<Infinity));
-    if(minRate===Infinity)return;
-    rates.forEach((r,vi)=>{if(r===minRate)vendL1[vi].l1++;});
-  });
-  const perfHtml=vendL1.sort((a,b)=>b.l1-a.l1).map(v=>{
-    const pct=itemCount>0?((v.l1/itemCount)*100).toFixed(0):0;
-    return`<tr><td style="font-weight:500">${esc(v.name)}</td>
-      <td style="text-align:center;font-family:'Spline Sans Mono',monospace;color:var(--accent2)">${v.l1}</td>
-      <td style="text-align:right;font-size:11px;color:var(--dim)">${pct}% of items</td></tr>`;
-  }).join('');
-  // AI insights placeholder
-  const aiBtn=GM.ready()?`<button class="btn" id="taAiInsights" style="margin-left:auto"><svg viewBox="0 0 24 24" fill="none" width="14" height="14"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 12a4 4 0 1 1 4-4"/><circle cx="20" cy="4" r="3"/></svg>AI Insights</button>`:'';
-  body.innerHTML=`
-  <div class="ta-kpi-row">
-    <div class="ta-kpi"><div class="ta-kpi-label">Total BOQ Value (L1)</div><div class="ta-kpi-val">${fmt(l1.total)}</div></div>
-    <div class="ta-kpi"><div class="ta-kpi-label">Vendors Compared</div><div class="ta-kpi-val" style="color:var(--blue)">${cbVendors.length}</div></div>
-    <div class="ta-kpi"><div class="ta-kpi-label">Lowest Vendor (L1)</div><div class="ta-kpi-val" style="color:var(--green)">${esc(l1.name)}</div></div>
-    <div class="ta-kpi"><div class="ta-kpi-label">Highest Vendor</div><div class="ta-kpi-val" style="color:var(--red)">${esc(lN.name)}</div></div>
-    <div class="ta-kpi"><div class="ta-kpi-label">Savings Opportunity</div><div class="ta-kpi-val" style="color:var(--accent2)">${fmt(savings)}</div><div style="font-size:10px;color:var(--faint);margin-top:3px">vs highest vendor (${savPct}%)</div></div>
-    <div class="ta-kpi"><div class="ta-kpi-label">BOQ Line Items</div><div class="ta-kpi-val">${itemCount}</div></div>
-  </div>
-  <div class="ta-grid2">
-    <div class="ta-section"><div class="ta-sec-head">Vendor Ranking</div><table class="ta-table"><tbody>${rankHtml}</tbody></table></div>
-    <div class="ta-section"><div class="ta-sec-head">Category-wise Cost Summary (L1)</div><table class="ta-table"><tbody>${catHtml||'<tr><td style="color:var(--faint)">No sections defined</td></tr>'}</tbody></table></div>
-  </div>
-  <div class="ta-section" style="margin-top:16px">
-    <div class="ta-sec-head" style="display:flex;align-items:center">Rate Variance Analysis ${aiBtn||''}</div>
-    <div class="ta-bar-chart">${barsHtml}</div>
-  </div>
-  <div class="ta-section" style="margin-top:16px">
-    <div class="ta-sec-head">Vendor Performance — L1 Count</div>
-    <table class="ta-table"><thead><tr><th style="padding:5px 8px;font-size:10px;color:var(--faint)">Vendor</th><th style="text-align:center;padding:5px 8px;font-size:10px;color:var(--faint)">L1 Items</th><th style="text-align:right;padding:5px 8px;font-size:10px;color:var(--faint)">Share</th></tr></thead><tbody>${perfHtml}</tbody></table>
-  </div>`;
-  // Bind AI insights
-  $('#taAiInsights')?.addEventListener('click',async()=>{
-    const btn=$('#taAiInsights');if(!btn)return;
-    const old=btn.innerHTML;btn.disabled=true;btn.innerHTML='Generating…';
-    try{
-      const r=await geminiTenderInsights(vTotals);
-      const insights=(r.insights||[]).map(i=>`<li style="margin-bottom:6px">${esc(i)}</li>`).join('');
-      const div=document.createElement('div');
-      div.style.cssText='margin-top:14px;padding:12px 16px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.35);border-radius:8px';
-      div.innerHTML=`<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--violet);margin-bottom:8px">AI Insights</div><ul style="padding-left:16px;font-size:12.5px;color:var(--dim);line-height:1.6">${insights}</ul>`;
-      body.appendChild(div);
-    }catch(e){showToast('AI error: '+e.message.slice(0,40));}
-    finally{btn.disabled=false;btn.innerHTML=old;}
-  });
-}
-
 /* ── Excel Import ─────────────────────────────────────── */
 function autoMapCol(headers,candidates){
   for(const c of candidates){const f=headers.find(h=>(h||'').toString().toLowerCase().includes(c.toLowerCase()));if(f)return f;}
@@ -7665,42 +6824,6 @@ function importBOQExcel(file){
   };
   reader.readAsBinaryString(file);
 }
-function importQuoteExcel(file){
-  if(!file)return;
-  if(typeof XLSX==='undefined'){alert('Excel library not loaded.');return;}
-  /* The Comparison Sheet Builder screen this fed is no longer in the page; initCbuild() would throw
-     on its missing elements and the import would fail silently. */
-  if(!document.getElementById('cbuild')){alert('Vendor quotes are entered per enquiry: open the enquiry in Enquiry Management, then use that vendor portal (Open Portal) or the cloud form.');return;}
-  if(!cbInit){initCbuild();cbInit=true;}
-  const reader=new FileReader();
-  reader.onload=e=>{
-    try{
-      const wb=XLSX.read(e.target.result,{type:'binary'});
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      const rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});
-      if(!rows.length){alert('No data.');return;}
-      const h=Object.keys(rows[0]);
-      const nc=autoMapCol(h,['item name','item','name','description short']);
-      const dc=autoMapCol(h,['description','desc','scope']);
-      const uc=autoMapCol(h,['unit','uom']);
-      const rc=autoMapCol(h,['rate','price','amount','cost']);
-      let added=0,vi=cbVendors.length-1;
-      rows.forEach(row=>{
-        const name=String(row[nc]||'').trim();if(!name)return;
-        const rates=cbVendors.map(()=>'');
-        if(vi>=0&&rc)rates[vi]=String(_impNum(row[rc]));
-        cbRows.push({sid:++cbSeq,cid:0,kind:'line',name,
-          desc:dc?String(row[dc]||'').trim():'',
-          uom:uc?String(row[uc]||'').trim():'',
-          hist:'',qty:'',rates});
-        added++;
-      });
-      if(added){renderCbTable&&renderCbTable();setMode('cbuild');showToast(`Imported ${added} vendor rows`);}
-    }catch(err){alert('Import failed: '+err.message);}
-  };
-  reader.readAsBinaryString(file);
-}
-
 /* ── BOQ Master: Advanced filters + multi-keyword search ── */
 function bindAdvancedFilters(){
   const tog=$('#mAdvToggle');
@@ -7774,12 +6897,11 @@ function bindKbd(){
       e.preventDefault();
       const m=document.querySelector('#modes button.on')?.dataset?.m||'home';
       ({home:()=>setMode('create'),create:()=>$('#cSearch')?.focus(),
-        compare:()=>$('#mSearch')?.focus(),cbuild:()=>$('#cbSearch')?.focus()})[m]?.();
+        compare:()=>$('#mSearch')?.focus()})[m]?.();
     }else if(k==='e'){
       e.preventDefault();
       const m=document.querySelector('#modes button.on')?.dataset?.m||'home';
-      ({create:()=>$('#bExpXls')?.click(),compare:()=>$('#mExpXls')?.click(),
-        cbuild:()=>$('#cbExpXls')?.click()})[m]?.();
+      ({create:()=>$('#bExpXls')?.click(),compare:()=>$('#mExpXls')?.click()})[m]?.();
       showToast('Exporting…');
     }else if(k==='n'){
       e.preventDefault();
@@ -7800,30 +6922,7 @@ function bindImportModal(){
   $('#topImportBtn')?.addEventListener('click',()=>overlay.classList.add('on'));
   ['#importClose','#importClose2'].forEach(id=>$(id)?.addEventListener('click',()=>overlay.classList.remove('on')));
   overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('on');});
-  /* "Import Vendor Enquiry" fed the Comparison Sheet Builder, whose screen is not in the page. */
-  if(!document.getElementById('cbuild')){const qt=overlay.querySelector('.import-tab[data-itype="quote"]');if(qt)qt.style.display='none';}
-  overlay.querySelectorAll('.import-tab').forEach(tab=>{
-    tab.addEventListener('click',()=>{
-      overlay.querySelectorAll('.import-tab').forEach(t=>t.classList.remove('on'));
-      tab.classList.add('on');
-      const t=tab.dataset.itype;
-      const bp=$('#importBoqPanel'),qp=$('#importQuotePanel');
-      if(bp)bp.style.display=t==='boq'?'':'none';
-      if(qp)qp.style.display=t==='quote'?'':'none';
-    });
-  });
   $('#importBoqFile')?.addEventListener('change',e=>{importBOQExcel(e.target.files[0]);e.target.value='';overlay.classList.remove('on');});
-  $('#importQuoteFile')?.addEventListener('change',e=>{importQuoteExcel(e.target.files[0]);e.target.value='';overlay.classList.remove('on');});
-}
-
-/* ── Tender analysis bindings ─────────────────────────── */
-function bindTenderAnalysis(){
-  $('#taRefresh')?.addEventListener('click',renderTenderAnalysis);
-  $('#taGoCbuild')?.addEventListener('click',()=>setMode('cbuild'));
-  document.querySelector('[data-m="tender"]')?.addEventListener('click',()=>{
-    // ensure it initialises
-    setTimeout(renderTenderAnalysis,80);
-  });
 }
 
 /* ── niDoEnhance: Gemini-aware, with clean re-binding ─────
@@ -7935,7 +7034,6 @@ setInterval(()=>{ if(_draftDirty&&typeof cInit!=='undefined'&&cInit&&typeof boq!
 
 /* ─────────── INIT ALL ENHANCEMENTS ─────────────────── */
 (function initAll(){
-  loadVendorLogos();
   bindGemSettings();
   /* ── Find-from-history bar: foldable, state persisted ── */
   (function(){
@@ -7958,12 +7056,8 @@ setInterval(()=>{ if(_draftDirty&&typeof cInit!=='undefined'&&cInit&&typeof boq!
   /* ── Backup / Restore entire workspace (all data + settings) to a JSON file ──
      Lets you move your work between computers / locations, or keep a safety copy.
      Backs up every app localStorage key except the transient AI response cache. */
-  /* The ⤓ / ⤒ links lived on the old landing page, which the dashboard now
-     replaces — so they were bound but unreachable. The same two actions are
-     exposed as window.TSBackup for Administration › System & Data; the
-     links still work if that markup is ever shown again. */
+  /* Exposed as window.TSBackup for Administration › System & Data. */
   (function(){
-    const bBtn=document.getElementById('hfBackup'), rBtn=document.getElementById('hfRestore'), rFile=document.getElementById('hfRestoreFile');
     function snapshot(){
       const data={};
       for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(!k||k.indexOf('boq_aic_')===0)continue; data[k]=localStorage.getItem(k); }
@@ -8001,13 +7095,9 @@ setInterval(()=>{ if(_draftDirty&&typeof cInit!=='undefined'&&cInit&&typeof boq!
     }
     function pickRestore(e){
       if(e&&e.preventDefault) e.preventDefault();
-      let inp=document.getElementById('hfRestoreFile');
-      if(!inp||!inp.isConnected){ inp=document.createElement('input'); inp.type='file'; inp.accept='application/json,.json'; inp.addEventListener('change',onRestoreFile); }
+      const inp=document.createElement('input'); inp.type='file'; inp.accept='application/json,.json'; inp.addEventListener('change',onRestoreFile);
       inp.click();
     }
-    if(bBtn)bBtn.addEventListener('click',doBackup);
-    if(rBtn)rBtn.addEventListener('click',pickRestore);
-    if(rFile)rFile.addEventListener('change',onRestoreFile);
     window.TSBackup={backup:doBackup,restore:pickRestore};
   })();
   (function(){
@@ -8112,11 +7202,6 @@ setInterval(()=>{ if(_draftDirty&&typeof cInit!=='undefined'&&cInit&&typeof boq!
     });
   });
 
-  // Inject vendor logo areas whenever cbuild adds a vendor chip (MutationObserver — DOMSubtreeModified is deprecated)
-  const _chips=document.getElementById('cbChips');
-  if(_chips){
-    new MutationObserver(()=>setTimeout(injectVendorLogoBadges,50)).observe(_chips,{childList:true,subtree:false});
-  }
 
   // Check for saved draft on load (deferred to not interrupt startup)
   setTimeout(checkRestoreDraft,600);
@@ -8236,12 +7321,9 @@ function initAdjustablePanels(){
 
 // Initialise on page-load and after any view becomes visible for the first time
 initAdjustablePanels();
-// Some views (e.g. cbuild) are hidden at load; re-run when the user opens them
+// Some views are hidden at load; re-run when the user opens them
 document.querySelectorAll('#modes button').forEach(btn=>{
   btn.addEventListener('click',()=>setTimeout(initAdjustablePanels,60));
-});
-['#goCreate','#goCbuild','#goCompare'].forEach(s=>{
-  document.querySelector(s)?.addEventListener('click',()=>setTimeout(initAdjustablePanels,60));
 });
 
 
@@ -13421,7 +12503,6 @@ return api;
     }).observe(el,{childList:true,characterData:true,subtree:true});
   }
   function scan(){
-    ['#ts1','#ts2'].forEach(function(id){ var el=document.querySelector(id); if(el) hook(el); });
     document.querySelectorAll('.qm-w .wn').forEach(hook);
   }
   if(document.readyState!=='loading') scan(); else document.addEventListener('DOMContentLoaded',scan);
