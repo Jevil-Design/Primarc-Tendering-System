@@ -66,14 +66,6 @@
     pending: { label: 'Pending Approval', color: 'var(--blue)', dot: '◔' },
     archived: { label: 'Archived', color: 'var(--violet)', dot: '▣' }
   };
-  // effective permission for a user on a module/action: designation default, then user override
-  function effPerm(user, modId, action) {
-    const d = desigById(user.designationId);
-    let v = d && d.perms && d.perms[modId] ? !!d.perms[modId][action] : false;
-    if (user.overrides && user.overrides[modId] && user.overrides[modId][action] != null) v = !!user.overrides[modId][action];
-    return v;
-  }
-
   /* ───────────────────────── current admin / session ───────────────────────── */
   function currentName() { try { const s = JSON.parse(localStorage.getItem('ts_session') || sessionStorage.getItem('ts_session')); return s ? s.name : 'Administrator'; } catch (e) { return 'Administrator'; } }
   function canAdmin() { return !window.Auth || (window.Auth.can && window.Auth.can('users')); }
@@ -309,11 +301,6 @@
       fl.forEach(w => { if (w.name === 'Quotation Approval') { w.name = 'Enquiry Approval'; fch = true; } });
       if (fch) save(K.flow, fl);
     } catch (e) {}
-  }
-  function ensureModule(name) {
-    const m = modules(); if (m.find(x => x.name.toLowerCase() === name.toLowerCase())) return;
-    m.push({ id: 'm_' + name.toLowerCase().replace(/[^a-z]/g, ''), name, order: m.length, core: false });
-    save(K.mod, m);
   }
 
   /* ════════════════════════════════════════════════════════════════════
@@ -579,24 +566,7 @@
     .erp-pwbar i{display:block;height:100%;width:0;border-radius:2px;transition:width .2s}
 
     /* permission matrix */
-    .erp-matrix{width:100%;border-collapse:collapse;font-size:12px}
-    .erp-matrix th,.erp-matrix td{border-bottom:1px solid var(--line2,var(--line));padding:0;text-align:center}
-    .erp-matrix thead th{background:var(--th-bg,var(--panel2));color:var(--th-ink,var(--faint));font-size:10px;text-transform:uppercase;letter-spacing:.4px;font-weight:700;padding:0 4px;height:34px;position:sticky;top:0;z-index:2;border-bottom:1px solid var(--line)}
-    .erp-matrix thead th.mod{text-align:left;padding-left:12px;min-width:160px;left:0;z-index:3}
-    .erp-matrix tbody td.mod{text-align:left;padding:6px 12px;color:var(--ink);font-weight:600;background:var(--panel);position:sticky;left:0;z-index:1}
-    .erp-matrix .cell{width:100%;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background-color .1s}
-    .erp-matrix .cell:hover{background:var(--hi)}
-    .erp-matrix .cb{width:15px;height:15px;border-radius:4px;border:1.5px solid var(--erp-fl);display:flex;align-items:center;justify-content:center}
-    .erp-matrix .cell.on .cb{background:var(--accent);border-color:var(--accent)}
-    .erp-matrix .cell.on .cb svg{width:10px;height:10px;stroke:#fff;stroke-width:3;fill:none}
-    .erp-matrix .cell.ovr .cb{box-shadow:0 0 0 2px var(--accent2)}
-    .erp-matrix tbody tr:hover td.mod{background:var(--hi)}
-    .erp-colh{cursor:pointer}
-    .erp-colh:hover{color:var(--accent)}
 
-    .erp-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--faint);margin-top:10px}
-    .erp-leg span{display:flex;align-items:center;gap:6px}
-    .erp-leg i{width:12px;height:12px;border-radius:3px;display:inline-block}
 
     /* workflow */
     .erp-flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;row-gap:10px}
@@ -605,9 +575,6 @@
     .erp-stepbox .lv{font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--faint);margin-bottom:2px}
     .erp-stepbox .nm{font-size:12.5px;font-weight:700;color:var(--ink)}
     .erp-stepbox .dp{font-size:11px;color:var(--dim);margin-top:1px;font-variant-numeric:tabular-nums}
-    .erp-stepbox .rm{position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--dim);font-size:13px;cursor:pointer;display:none;align-items:center;justify-content:center}
-    .erp-stepbox:hover .rm,.erp-stepbox .rm:focus-visible{display:flex}
-    .erp-stepbox .rm:hover{border-color:var(--red);color:var(--red)}
     .erp-arrow{width:26px;display:flex;align-items:center;justify-content:center;color:var(--faint)}
     .erp-arrow svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
 
@@ -671,8 +638,6 @@
     .erp-seg button.on{background:var(--panel);color:var(--accent);box-shadow:0 0 0 1px var(--line)}
     .erp-seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 
-    .erp-bar2{height:6px;border-radius:3px;background:var(--panel3);overflow:hidden}
-    .erp-bar2 i{display:block;height:100%;border-radius:3px}
 
     /* narrow screens: the admin nav becomes a scrolling tab strip above the page */
     @media (max-width:860px){
@@ -771,9 +736,7 @@
     { id: 'users', label: 'Users', icon: 'users', cnt: () => users().length },
     { act: 'roleAccess', label: 'Role Access', icon: 'key', tip: 'Sign-in roles and what each role may do — this is what the app enforces' },
     { id: 'designations', label: 'Designations', icon: 'desig', cnt: () => desigs().length },
-    { id: 'permissions', label: 'Designation Matrix', icon: 'perm' },
-    { id: 'workflow', label: 'Approval & Limits', icon: 'flow' },
-    { id: 'security', label: 'Security Policy', icon: 'security' },
+    { id: 'security', label: 'Passwords & Lockouts', icon: 'security' },
     { sec: 'Organisation & Data' },
     { id: 'departments', label: 'Departments', icon: 'dept', cnt: () => depts().length },
     { id: 'organization', label: 'Organization', icon: 'org' },
@@ -787,7 +750,7 @@
     { id: 'notifications', label: 'Notifications', icon: 'bell', cnt: () => notifs().filter(n => !n.read).length, hot: true },
     { ext: 'del', label: 'Deleted Items', icon: 'trash', tip: 'Opens Deleted Items' }
   ];
-  const TITLES = { dashboard: 'Administration', users: 'Users', designations: 'Designations', departments: 'Departments', organization: 'Organization', permissions: 'Designation Matrix', projects: 'Projects', majorterms: 'Major Terms', workflow: 'Approval & Limits', security: 'Security Policy', audit: 'Audit Trail', notifications: 'Notifications', system: 'System & Data' };
+  const TITLES = { dashboard: 'Administration', users: 'Users', designations: 'Designations', departments: 'Departments', organization: 'Organization', projects: 'Projects', majorterms: 'Major Terms', security: 'Passwords & Lockouts', audit: 'Audit Trail', notifications: 'Notifications', system: 'System & Data' };
 
   const S = {
     view: 'dashboard',
@@ -795,8 +758,6 @@
     collapsed: load('erp_side_collapsed', false),
     pinned: load('erp_pinned', []),
     u: { q: '', dept: '', desig: '', status: '', sort: 'name', dir: 1, page: 1, per: 8, sel: [] },
-    permDesig: null,
-    projUser: null,
     auditQ: '', auditMod: '',
     notifFilter: 'all'
   };
@@ -924,10 +885,10 @@
     /* the admin modules, grouped the same way as the side navigation */
     const DESC = {
       users: 'Accounts, status, password resets', roleAccess: 'What each sign-in role may do (enforced)',
-      designations: 'Job titles, hierarchy and limits', permissions: 'Reference permissions per designation',
-      workflow: 'Approval chains and ₹ limits', security: 'Password and session policy',
+      designations: 'Job titles and reporting line',
+      security: 'Password length and locked accounts',
       departments: 'Department master', organization: 'Company › branch › department tree',
-      projects: 'Project master and user access', majorterms: 'Standard contract clauses and Excel import', bmaster: 'Item library and rate history',
+      projects: 'Project master list', majorterms: 'Standard contract clauses and Excel import', bmaster: 'Item library and rate history',
       vmaster: 'Contractor and supplier records', system: 'Backup, import, theme, AI provider',
       audit: 'Who changed what, and when', notifications: 'Administrative alerts', del: 'Restore soft-deleted records'
     };
@@ -941,7 +902,7 @@
     });
 
     const server = !!(window.TSApi && window.TSApi.active && window.TSApi.session && window.CloudflareAPI);
-    const pol = policy(), lic = pol.license;
+    const pol = policy();
     return `
       <div class="erp-sec-head"><div><h1 class="erp-h">Administration</h1><div class="erp-sub">Users, access, organisation data and audit for the Tendering System.</div></div>
         <div class="acts"><button class="erp-btn" onclick="ERP.go('audit')">${ic('audit')}Audit trail</button><button class="erp-btn primary" onclick="ERP.addUser()">${ic('plus')}Add user</button></div></div>
@@ -964,7 +925,6 @@
               <div class="r"><span class="k">Admin master data</span><span class="v">This browser</span></div>
               <div class="r"><span class="k">Session limits</span><span class="v">${server ? '30 min idle · 12 h max' : (pol.sessionTimeout || 30) + ' min idle'}</span></div>
               <div class="r"><span class="k">Min. password length</span><span class="v">${pol.minLen || 8} characters</span></div>
-              ${lic && lic.total ? `<div class="r"><span class="k">Licensed seats</span><span class="v">${u.filter(x => x.status !== 'archived').length} of ${lic.total} used</span></div>` : ''}
             </div></div>
         </div>
       </div>`;
@@ -1019,6 +979,6 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
 
   /* command palette + remaining views are attached by the continuation file */
-  window.__ERP_INTERNAL = { S, NAV, TITLES, VIEWS, BIND, load, save, K, esc, ic, ICON, ACTIONS, STATUS, users, setUsers, depts, desigs, modules, projects, branches, companies, audit, notifs, flows, policy, settings, deptName, desigById, desigName, branchName, companyName, userById, userName, effPerm, logAudit, notify, refreshBadge, hash, rndSalt, uid, fmtDate, fmtDT, ago, inr, inrFull, avatar, statusBadge, desigTag, ensureModule, go, renderMain, renderNav, renderShell, canAdmin, currentName, myIP, browserName, osName };
+  window.__ERP_INTERNAL = { S, NAV, TITLES, VIEWS, BIND, load, save, K, esc, ic, ICON, ACTIONS, STATUS, users, setUsers, depts, desigs, modules, projects, branches, companies, audit, notifs, flows, policy, settings, deptName, desigById, desigName, branchName, companyName, userById, userName, logAudit, notify, refreshBadge, hash, rndSalt, uid, fmtDate, fmtDT, ago, inr, inrFull, avatar, statusBadge, desigTag, go, renderMain, renderNav, renderShell, canAdmin, currentName, myIP, browserName, osName };
   function openCmd() { if (window.__ERP_openCmd) window.__ERP_openCmd(); }
 })();

@@ -46,13 +46,13 @@ check('dashboard shows BOQ library count from the catalog', st.lib != null && st
 check('no invented figures (Pending Approvals +3, Online now, Today\'s logins, System Health)', !/Pending Approvals|Online Now|Today's Logins|System Health|SHA-256/i.test(st.text));
 
 /* ── every section renders ── */
-for (const v of ['dashboard', 'users', 'designations', 'permissions', 'workflow', 'security', 'departments', 'organization', 'projects', 'system', 'audit', 'notifications']) {
+for (const v of ['dashboard', 'users', 'designations', 'security', 'departments', 'organization', 'projects', 'system', 'audit', 'notifications']) {
   const before = errs.length;
   await page.evaluate((x) => ERP.go(x), v); await sleep(350);
   const ok = await page.evaluate(() => !!document.querySelector('#erpBody h1.erp-h') && document.querySelector('#erpNav a.on') !== null);
   check(`section "${v}" renders`, ok && errs.length === before, errs.slice(before).join(' | '));
 }
-check('top bar follows the admin section', await page.evaluate(() => { ERP.go('security'); return new Promise((r) => setTimeout(() => r(document.getElementById('pwsTitle').textContent), 200)); }) === 'Security Policy');
+check('top bar follows the admin section', await page.evaluate(() => { ERP.go('security'); return new Promise((r) => setTimeout(() => r(document.getElementById('pwsTitle').textContent), 200)); }) === 'Passwords & Lockouts');
 
 /* ── user drawer ── */
 await page.evaluate(() => ERP.go('users')); await sleep(300);
@@ -119,20 +119,30 @@ const dep = (await depts()).find((d) => d.name === 'UI-ADMIN Dept');
 check('New department saves', !!dep);
 await page.evaluate((id) => { ERP._delDept(id); }, dep.id); await dlg('ok');
 check('Delete department asks in-app, then removes it', !(await depts()).some((d) => d.name === 'UI-ADMIN Dept'));
-await page.evaluate(() => ERP.go('permissions')); await sleep(300);
-const before = await page.evaluate(() => { const id = document.getElementById('permDesig').value; const d = JSON.parse(localStorage.getItem('erp_designations')).find((x) => x.id === id); const m = Object.keys(d.perms || {})[0]; return { id, m, v: !!(d.perms[m] || {}).share }; });
-await page.evaluate((m) => ERP._permTog(m, 'share'), before.m); await sleep(200);
-const after = await page.evaluate((b) => !!JSON.parse(localStorage.getItem('erp_designations')).find((x) => x.id === b.id).perms[b.m].share, before);
-check('Designation matrix toggle saves', after !== before.v);
-await page.evaluate((m) => ERP._permTog(m, 'share'), before.m);
-check('Designation matrix says it is reference-only and links Role Access', await page.evaluate(() => /Reference only/.test(document.getElementById('erpBody').innerText) && !/apply across the app/.test(document.getElementById('erpBody').innerText)));
-await page.evaluate(() => ERP.go('workflow')); await sleep(300);
-const wf0 = await page.evaluate(() => JSON.parse(localStorage.getItem('erp_workflows'))[0]);
-await page.evaluate((id) => { ERP._wfAdd(id); }, wf0.id); await page.waitForSelector('#wfPick'); await dlg('ok');
-const wf1 = await page.evaluate((id) => JSON.parse(localStorage.getItem('erp_workflows')).find((w) => w.id === id), wf0.id);
-check('Add approval level (picked from a list) saves', wf1.steps.length === wf0.steps.length + 1);
-await page.evaluate((id, n) => ERP._wfRemove(id, n), wf0.id, wf1.steps.length - 1);
-
+/* removed settings that nothing in the app applied */
+st = await page.evaluate(() => ({ nav: [...document.querySelectorAll('#erpNav a')].map((x) => x.textContent.trim()).join('|'),
+  api: ['_permTog', '_wfAdd', '_setLimit', '_saveProjAccess', '_killAll', 'forceLogout', '_compareDesig'].filter((f) => typeof ERP[f] === 'function') }));
+check('Designation Matrix and Approval & Limits are gone from the nav', !/Designation Matrix|Approval/.test(st.nav), st.nav);
+check('their actions are gone too', !st.api.length, st.api.join(','));
+await page.evaluate(() => ERP.go('projects')); await sleep(300);
+check('Projects page has no "Project access" panel', await page.evaluate(() => !/Project access|Assign projects/.test(document.getElementById('erpBody').innerText) && !document.getElementById('paUser')));
+await page.evaluate(() => ERP.go('security')); await sleep(300);
+st = await page.evaluate(() => ({ t: document.getElementById('erpBody').innerText, ids: ['pExp', 'pHist', 'pLock', 'pTimeout', 'p2fa', 'pSched', 'pIpMode', 'pLicTotal'].filter((x) => document.getElementById(x)) }));
+check('Passwords & Lockouts shows only enforced settings', !st.ids.length && /Minimum password length/i.test(st.t) && /Locked \/ Restricted/i.test(st.t), st.ids.join(','));
+const pol0 = await page.evaluate(() => JSON.parse(localStorage.getItem('erp_policy')));
+await page.evaluate(() => { document.getElementById('pMin').value = '10'; ERP._savePolicy(); }); await sleep(250);
+const pol1 = await page.evaluate(() => JSON.parse(localStorage.getItem('erp_policy')));
+check('saving the minimum length keeps the other stored policy fields', pol1.minLen === 10 && pol1.expiryDays === pol0.expiryDays && JSON.stringify(pol1.license) === JSON.stringify(pol0.license));
+await page.evaluate((n) => { document.getElementById('pMin').value = String(n); ERP._savePolicy(); }, pol0.minLen || 8); await sleep(250);
+await page.evaluate(() => ERP.go('designations')); await sleep(300);
+const dg0 = await page.evaluate(() => JSON.parse(localStorage.getItem('erp_designations')).find((d) => d.limits));
+await page.evaluate((id) => ERP.editDesig(id), dg0.id); await sleep(400);
+check('designation editor has no approval-limit or copy-permission fields', await page.evaluate(() => !document.getElementById('dgLQ') && !document.getElementById('dgCopy')));
+await page.evaluate(() => { document.getElementById('dgDesc').value = 'e2e edited'; }); await page.click('.erp-dfoot .erp-btn.primary'); await sleep(400);
+const dg1 = await page.evaluate((id) => JSON.parse(localStorage.getItem('erp_designations')).find((d) => d.id === id), dg0.id);
+check('editing a designation keeps its stored limits and permissions', dg1.description === 'e2e edited' && JSON.stringify(dg1.limits) === JSON.stringify(dg0.limits) && JSON.stringify(dg1.perms) === JSON.stringify(dg0.perms));
+await page.evaluate(() => ERP.go('users')); await sleep(300);
+check('user menu no longer offers Force logout', await page.evaluate(() => { const b = document.querySelector('#erpBody [data-rowmenu]'); if (!b) return false; b.click(); const m = document.querySelector('.erp-rowmenu'); const ok = !!m && !/Force logout/i.test(m.textContent); document.body.click(); return ok; }));
 /* ── audit: no invented IP addresses ── */
 st = await page.evaluate(() => JSON.parse(localStorage.getItem('erp_audit')).slice(0, 5));
 check('new audit entries carry no made-up IP', st.length > 0 && st.every((a) => !a.ip), JSON.stringify(st.map((a) => a.ip)));
@@ -165,7 +175,7 @@ check('…and Enter opens it', await page.evaluate(() => document.querySelector(
 for (const [w, h] of [[1366, 768], [1024, 768], [390, 844]]) {
   await page.setViewport({ width: w, height: h }); await sleep(300);
   const over = [];
-  for (const v of ['dashboard', 'users', 'permissions', 'security', 'system']) {
+  for (const v of ['dashboard', 'users', 'designations', 'projects', 'security', 'system']) {
     await page.evaluate((x) => ERP.go(x), v); await sleep(250);
     const o = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: innerWidth }));
     if (o.sw > o.iw) over.push(v + ': ' + o.sw + '>' + o.iw);

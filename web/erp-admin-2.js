@@ -7,10 +7,10 @@
   const I = window.__ERP_INTERNAL;
   if (!I) { console.error('ERP internals missing'); return; }
   const { S, NAV, TITLES, VIEWS, BIND, load, save, K, esc, ic, ICON, ACTIONS, STATUS,
-    users, setUsers, depts, desigs, modules, projects, branches, companies, audit, notifs, flows, policy, settings,
-    deptName, desigById, desigName, branchName, companyName, userById, userName, effPerm,
+    users, setUsers, depts, desigs, modules, projects, branches, companies, audit, notifs, policy, settings,
+    deptName, desigById, desigName, branchName, companyName, userById, userName,
     logAudit, notify, refreshBadge, hash, rndSalt, uid, fmtDate, fmtDT, ago, inr, inrFull,
-    avatar, statusBadge, desigTag, ensureModule, go, renderMain, renderNav, currentName, myIP, browserName, osName } = I;
+    avatar, statusBadge, desigTag, go, renderMain, renderNav, currentName, myIP, browserName, osName } = I;
 
   const toast = (m) => { if (window.showToast) window.showToast(m); else { const t = document.createElement('div'); t.textContent = m; t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:9px;font-size:13px;font-weight:600;z-index:100050;box-shadow:0 10px 30px rgba(0,0,0,.4);font-family:Archivo,sans-serif'; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); } };
   const $ = (s, r) => (r || document).querySelector(s);
@@ -318,8 +318,6 @@
             <div class="erp-pwbar"><i id="fPwBar"></i></div></div>
           <div><label class="erp-flbl">Confirm Password</label><input class="erp-fin" id="fPw2" type="password" placeholder="re-enter"></div>
           <div class="full"><label class="erp-toggle"><input type="checkbox" id="fPa" ${pa ? 'checked' : ''}><span class="tk"></span><span class="tl">Allow Platform Access</span></label><div class="erp-fhint">When off, the user cannot sign in and active sessions are terminated.</div></div>
-          <div><label class="erp-flbl">Account Expiry Date</label><input class="erp-fin" id="fExpiry" type="date" value="${u ? esc(u.expiryDate || '') : ''}"><div class="erp-fhint">Optional — login blocked after this date</div></div>
-          <div><label class="erp-flbl">Digital Signature</label><button class="erp-btn" style="width:100%;justify-content:center" onclick="document.getElementById('uSignFile').click()">${draft.signature ? '✓ Signature attached' : '⤓ Upload signature'}</button><input type="file" id="uSignFile" accept="image/*" style="display:none"></div>
 
           <div class="erp-fsec">${ic('audit')}Notes</div>
           <div class="full"><label class="erp-flbl">Remarks</label><textarea class="erp-fta" id="fRemarks" placeholder="Internal notes about this employee…">${u ? esc(u.remarks || '') : ''}</textarea></div>
@@ -331,7 +329,6 @@
   }
   function bindDrawer() {
     const pf = $('#uPhotoFile'); if (pf) pf.onchange = (e) => readImg(e, (d) => { draft.photo = d; const el = $('#uPhoto'); el.style.backgroundImage = `url('${d}')`; el.textContent = ''; const ov = document.createElement('div'); ov.className = 'ov'; ov.textContent = 'Change'; el.appendChild(ov); });
-    const sf = $('#uSignFile'); if (sf) sf.onchange = (e) => readImg(e, (d) => { draft.signature = d; toast('✓ Signature attached'); });
     // designation combo
     const inp = $('#fDesig'); const list = $('#fDesigList');
     function renderList() {
@@ -357,14 +354,12 @@
   function quickDesig(presetName) {
     const deptOpts = depts().map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join('');
     const reportOpts = `<option value="">— Top level —</option>` + desigs().map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join('');
-    const copyOpts = `<option value="">— Start blank —</option>` + desigs().map(d => `<option value="${d.id}">Copy from ${esc(d.name)}</option>`).join('');
     openOv('modal', `
       <div class="erp-dh"><div><h3>Create Designation</h3><div class="sub">Added instantly — no page refresh</div></div><button class="erp-x" onclick="ERP._reopenDrawerFromQuick()">×</button></div>
       <div class="erp-dbody"><div class="erp-fgrid">
         <div class="full"><label class="erp-flbl">Designation Name <span class="req">*</span></label><input class="erp-fin" id="qdName" value="${esc(presetName || '')}" placeholder="e.g. Senior Commercial Engineer"></div>
         <div><label class="erp-flbl">Department</label><select class="erp-fsel" id="qdDept">${deptOpts}</select></div>
         <div><label class="erp-flbl">Reports To</label><select class="erp-fsel" id="qdReports">${reportOpts}</select></div>
-        <div class="full"><label class="erp-flbl">Copy Permissions From</label><select class="erp-fsel" id="qdCopy">${copyOpts}</select></div>
         <div class="full"><label class="erp-flbl">Description</label><textarea class="erp-fta" id="qdDesc" placeholder="What this role does…"></textarea></div>
         <div class="full"><label class="erp-toggle"><input type="checkbox" id="qdActive" checked><span class="tk"></span><span class="tl">Active</span></label></div>
       </div></div>
@@ -390,12 +385,12 @@
         <button type="button" class="erp-btn ghost icon" data-rowmenu title="More actions" aria-label="More actions for ${esc(d.name)}" aria-haspopup="menu" onclick="ERP._desigMenu(event,'${d.id}')">${ic('dots')}</button>
       </td></tr>`).join('');
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Designations${localBadge()}</h1><div class="erp-sub">${ds.length} job titles across ${depts().length} departments, with their reporting line and approval limits.</div></div>
-        <div class="acts"><button class="erp-btn" onclick="ERP._compareDesig()">${ic('desig')}Compare</button><button class="erp-btn primary" onclick="ERP.editDesig('')">${ic('plus')}New designation</button></div></div>
+      <div class="erp-sec-head"><div><h1 class="erp-h">Designations${localBadge()}</h1><div class="erp-sub">${ds.length} job titles across ${depts().length} departments, with their reporting line.</div></div>
+        <div class="acts"><button class="erp-btn primary" onclick="ERP.editDesig('')">${ic('plus')}New designation</button></div></div>
       <div class="erp-card"><div class="erp-tbl-wrap"><table class="erp-tbl">
         <thead><tr><th class="nosort">Designation</th><th class="nosort">Department</th><th class="nosort">Reports To</th><th class="nosort">Level</th><th class="nosort num">Users</th><th class="nosort">Status</th><th class="nosort"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Actions</span></th></tr></thead>
         <tbody>${rows || `<tr><td colspan="7"><div class="erp-empty"><b>No designations yet</b>Create the job titles people hold.</div></td></tr>`}</tbody></table></div></div>
-      <h2 class="erp-h2">Reporting hierarchy</h2><div class="erp-sub">Main approval line, top to bottom.</div>
+      <h2 class="erp-h2">Reporting hierarchy</h2><div class="erp-sub">Main reporting line, top to bottom.</div>
       ${hierarchyChain()}`;
   };
   function hierarchyChain() {
@@ -407,23 +402,15 @@
     const d = editId ? desigById(editId) : null;
     const deptOpts = depts().map(x => `<option value="${x.id}" ${d && d.departmentId === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
     const reportOpts = `<option value="">— Top level —</option>` + desigs().filter(x => x.id !== editId).map(x => `<option value="${x.id}" ${d && d.reportsTo === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('');
-    const copyRow = editId ? '' : `<div class="full"><label class="erp-flbl">Copy Permissions From</label><select class="erp-fsel" id="dgCopy"><option value="">— Start blank —</option>${desigs().map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select></div>`;
-    const lim = (d && d.limits) || { quotation: 0, tender: 0, workorder: 0, purchase: 0 };
     openOv('modal', `
-      <div class="erp-dh"><div><h3>${d ? 'Edit Designation' : 'New Designation'}</h3><div class="sub">${d ? esc(d.name) : 'Define a role, its place in the hierarchy & approval limits'}</div></div><button class="erp-x" onclick="ERP._closeOv()">×</button></div>
+      <div class="erp-dh"><div><h3>${d ? 'Edit Designation' : 'New Designation'}</h3><div class="sub">${d ? esc(d.name) : 'Define a role and its place in the hierarchy'}</div></div><button class="erp-x" onclick="ERP._closeOv()">×</button></div>
       <div class="erp-dbody"><div class="erp-fgrid">
         <div class="full"><label class="erp-flbl">Designation Name <span class="req">*</span></label><input class="erp-fin" id="dgName" value="${d ? esc(d.name) : ''}" placeholder="e.g. Senior Commercial Engineer"></div>
         <div><label class="erp-flbl">Department</label><select class="erp-fsel" id="dgDept">${deptOpts}</select></div>
         <div><label class="erp-flbl">Reports To</label><select class="erp-fsel" id="dgReports">${reportOpts}</select></div>
         <div><label class="erp-flbl">Hierarchy Level</label><input class="erp-fin" id="dgLevel" type="number" min="1" max="10" value="${d ? (d.level || 5) : 5}"></div>
         <div><label class="erp-flbl">Status</label><select class="erp-fsel" id="dgStatus"><option value="active" ${d && d.status === 'active' ? 'selected' : ''}>Active</option><option value="inactive" ${d && d.status === 'inactive' ? 'selected' : ''}>Disabled</option></select></div>
-        ${copyRow}
         <div class="full"><label class="erp-flbl">Description</label><textarea class="erp-fta" id="dgDesc" placeholder="Role summary…">${d ? esc(d.description || '') : ''}</textarea></div>
-        <div class="erp-fsec">${ic('flow')}Financial Approval Limits (₹)</div>
-        <div><label class="erp-flbl">Enquiry</label><input class="erp-fin mono" id="dgLQ" type="number" value="${lim.quotation || 0}"></div>
-        <div><label class="erp-flbl">Tender</label><input class="erp-fin mono" id="dgLT" type="number" value="${lim.tender || 0}"></div>
-        <div><label class="erp-flbl">Work Order</label><input class="erp-fin mono" id="dgLW" type="number" value="${lim.workorder || 0}"></div>
-        <div><label class="erp-flbl">Purchase Order</label><input class="erp-fin mono" id="dgLP" type="number" value="${lim.purchase || 0}"></div>
       </div></div>
       <div class="erp-dfoot"><span class="msg" id="dgMsg"></span><button class="erp-btn" onclick="ERP._closeOv()">Cancel</button><button class="erp-btn primary" onclick="ERP._saveDesig('${editId || ''}')">${ic('check')}${d ? 'Save' : 'Create'}</button></div>`);
     setTimeout(() => { const n = $('#dgName'); if (n) n.focus(); }, 60);
@@ -485,52 +472,9 @@
   }
 
   /* ════════════════════════════════════════════════════════════════════
-     PERMISSIONS  (module × action matrix)
-     ════════════════════════════════════════════════════════════════════ */
-  VIEWS.permissions = function () {
-    if (!S.permDesig || !desigById(S.permDesig)) S.permDesig = (desigs()[0] || {}).id;
-    const d = desigById(S.permDesig);
-    const mods = modules().slice().sort((a, b) => (a.order || 0) - (b.order || 0));
-    const desigOpts = desigs().map(x => `<option value="${x.id}" ${x.id === S.permDesig ? 'selected' : ''}>${esc(x.name)} · ${esc(deptName(x.departmentId))}</option>`).join('');
-    const head = `<tr><th class="mod">Module</th>${ACTIONS.map(a => `<th class="erp-colh" onclick="ERP._permCol('${a[0]}')" title="Toggle column">${a[1]}</th>`).join('')}</tr>`;
-    const body = mods.map(m => {
-      const cells = ACTIONS.map(a => {
-        const on = d && d.perms && d.perms[m.id] && d.perms[m.id][a[0]];
-        return `<td><div class="cell ${on ? 'on' : ''}" onclick="ERP._permTog('${m.id}','${a[0]}')"><div class="cb">${on ? ic('check') : ''}</div></div></td>`;
-      }).join('');
-      return `<tr><td class="mod">${esc(m.name)}${m.core ? '' : ' <span class="erp-pill" style="background:var(--violet);font-size:7px">NEW</span>'}<div style="font-size:9px;font-weight:500;color:var(--faint)">${permCount(d, m.id)}/${ACTIONS.length}</div></td>${cells}</tr>`;
-    }).join('');
-    return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Designation Matrix${localBadge()}</h1><div class="erp-sub">Module-by-action permissions recorded for each designation.</div></div></div>
-      <div class="erp-note">${ic('key')}<div><b>Reference only — this matrix does not control access.</b> What a person can do in the app is decided by their sign-in <b>role</b>; change that in Role Access.</div><button class="erp-btn sm" onclick="ERP._navAct('roleAccess')">Open Role Access</button></div>
-      <div class="erp-toolbar">
-        <label class="erp-flbl" for="permDesig" style="margin:0;align-self:center">Designation</label>
-        <select class="erp-select" id="permDesig" style="min-width:260px;max-width:none">${desigOpts}</select>
-        <div class="erp-tb-sp"></div>
-        <button class="erp-btn ghost" onclick="ERP._permAll(1)">${ic('check')}Grant all</button>
-        <button class="erp-btn ghost" onclick="ERP._permAll(0)">Clear all</button>
-        <button class="erp-btn" onclick="ERP._addModule()">${ic('plus')}Register module</button>
-      </div>
-      <div class="erp-card"><div class="erp-tbl-wrap" style="max-height:none"><table class="erp-matrix"><thead>${head}</thead><tbody>${body}</tbody></table></div></div>
-      <div class="erp-leg"><span><i style="background:var(--accent)"></i>Granted</span><span><i style="background:var(--panel3);border:1.5px solid var(--line)"></i>Denied</span><span>Click a column heading to toggle that action for every module. Changes save straight away.</span></div>`;
-  };
-  BIND.permissions = function () { const s = $('#permDesig'); if (s) s.onchange = e => { S.permDesig = e.target.value; renderMain(); }; };
-  function permCount(d, mId) { if (!d || !d.perms || !d.perms[mId]) return 0; return ACTIONS.filter(a => d.perms[mId][a[0]]).length; }
-
-  /* ════════════════════════════════════════════════════════════════════
-     PROJECT ACCESS
+     PROJECTS
      ════════════════════════════════════════════════════════════════════ */
   VIEWS.projects = function () {
-    if (!S.projUser || !userById(S.projUser)) S.projUser = (users()[0] || {}).id;
-    const u = userById(S.projUser);
-    const userOpts = users().map(x => `<option value="${x.id}" ${x.id === S.projUser ? 'selected' : ''}>${esc(x.name)} · ${esc(desigName(x.designationId))}</option>`).join('');
-    const pa = u.projectAccess || 'all';
-    const mode = typeof pa === 'string' ? pa : pa.mode;
-    const ids = typeof pa === 'object' ? (pa.ids || []) : [];
-    const projRows = projects().map(p => {
-      const on = mode === 'all' || ids.includes(p.id);
-      return `<label class="erp-notif" style="cursor:pointer;border-bottom:1px solid var(--line)"><input type="checkbox" class="erp-chk paChk" data-id="${p.id}" ${on ? 'checked' : ''} ${mode !== 'selected' ? 'disabled' : ''} style="margin-top:3px"><div style="flex:1"><div class="ttl">${esc(p.name)}</div><div class="ms">Project code ${esc(p.code)}</div></div></label>`;
-    }).join('');
     const masterRows = projects().map(p => `<tr>
         <td><div class="nm">${esc(p.name)}</div></td>
         <td class="mono">${esc(p.code || '—')}</td>
@@ -541,136 +485,29 @@
         <td class="acts"><button type="button" class="erp-btn ghost icon" title="Edit ${esc(p.name)}" aria-label="Edit ${esc(p.name)}" onclick="ERP.editProject('${p.id}')">${ic('edit')}</button><button type="button" class="erp-btn ghost icon danger" title="Delete ${esc(p.name)}" aria-label="Delete ${esc(p.name)}" onclick="ERP._delProject('${p.id}')">${ic('trash')}</button></td>
       </tr>`).join('');
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Projects${localBadge()}</h1><div class="erp-sub">${projects().length} project${projects().length === 1 ? '' : 's'} — the master list, and which projects each user may work on.</div></div>
+      <div class="erp-sec-head"><div><h1 class="erp-h">Projects${localBadge()}</h1><div class="erp-sub">${projects().length} project${projects().length === 1 ? '' : 's'} in the project master list.</div></div>
         <div class="acts"><button class="erp-btn primary" onclick="ERP.editProject('')">${ic('plus')}New project</button></div></div>
-      <div class="erp-card" style="margin-bottom:22px"><div class="erp-tbl-wrap"><table class="erp-tbl">
+      <div class="erp-card"><div class="erp-tbl-wrap"><table class="erp-tbl">
         <thead><tr><th class="nosort">Project</th><th class="nosort">Code</th><th class="nosort">Client</th><th class="nosort">Location</th><th class="nosort">Project Manager</th><th class="nosort">Status</th><th class="nosort"></th></tr></thead>
-        <tbody>${masterRows || `<tr><td colspan="7"><div class="erp-empty"><b>No projects yet</b><button class="erp-btn primary sm" onclick="ERP.editProject('')">${ic('plus')}New project</button></div></td></tr>`}</tbody></table></div></div>
-      <h2 class="erp-h2">Project access</h2><div class="erp-sub">Choose which projects a user can see and work on.</div>
-      <div class="erp-grid2">
-        <div class="erp-card"><div class="erp-card-head"><div class="ttl">Assign projects</div><button class="erp-btn sm primary" onclick="ERP._saveProjAccess()">${ic('check')}Save</button></div>
-          <div class="erp-card-body">
-            <label class="erp-flbl">User</label><select class="erp-fsel" id="paUser" style="margin-bottom:16px">${userOpts}</select>
-            <label class="erp-flbl">Access scope</label>
-            <div class="erp-seg" id="paMode" style="margin-bottom:14px">
-              <button class="${mode === 'all' ? 'on' : ''}" data-m="all">All Projects</button>
-              <button class="${mode === 'assigned' ? 'on' : ''}" data-m="assigned">Assigned Only</button>
-              <button class="${mode === 'selected' ? 'on' : ''}" data-m="selected">Selected</button>
-            </div>
-            <div style="border:1px solid var(--line);border-radius:10px;overflow:hidden" id="paList">${projRows}</div>
-          </div></div>
-        <div class="erp-card"><div class="erp-card-head"><div class="ttl">Access summary</div></div>
-          <div class="erp-card-body">
-            <div class="erp-cellname" style="margin-bottom:14px">${avatar(u, 40)}<div><div class="nm">${esc(u.name)}</div><div style="font-size:11px;color:var(--faint)">${esc(desigName(u.designationId))} · ${esc(deptName(u.departmentId))}</div></div></div>
-            <div class="erp-kv">
-              <div class="r"><span class="k">Scope</span><span class="v">${mode === 'all' ? 'All projects' : mode === 'assigned' ? 'Assigned only' : ids.length + ' selected'}</span></div>
-              <div class="r"><span class="k">Branch</span><span class="v">${esc(branchName(u.branchId))}</span></div>
-              <div class="r"><span class="k">Company</span><span class="v">${esc(companyName(u.companyId))}</span></div>
-            </div>
-            <div class="erp-fhint" style="margin-top:14px">Users with “All Projects” see every site. “Selected” limits them to the ticked projects only.</div>
-          </div></div>
-      </div>`;
+        <tbody>${masterRows || `<tr><td colspan="7"><div class="erp-empty"><b>No projects yet</b><button class="erp-btn primary sm" onclick="ERP.editProject('')">${ic('plus')}New project</button></div></td></tr>`}</tbody></table></div></div>`;
   };
-  BIND.projects = function () {
-    const s = $('#paUser'); if (s) s.onchange = e => { S.projUser = e.target.value; renderMain(); };
-    document.querySelectorAll('#paMode button').forEach(b => b.onclick = () => {
-      const u = userById(S.projUser); const ids = (typeof u.projectAccess === 'object' ? u.projectAccess.ids : []) || [];
-      u.projectAccess = b.dataset.m === 'selected' ? { mode: 'selected', ids } : b.dataset.m;
-      const all = users(); const i = all.findIndex(x => x.id === u.id); all[i] = u; setUsers(all); renderMain();
-    });
-  };
-
   /* ════════════════════════════════════════════════════════════════════
-     APPROVAL WORKFLOW + FINANCIAL LIMITS
-     ════════════════════════════════════════════════════════════════════ */
-  VIEWS.workflow = function () {
-    const wf = flows();
-    const chains = wf.map(w => {
-      const steps = w.steps.map((sid, i) => {
-        const d = desigById(sid);
-        return `<div class="erp-step"><div class="erp-stepbox"><button class="rm" title="Remove this level" aria-label="Remove ${d ? esc(d.name) : 'level'}" onclick="ERP._wfRemove('${w.id}',${i})">×</button><div class="lv">Step ${i + 1}</div><div class="nm">${d ? esc(d.name) : '—'}</div><div class="dp">limit ${inr((d && d.limits && d.limits[wfKind(w)]) || 0)}</div></div>${i < w.steps.length - 1 ? `<div class="erp-arrow">${ic('chevR')}</div>` : ''}</div>`;
-      }).join('');
-      return `<div class="erp-card" style="margin-bottom:14px"><div class="erp-card-head"><div class="ttl">${esc(w.name)}<span>${w.steps.length} levels · ${esc((modules().find(m => m.id === w.moduleId) || {}).name || '')}</span></div><button class="erp-btn sm" onclick="ERP._wfAdd('${w.id}')">${ic('plus')}Add level</button></div>
-        <div class="erp-card-body"><div class="erp-flow">${steps}</div>
-          <div class="erp-leg" style="margin-top:14px"><span>Each level supports: Pending · Approved · Rejected · Returned · Comments · Digital Signature · Approval Date. Amounts above a level's limit escalate automatically.</span></div></div></div>`;
-    }).join('');
-
-    const limRows = desigs().slice().sort((a, b) => (a.level || 9) - (b.level || 9)).map(d => {
-      const l = d.limits || {};
-      return `<tr><td><div class="nm">${esc(d.name)}</div></td>
-        <td><input class="erp-input mono" style="width:120px;padding:5px 8px" type="number" value="${l.quotation || 0}" onchange="ERP._setLimit('${d.id}','quotation',this.value)"></td>
-        <td><input class="erp-input mono" style="width:120px;padding:5px 8px" type="number" value="${l.tender || 0}" onchange="ERP._setLimit('${d.id}','tender',this.value)"></td>
-        <td><input class="erp-input mono" style="width:120px;padding:5px 8px" type="number" value="${l.workorder || 0}" onchange="ERP._setLimit('${d.id}','workorder',this.value)"></td>
-        <td><input class="erp-input mono" style="width:120px;padding:5px 8px" type="number" value="${l.purchase || 0}" onchange="ERP._setLimit('${d.id}','purchase',this.value)"></td>
-      </tr>`;
-    }).join('');
-    return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Approval &amp; Limits${localBadge()}</h1><div class="erp-sub">Approval chains, and the ₹ amount each designation may approve.</div></div></div>
-      ${chains}
-      <div class="erp-card"><div class="erp-card-head"><div class="ttl">Financial Approval Limits<span>₹ per designation — anything above escalates to the next level</span></div></div>
-        <div class="erp-tbl-wrap"><table class="erp-tbl">
-          <thead><tr><th class="nosort">Designation</th><th class="nosort">Enquiry</th><th class="nosort">Tender</th><th class="nosort">Work Order</th><th class="nosort">Purchase</th></tr></thead>
-          <tbody>${limRows}</tbody></table></div></div>`;
-  };
-  function wfKind(w) { const n = w.name.toLowerCase(); if (n.includes('tender')) return 'tender'; if (n.includes('work')) return 'workorder'; if (n.includes('purchase')) return 'purchase'; return 'quotation'; }
-
-  /* ════════════════════════════════════════════════════════════════════
-     SECURITY & ACCESS CONTROL
+     PASSWORDS & LOCKED ACCOUNTS  (only settings the app actually applies)
      ════════════════════════════════════════════════════════════════════ */
   VIEWS.security = function () {
     const p = policy();
     const u = users();
-    const sessions = [];
-    u.forEach(x => (x.sessions || []).forEach(s => sessions.push({ u: x, s })));
-    const statusCounts = Object.keys(STATUS).map(k => ({ k, n: u.filter(x => (x.status || 'active') === k).length })).filter(x => x.n);
-    const lic = p.license || { total: 50 };
-    const used = u.filter(x => x.status !== 'archived').length;
+    const blocked = u.filter(x => x.status === 'locked' || x.platformAccess === false);
     return `
-      <div class="erp-sec-head"><div><h1 class="erp-h">Security Policy${localBadge()}</h1><div class="erp-sub">${statusCounts.map(c => c.n + ' ' + STATUS[c.k].label.toLowerCase()).join(' · ')} account${u.length === 1 ? '' : 's'}.</div></div>
-        <div class="acts"><button class="erp-btn primary" id="pSave" onclick="ERP._savePolicy()">${ic('check')}Save policy</button></div></div>
-      <div class="erp-note warn">${ic('security')}<div><b>What is enforced today:</b> the minimum password length, when passwords are set here. ${SERVER() ? 'Sign-in sessions are controlled by the server (30 min idle, 12 h maximum). ' : ''}The other rules on this page are recorded but not yet enforced at sign-in.</div></div>
-
+      <div class="erp-sec-head"><div><h1 class="erp-h">Passwords &amp; Lockouts${localBadge()}</h1><div class="erp-sub">${blocked.length} locked or restricted account${blocked.length === 1 ? '' : 's'}.</div></div></div>
+      <div class="erp-note">${ic('security')}<div>The minimum length applies whenever a password is set in Administration. ${SERVER() ? 'Sign-in sessions are controlled by the server (30 min idle, 12 h maximum).' : ''}</div></div>
       <div class="erp-grid2">
-        <div style="display:flex;flex-direction:column;gap:16px">
-          <div class="erp-card"><div class="erp-card-head"><div class="ttl">Password Policy</div></div><div class="erp-card-body"><div class="erp-fgrid">
-            <div><label class="erp-flbl">Minimum length</label><input class="erp-fin mono" id="pMin" type="number" value="${p.minLen || 8}"></div>
-            <div><label class="erp-flbl">Expiry (days)</label><input class="erp-fin mono" id="pExp" type="number" value="${p.expiryDays || 90}"></div>
-            <div><label class="erp-flbl">Password history</label><input class="erp-fin mono" id="pHist" type="number" value="${p.history || 3}"></div>
-            <div><label class="erp-flbl">Lock after N fails</label><input class="erp-fin mono" id="pLock" type="number" value="${p.lockAfter || 5}"></div>
-            <div class="full"><label class="erp-toggle"><input type="checkbox" id="pCx" ${p.complexity ? 'checked' : ''}><span class="tk"></span><span class="tl">Require complexity (upper, number, symbol)</span></label></div>
-            <div class="full"><label class="erp-toggle"><input type="checkbox" id="pFirst" ${p.mustChangeFirst ? 'checked' : ''}><span class="tk"></span><span class="tl">Force password change on first login</span></label></div>
-          </div></div></div>
-
-          <div class="erp-card"><div class="erp-card-head"><div class="ttl">Sessions & Login</div></div><div class="erp-card-body"><div class="erp-fgrid">
-            <div><label class="erp-flbl">Idle timeout (min)</label><input class="erp-fin mono" id="pTimeout" type="number" value="${p.sessionTimeout || 30}"></div>
-            <div><label class="erp-flbl">Concurrent logins</label><select class="erp-fsel" id="pConc"><option value="multi" ${p.concurrent === 'multi' ? 'selected' : ''}>Multiple devices</option><option value="one" ${p.concurrent === 'one' ? 'selected' : ''}>One device only</option><option value="two" ${p.concurrent === 'two' ? 'selected' : ''}>Two devices max</option></select></div>
-            <div class="full"><label class="erp-toggle"><input type="checkbox" id="p2fa" ${p.twoFactor ? 'checked' : ''}><span class="tk"></span><span class="tl">Two-factor authentication <span style="color:var(--faint);font-weight:500">(not available yet)</span></span></label></div>
-            <div class="full"><label class="erp-toggle"><input type="checkbox" id="pRem" ${p.rememberMe ? 'checked' : ''}><span class="tk"></span><span class="tl">Allow “Remember me”</span></label></div>
-            <div class="full"><label class="erp-toggle"><input type="checkbox" id="pSched" ${p.scheduleEnabled ? 'checked' : ''}><span class="tk"></span><span class="tl">Restrict login hours</span></label></div>
-            <div><label class="erp-flbl">From</label><input class="erp-fin" id="pFrom" type="time" value="${p.scheduleFrom || '09:00'}"></div>
-            <div><label class="erp-flbl">To</label><input class="erp-fin" id="pTo" type="time" value="${p.scheduleTo || '19:00'}"></div>
-          </div></div></div>
-
-          <details class="erp-card"><summary>IP restriction<span>advanced</span></summary><div class="erp-card-body"><div class="erp-fgrid">
-            <div class="full"><label class="erp-flbl">Mode</label><select class="erp-fsel" id="pIpMode"><option value="any" ${p.ipMode === 'any' ? 'selected' : ''}>Allow any IP</option><option value="office" ${p.ipMode === 'office' ? 'selected' : ''}>Office IP ranges only</option><option value="block" ${p.ipMode === 'block' ? 'selected' : ''}>Block specific IPs</option></select></div>
-            <div class="full"><label class="erp-flbl">IP / CIDR list</label><input class="erp-fin mono" id="pIpList" value="${esc(p.ipList || '')}" placeholder="203.122.45.0/24"></div>
-          </div></div></details>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:16px">
-          <details class="erp-card"><summary>Licence seats<span>${used} of ${lic.total} used</span></summary><div class="erp-card-body">
-            <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px"><div style="font-size:24px;font-weight:800;color:var(--ink)">${used}<span style="font-size:14px;color:var(--faint)"> / ${lic.total}</span></div><div style="font-size:11px;color:var(--dim);text-align:right">${lic.total - used} free<br><span style="color:var(--faint)">exp ${fmtDate(new Date(lic.expires).getTime())}</span></div></div>
-            <div class="erp-bar2"><i style="width:${Math.min(100, used / lic.total * 100)}%;background:${used / lic.total > .9 ? 'var(--red)' : 'var(--green)'}"></i></div>
-            <div class="erp-fgrid" style="margin-top:14px"><div><label class="erp-flbl">Seats</label><input class="erp-fin mono" id="pLicTotal" type="number" value="${lic.total}"></div><div><label class="erp-flbl">Expires</label><input class="erp-fin" id="pLicExp" type="date" value="${lic.expires}"></div></div>
-          </div></details>
-
-          <div class="erp-card"><div class="erp-card-head"><div class="ttl">Active sessions<span>${sessions.length} in this browser's list</span></div>${sessions.length ? '<button class="erp-btn sm danger" onclick="ERP._killAll()">End all</button>' : ''}</div>
-            <div class="erp-card-body" style="padding:6px 0">${sessions.length ? sessions.map(({ u, s }) => `<div class="erp-act" style="padding:11px 16px"><div class="dot" style="background:color-mix(in srgb,var(--green) 16%,transparent)">${ic('power').replace('<svg', '<svg style="stroke:var(--green)"')}</div><div class="txt"><div class="a">${esc(u.name)}</div><div class="m">${esc(s.browser)} · ${esc(s.os)} · ${esc(s.ip)} · ${ago(s.last)}</div></div><button class="erp-btn sm danger" onclick="ERP._killSession('${u.id}','${s.id}')">End</button></div>`).join('') : '<div class="erp-empty">No active sessions</div>'}</div></div>
-
-          <div class="erp-card"><div class="erp-card-head"><div class="ttl">Locked / Restricted</div></div><div class="erp-card-body" style="padding:6px 0">
-            ${u.filter(x => x.status === 'locked' || x.platformAccess === false).map(x => `<div class="erp-act" style="padding:11px 16px"><div class="dot" style="background:color-mix(in srgb,var(--red) 16%,transparent)">${ic('lock').replace('<svg', '<svg style="stroke:var(--red)"')}</div><div class="txt"><div class="a">${esc(x.name)}</div><div class="m">${esc(x.lockReason || (x.platformAccess === false ? 'Platform access disabled' : 'Locked'))}</div></div><button class="erp-btn sm" onclick="ERP.unlockUser('${x.id}')">${ic('unlock')}Unlock</button></div>`).join('') || '<div class="erp-empty">No locked accounts</div>'}
-          </div></div>
-        </div>
+        <div class="erp-card"><div class="erp-card-head"><div class="ttl">Password rule</div><button class="erp-btn sm primary" id="pSave" onclick="ERP._savePolicy()">${ic('check')}Save</button></div><div class="erp-card-body">
+          <label class="erp-flbl" for="pMin">Minimum password length</label><input class="erp-fin mono" id="pMin" type="number" min="6" max="64" value="${p.minLen || 8}" style="max-width:160px">
+        </div></div>
+        <div class="erp-card"><div class="erp-card-head"><div class="ttl">Locked / Restricted</div></div><div class="erp-card-body" style="padding:6px 0">
+          ${blocked.map(x => `<div class="erp-act" style="padding:11px 16px"><div class="dot" style="background:color-mix(in srgb,var(--red) 16%,transparent)">${ic('lock').replace('<svg', '<svg style="stroke:var(--red)"')}</div><div class="txt"><div class="a">${esc(x.name)}</div><div class="m">${esc(x.lockReason || (x.platformAccess === false ? 'Platform access disabled' : 'Locked'))}</div></div><button class="erp-btn sm" onclick="ERP.unlockUser('${x.id}')">${ic('unlock')}Unlock</button></div>`).join('') || '<div class="erp-empty">No locked accounts</div>'}
+        </div></div>
       </div>`;
   };
 
@@ -984,7 +821,6 @@
         { act: 'edit', icon: 'edit', label: 'Edit user', fn: () => userDrawer(id) },
         { act: 'reset', icon: 'key', label: 'Reset password', fn: () => window.ERP.resetPw(id) },
         u.status === 'locked' ? { act: 'unlock', icon: 'unlock', label: 'Unlock account', fn: () => window.ERP.unlockUser(id) } : { act: 'lock', icon: 'lock', label: 'Lock account', fn: () => window.ERP.lockUser(id) },
-        { act: 'force', icon: 'logout', label: 'Force logout', fn: () => window.ERP.forceLogout(id) },
         { act: 'pa', icon: 'power', label: (u.platformAccess !== false ? 'Revoke platform access' : 'Grant platform access'), fn: () => window.ERP.togglePA(id) },
         '-',
         { act: 'clone', icon: 'copy', label: 'Clone user', fn: () => window.ERP.cloneUser(id) },
@@ -1052,7 +888,6 @@
       logAudit({ module: 'Administration', action: 'Password Reset', target: u.name, newVal: 'Forced change on next login' });
       toast('✓ Password reset for ' + u.name);
     },
-    forceLogout: (id) => { if (SERVER()) { notice('Not available yet', 'Ending one user\'s sessions is not available from here yet. Resetting their password, or locking the account, signs them out everywhere.'); return; } const u = userById(id); u.sessions = []; persistUser(u); logAudit({ module: 'Administration', action: 'Force Logout', target: u.name, newVal: 'All sessions terminated' }); toast('⎋ ' + u.name + ' logged out everywhere'); renderMain(); },
     togglePA: async (id) => {
       { const u1 = userById(id); if (u1 && u1.platformAccess !== false && !(await confirmBox('Revoke sign-in for ' + u1.name + '?', 'They will not be able to sign in until access is granted again.', 'Revoke access'))) return; }
       if (SERVER()) { const u0 = userById(id); const on = u0 && u0.platformAccess === false; serverDo(() => window.TSApi.updateUser(id, { active: on }), on ? '✓ Access granted' : '⊘ Access revoked'); return; }
@@ -1093,7 +928,7 @@
         photo: draft.photo, signature: draft.signature,
         departmentId: val('fDept'), designationId: draft.designationId,
         reportingManagerId: val('fMgr') || null, branchId: val('fBranch'), companyId: val('fComp'),
-        status, platformAccess: $('#fPa').checked, joiningDate: val('fJoin'), expiryDate: val('fExpiry'),
+        status, platformAccess: $('#fPa').checked, joiningDate: val('fJoin'),
         remarks: val('fRemarks'), overrides: u.overrides || {}, sessions: u.sessions || [],
         active: status === 'active' && $('#fPa').checked,
         avatarColor: u.avatarColor || ['#ff6a2c', '#5e9bf0', '#34d399', '#a78bfa'][Math.floor(Math.random() * 4)],
@@ -1130,9 +965,7 @@
     _createDesigInline: () => {
       const name = val('qdName').trim(); const msg = $('#qdMsg'); if (!name) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Enter a name'; } return; }
       if (desigs().find(d => d.name.toLowerCase() === name.toLowerCase())) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Already exists'; } return; }
-      const copyFrom = val('qdCopy'); const src = copyFrom ? desigById(copyFrom) : null;
-      const perms = src ? JSON.parse(JSON.stringify(src.perms || {})) : {};
-      const d = { id: uid('dg'), name, departmentId: val('qdDept'), reportsTo: val('qdReports') || null, description: val('qdDesc'), status: $('#qdActive').checked ? 'active' : 'inactive', level: 5, perms, limits: src ? Object.assign({}, src.limits) : { quotation: 0, tender: 0, workorder: 0, purchase: 0 } };
+      const d = { id: uid('dg'), name, departmentId: val('qdDept'), reportsTo: val('qdReports') || null, description: val('qdDesc'), status: $('#qdActive').checked ? 'active' : 'inactive', level: 5 };
       const ds = desigs(); ds.push(d); save(K.desig, ds);
       logAudit({ module: 'Administration', action: 'Designation Created', target: name, newVal: deptName(d.departmentId) });
       toast('✓ Designation “' + name + '” created');
@@ -1147,12 +980,10 @@
       const name = val('dgName').trim(); const msg = $('#dgMsg'); if (!name) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Enter a name'; } return; }
       const dup = desigs().find(d => d.name.toLowerCase() === name.toLowerCase() && d.id !== editId); if (dup) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Designation exists'; } return; }
       const ds = desigs();
-      const limits = { quotation: +val('dgLQ') || 0, tender: +val('dgLT') || 0, workorder: +val('dgLW') || 0, purchase: +val('dgLP') || 0 };
       if (editId) {
-        const d = ds.find(x => x.id === editId); Object.assign(d, { name, departmentId: val('dgDept'), reportsTo: val('dgReports') || null, level: +val('dgLevel') || 5, status: val('dgStatus'), description: val('dgDesc'), limits });
+        const d = ds.find(x => x.id === editId); Object.assign(d, { name, departmentId: val('dgDept'), reportsTo: val('dgReports') || null, level: +val('dgLevel') || 5, status: val('dgStatus'), description: val('dgDesc') });
       } else {
-        const copy = val('dgCopy'); const src = copy ? desigById(copy) : null;
-        ds.push({ id: uid('dg'), name, departmentId: val('dgDept'), reportsTo: val('dgReports') || null, level: +val('dgLevel') || 5, status: val('dgStatus'), description: val('dgDesc'), perms: src ? JSON.parse(JSON.stringify(src.perms || {})) : {}, limits });
+        ds.push({ id: uid('dg'), name, departmentId: val('dgDept'), reportsTo: val('dgReports') || null, level: +val('dgLevel') || 5, status: val('dgStatus'), description: val('dgDesc') });
       }
       save(K.desig, ds);
       logAudit({ module: 'Administration', action: editId ? 'Designation Edited' : 'Designation Created', target: name });
@@ -1162,7 +993,6 @@
       const d = desigById(id);
       rowMenu(ev, [
         { act: 'edit', icon: 'edit', label: 'Edit', fn: () => desigEditor(id) },
-        { act: 'perm', icon: 'perm', label: 'Set permissions', fn: () => window.ERP._permFor(id) },
         { act: 'clone', icon: 'copy', label: 'Clone designation', fn: () => window.ERP._cloneDesig(id) },
         { act: 'toggle', icon: 'power', label: d.status === 'inactive' ? 'Enable' : 'Disable', fn: () => { d.status = d.status === 'inactive' ? 'active' : 'inactive'; save(K.desig, desigs().map(x => x.id === id ? d : x)); renderMain(); } },
         '-',
@@ -1170,27 +1000,7 @@
       ]);
     },
     _cloneDesig: (id) => { const d = desigById(id); const ds = desigs(); ds.push(Object.assign({}, JSON.parse(JSON.stringify(d)), { id: uid('dg'), name: d.name + ' (Copy)' })); save(K.desig, ds); logAudit({ module: 'Administration', action: 'Designation Cloned', target: d.name }); toast('✓ Cloned'); renderMain(); },
-    _delDesig: async (id) => { const d = desigById(id); const n = userCount(id); if (n) { notice('Cannot delete', n + ' user(s) hold the designation “' + d.name + '”. Move them to another designation first.'); return; } if (!(await confirmBox('Delete designation “' + d.name + '”?', 'Its permission settings and approval limits are removed too.', 'Delete'))) return; save(K.desig, desigs().filter(x => x.id !== id)); logAudit({ module: 'Administration', action: 'Designation Deleted', target: d.name }); toast('🗑 Deleted'); renderNav(); renderMain(); },
-    _permFor: (id) => { S.permDesig = id; go('permissions'); },
-    _compareDesig: () => {
-      const ds = desigs();
-      const optA = ds.map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join('');
-      openOv('wide', `<div class="erp-dh"><div><h3>Compare Designations</h3><div class="sub">Side-by-side permission diff</div></div><button class="erp-x" onclick="ERP._closeOv()">×</button></div>
-        <div class="erp-dbody"><div style="display:flex;gap:12px;margin-bottom:16px"><select class="erp-fsel" id="cmpA">${optA}</select><select class="erp-fsel" id="cmpB">${ds.map((d, i) => `<option value="${d.id}" ${i === 1 ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}</select></div><div id="cmpOut"></div></div>`);
-      const run = () => {
-        const a = desigById(val('cmpA')), b = desigById(val('cmpB'));
-        const mods = modules();
-        let h = `<table class="erp-tbl"><thead><tr><th class="nosort">Module · Action</th><th class="nosort">${esc(a.name)}</th><th class="nosort">${esc(b.name)}</th></tr></thead><tbody>`;
-        mods.forEach(m => ACTIONS.forEach(act => {
-          const av = a.perms && a.perms[m.id] && a.perms[m.id][act[0]], bv = b.perms && b.perms[m.id] && b.perms[m.id][act[0]];
-          if (!av && !bv) return;
-          if (av !== bv) h += `<tr><td>${esc(m.name)} · ${act[1]}</td><td>${av ? '<span style="color:var(--green)">✓</span>' : '<span style="color:var(--faint)">✕</span>'}</td><td>${bv ? '<span style="color:var(--green)">✓</span>' : '<span style="color:var(--faint)">✕</span>'}</td></tr>`;
-        }));
-        h += '</tbody></table>';
-        $('#cmpOut').innerHTML = h.includes('<tr><td>') ? h : '<div class="erp-empty">These designations have identical permissions</div>';
-      };
-      $('#cmpA').onchange = run; $('#cmpB').onchange = run; run();
-    },
+    _delDesig: async (id) => { const d = desigById(id); const n = userCount(id); if (n) { notice('Cannot delete', n + ' user(s) hold the designation “' + d.name + '”. Move them to another designation first.'); return; } if (!(await confirmBox('Delete designation “' + d.name + '”?', 'This cannot be undone.', 'Delete'))) return; save(K.desig, desigs().filter(x => x.id !== id)); logAudit({ module: 'Administration', action: 'Designation Deleted', target: d.name }); toast('🗑 Deleted'); renderNav(); renderMain(); },
 
     _saveDept: (editId) => {
       const name = val('dpName').trim(); const msg = $('#dpMsg'); if (!name) { if (msg) { msg.style.color = 'var(--red)'; msg.textContent = 'Enter a name'; } return; }
@@ -1226,52 +1036,12 @@
       logAudit({ module: 'Administration', action: 'Project Deleted', target: p.name }); toast('🗑 Deleted'); renderMain();
     },
 
-    /* permissions */
-    _permTog: (mId, act) => { const d = desigById(S.permDesig); d.perms = d.perms || {}; d.perms[mId] = d.perms[mId] || {}; d.perms[mId][act] = d.perms[mId][act] ? 0 : 1; save(K.desig, desigs().map(x => x.id === d.id ? d : x)); logAudit({ module: 'Administration', action: 'Permission Modified', target: d.name, newVal: (modules().find(m => m.id === mId) || {}).name + ': ' + act + ' ' + (d.perms[mId][act] ? 'ON' : 'OFF') }); renderMain(); },
-    _permCol: (act) => { const d = desigById(S.permDesig); const mods = modules(); const allOn = mods.every(m => d.perms && d.perms[m.id] && d.perms[m.id][act]); mods.forEach(m => { d.perms = d.perms || {}; d.perms[m.id] = d.perms[m.id] || {}; d.perms[m.id][act] = allOn ? 0 : 1; }); save(K.desig, desigs().map(x => x.id === d.id ? d : x)); renderMain(); },
-    _permAll: (on) => { const d = desigById(S.permDesig); const mods = modules(); mods.forEach(m => { d.perms = d.perms || {}; d.perms[m.id] = d.perms[m.id] || {}; ACTIONS.forEach(a => d.perms[m.id][a[0]] = on ? 1 : 0); }); save(K.desig, desigs().map(x => x.id === d.id ? d : x)); logAudit({ module: 'Administration', action: 'Permission Modified', target: d.name, newVal: on ? 'All granted' : 'All cleared' }); toast(on ? 'All granted' : 'All cleared'); renderMain(); },
-    _addModule: async () => { const name = await dialog({ title: 'Register module', sub: 'Adds a row to the designation matrix.', ok: 'Add module',
-        html: '<label class="erp-flbl" for="amName">Module name <span class="req">*</span></label><input class="erp-fin" id="amName" placeholder="e.g. Site Diary">',
-        validate: (root, msg) => { const v = root.querySelector('#amName').value.trim(); if (!v) { msg('Enter a name.'); return false; } if (modules().some(m => m.name.toLowerCase() === v.toLowerCase())) { msg('That module already exists.'); return false; } return v; } });
-      if (!name) return; ensureModule(name.trim()); logAudit({ module: 'Administration', action: 'Module Registered', target: name.trim() }); toast('✓ Module added — data-driven engine updated'); renderMain(); },
-
-    /* project access */
-    _saveProjAccess: () => {
-      const u = userById(S.projUser); const mode = $('#paMode .on').dataset.m;
-      if (mode === 'selected') { const ids = [...document.querySelectorAll('.paChk:checked')].map(c => c.dataset.id); u.projectAccess = { mode: 'selected', ids }; }
-      else u.projectAccess = mode;
-      persistUser(u); logAudit({ module: 'Administration', action: 'Project Access Changed', target: u.name, newVal: mode === 'selected' ? u.projectAccess.ids.length + ' projects' : mode }); toast('✓ Project access saved');
-    },
-
-    /* workflow + limits */
-    _wfAdd: async (wfId) => {
-      const w = flows().find(x => x.id === wfId);
-      const avail = desigs().filter(d => !w.steps.includes(d.id));
-      if (!avail.length) { notice('Nothing to add', 'Every designation is already a step in “' + w.name + '”.'); return; }
-      const pickId = await dialog({ title: 'Add approval level', sub: w.name + ' — added as step ' + (w.steps.length + 1), ok: 'Add step',
-        html: `<label class="erp-flbl" for="wfPick">Designation</label><select class="erp-fsel" id="wfPick">${avail.map(d => `<option value="${d.id}">${esc(d.name)} · ${esc(deptName(d.departmentId))}</option>`).join('')}</select>`,
-        validate: (root) => root.querySelector('#wfPick').value });
-      if (!pickId) return; const d = desigById(pickId); if (!d) return;
-      w.steps.push(d.id); save(K.flow, flows().map(x => x.id === wfId ? w : x)); logAudit({ module: 'Administration', action: 'Workflow Updated', target: w.name, newVal: 'Added ' + d.name }); renderMain();
-    },
-    _wfRemove: (wfId, i) => { const w = flows().find(x => x.id === wfId); w.steps.splice(i, 1); save(K.flow, flows().map(x => x.id === wfId ? w : x)); renderMain(); },
-    _setLimit: (dId, key, v) => { const d = desigById(dId); d.limits = d.limits || {}; d.limits[key] = +v || 0; save(K.desig, desigs().map(x => x.id === dId ? d : x)); toast('✓ Limit updated'); },
-
     /* security */
     _savePolicy: () => {
       const p = policy();
-      Object.assign(p, {
-        minLen: +val('pMin') || 8, expiryDays: +val('pExp') || 90, history: +val('pHist') || 3, lockAfter: +val('pLock') || 5,
-        complexity: $('#pCx').checked, mustChangeFirst: $('#pFirst').checked,
-        sessionTimeout: +val('pTimeout') || 30, concurrent: val('pConc'), twoFactor: $('#p2fa').checked, rememberMe: $('#pRem').checked,
-        scheduleEnabled: $('#pSched').checked, scheduleFrom: val('pFrom'), scheduleTo: val('pTo'),
-        ipMode: val('pIpMode'), ipList: val('pIpList'),
-        license: { total: +val('pLicTotal') || 50, expires: val('pLicExp') }
-      });
-      save(K.policy, p); logAudit({ module: 'Administration', action: 'Security Policy Updated', newVal: 'Password & session rules changed' }); toast('✓ Security policy saved'); renderMain();
+      p.minLen = Math.max(6, Math.min(64, +val('pMin') || 8)); // other stored policy fields are left as they are
+      save(K.policy, p); logAudit({ module: 'Administration', action: 'Security Policy Updated', newVal: 'Minimum password length ' + p.minLen }); toast('✓ Saved'); renderMain();
     },
-    _killSession: (uid2, sid) => { const u = userById(uid2); u.sessions = (u.sessions || []).filter(s => s.id !== sid); persistUser(u); logAudit({ module: 'Administration', action: 'Session Terminated', target: u.name }); toast('Session ended'); renderMain(); },
-    _killAll: async () => { if (!(await confirmBox('End all sessions?', 'Every signed-in user on this browser\'s session list is signed out.', 'End all sessions'))) return; const all = users(); all.forEach(u => u.sessions = []); setUsers(all); logAudit({ module: 'Administration', action: 'Force Logout', target: 'All users', newVal: 'All sessions terminated' }); toast('All sessions terminated'); renderMain(); },
 
     /* audit + notif */
     _exportAudit: () => { exportCSV('audit-trail', ['Date', 'Module', 'Action', 'Target', 'By', 'Before', 'After', 'Reason', 'IP', 'Browser'], audit().map(x => [new Date(x.ts).toISOString(), x.module, x.action, x.target, x.admin, x.oldVal, x.newVal, x.reason, x.ip, x.browser])); toast('⤓ Audit exported'); },

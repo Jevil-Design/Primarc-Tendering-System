@@ -26,11 +26,10 @@ await page.type('#vmSearch', 'e2e', { delay: 30 }); await sleep(500);
 const shown = await page.evaluate(() => document.querySelectorAll('#qmMain tbody tr').length);
 check('Vendor Master search filters', shown >= 1, shown + ' rows in ' + (Date.now() - t0) + ' ms');
 
-/* Import dialog: the orphaned vendor-quote tab is hidden, the BOQ tab still works */
-const imp = await page.evaluate(() => { const qt = document.querySelector('#importOverlay .import-tab[data-itype="quote"]'); const bt = document.querySelector('#importOverlay .import-tab[data-itype="boq"]'); return { quoteHidden: !qt || qt.style.display === 'none', boq: !!bt && bt.style.display !== 'none' }; });
-check('Import dialog: unreachable vendor-quote tab hidden, BOQ import kept', imp.quoteHidden && imp.boq, JSON.stringify(imp));
-const cbr = await page.evaluate(() => cbRowRanks(['1,250', '1300', '', '0']));
-check('builder ranking parses "1,250" and ignores blank/0', cbr[0] === 1 && cbr[1] === 2 && !cbr[2] && !cbr[3], JSON.stringify(cbr));
+/* Import dialog: BOQ import only (the vendor-quote tab and the Comparison Sheet Builder were removed) */
+const imp = await page.evaluate(() => ({ tabs: document.querySelectorAll('#importOverlay .import-tab').length, quote: !!document.getElementById('importQuotePanel'), boq: !!document.getElementById('importBoqPanel'),
+  title: (document.querySelector('#importOverlay h3') || {}).textContent, builder: typeof cbRowRanks !== 'undefined' || !!document.getElementById('cbuild') }));
+check('Import dialog: BOQ import only, removed builder gone', !imp.tabs && !imp.quote && imp.boq && imp.title === 'Import BOQ from Excel' && !imp.builder, JSON.stringify(imp));
 
 /* ERP Admin → server */
 const created = await page.evaluate(async () => {
