@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Spline+Sans+Mono:wght@400;500;600&display=swap">
-<title>BOQ Builder</title>
+<title>Tendering System</title>
 <style>
   :root{
     --bg:#0e1014; --panel:#161922; --panel2:#1c2029; --panel3:#222732; --line:#2b313d;
@@ -6104,7 +6104,7 @@ const AI = {
       }else{
         // OpenAI-compatible: OpenAI, Groq, OpenRouter, Mistral
         const headers={'Content-Type':'application/json','Authorization':'Bearer '+direct.key};
-        if(pid==='openrouter'){headers['HTTP-Referer']=location.origin;headers['X-Title']='BOQ Builder';}
+        if(pid==='openrouter'){headers['HTTP-Referer']=location.origin;headers['X-Title']='Tendering System';}
         const res=await fetch(`${pinfo.baseURL}/chat/completions`,{
           method:'POST',headers,
           body:JSON.stringify({model,messages:[{role:'user',content:prompt}],max_tokens:maxTokens,temperature:0.3})
@@ -7775,7 +7775,7 @@ $('#loader').style.display='none';
 <script type="text/plain" id="gasCode">/****************************************************************************************
  *  PRIMARC TENDERING - CLOUD BACKEND  (Google Apps Script)
  *  ---------------------------------------------------------------------------------
- *  This single file turns a Google Sheet into the cloud "mailbox" for the BOQ Builder.
+ *  This single file turns a Google Sheet into the cloud "mailbox" for the Tendering System.
  *  It does THREE jobs:
  *    1. Receives published RFQs from the admin app          (doPost  action=publish)
  *    2. Serves a fill-in form to each contractor by link    (doGet   ?t=TOKEN)
@@ -7791,7 +7791,7 @@ $('#loader').style.display='none';
  *        - Execute as  : Me
  *        - Who has access : Anyone
  *      Click Deploy, authorise, and COPY the "Web app URL" (ends in /exec).
- *  6.  In the BOQ Builder >  Cloud Settings, paste that URL + the same OWNER_KEY.
+ *  6.  In the Tendering System >  Cloud Settings, paste that URL + the same OWNER_KEY.
  *  7.  Click "Test Connection". Done - Publish an RFQ and share the links.
  *
  *  To update the code later: paste changes, then Deploy > Manage deployments >

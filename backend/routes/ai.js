@@ -137,7 +137,7 @@ export default function register(router) {
       const headers = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key };
       if (provider === 'openrouter') {
         headers['HTTP-Referer'] = (ctx.env.ALLOWED_ORIGINS || '').split(',')[0].trim() || 'https://vercel.app';
-        headers['X-Title'] = 'BOQ Builder';
+        headers['X-Title'] = 'Tendering System';
       }
       const res = await fetch(`${baseURL}/chat/completions`, {
         method: 'POST', headers,
