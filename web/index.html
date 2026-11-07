@@ -1782,6 +1782,139 @@ html[data-theme="light"] #authGate.auth-v2{
   #authGate.auth-v2 .av2-login{ padding:18px }
 }
 
+/* ── login refresh (2026-11-07): depth, glow, elevated form card ──────────
+   Visual only — every id, handler and the form flow above are unchanged.
+   Prefixed with .av2 so it outranks the design-system sheet loaded later. */
+#authGate.auth-v2{ --av2-bg:#121823; --av2-card-sh:0 1px 2px rgba(0,0,0,.3),0 24px 60px -18px rgba(0,0,0,.6); --av2-blue:#3b82f6; --av2-blue2:#1d4ed8 }
+html[data-theme="light"] #authGate.auth-v2{ --av2-bg:#eef2f8; --av2-card-sh:0 1px 2px rgba(16,24,40,.05),0 24px 56px -20px rgba(22,42,90,.28) }
+#authGate.auth-v2 .av2 .av2-brand{
+  background:
+    radial-gradient(120% 80% at 0% 0%,rgba(59,130,246,.22),transparent 55%),
+    radial-gradient(90% 70% at 100% 100%,rgba(14,165,233,.14),transparent 60%),
+    linear-gradient(160deg,#14213d 0%,#0d1830 50%,#081122 100%);
+}
+#authGate.auth-v2 .av2 .av2-brand::before{       /* faint dot grid */
+  content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1.2px); background-size:22px 22px;
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,transparent 85%); mask-image:linear-gradient(180deg,#000 0%,transparent 85%);
+}
+/* the line-art was caught by ".av2-brand > *{position:relative}" and sat in
+   the layout flow, pushing content down (very visibly on phones) */
+#authGate.auth-v2 .av2 .av2-art{ position:absolute; inset:0; z-index:0; opacity:.35 }
+/* ".av2-feats span{display:block}" also hit the icon tile, so icons sat top-left */
+#authGate.auth-v2 .av2 .av2-feats .av2-fic{ display:flex; max-width:none }
+#authGate.auth-v2 .av2 .av2-orb{ position:absolute; z-index:0; border-radius:50%; filter:blur(60px); pointer-events:none }
+#authGate.auth-v2 .av2 .av2-orb1{ width:340px; height:340px; left:-90px; top:28%; background:rgba(37,99,235,.38); animation:av2drift 16s ease-in-out infinite alternate }
+#authGate.auth-v2 .av2 .av2-orb2{ width:260px; height:260px; right:-70px; bottom:-60px; background:rgba(14,165,233,.25); animation:av2drift 20s ease-in-out infinite alternate-reverse }
+@keyframes av2drift{ to{ transform:translate(40px,-30px) scale(1.08) } }
+#authGate.auth-v2 .av2 .av2-kicker{
+  display:inline-flex; align-items:center; gap:8px; margin-bottom:16px; padding:5px 11px 5px 9px;
+  border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase;
+  color:#bcd3ff; background:rgba(59,130,246,.14); border:1px solid rgba(96,165,250,.28);
+}
+#authGate.auth-v2 .av2 .av2-kicker i{ width:7px; height:7px; border-radius:50%; background:#60a5fa; box-shadow:0 0 0 3px rgba(96,165,250,.22) }
+#authGate.auth-v2 .av2 .av2-brand h1{ font-size:clamp(28px,2.9vw,42px); letter-spacing:-1px }
+#authGate.auth-v2 .av2 .av2-brand h1 em{
+  background:linear-gradient(90deg,#60a5fa 0%,#3b82f6 45%,#38bdf8 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+#authGate.auth-v2 .av2 .av2-feats{ gap:10px; max-width:470px }
+#authGate.auth-v2 .av2 .av2-feats li{
+  padding:12px 14px; border-radius:12px; background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.07); transition:background-color .2s,border-color .2s,transform .2s;
+}
+#authGate.auth-v2 .av2 .av2-feats li:hover{ background:rgba(255,255,255,.06); border-color:rgba(96,165,250,.3); transform:translateX(3px) }
+#authGate.auth-v2 .av2 .av2-fic{
+  background:linear-gradient(145deg,rgba(59,130,246,.3),rgba(29,78,216,.16)); border-color:rgba(96,165,250,.35);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+#authGate.auth-v2 .av2 .av2-fic svg{ stroke:#93c5fd }
+
+/* form side */
+#authGate.auth-v2 .av2 .av2-login{
+  background:
+    radial-gradient(60% 50% at 85% 10%,rgba(59,130,246,.10),transparent 70%),
+    radial-gradient(50% 45% at 10% 95%,rgba(14,165,233,.08),transparent 70%),
+    var(--av2-bg);
+}
+#authGate.auth-v2 .av2 .card.av2-form{
+  max-width:400px; padding:34px 34px 28px; border-radius:18px;
+  background:var(--av2-surface); border:1px solid color-mix(in srgb,var(--av2-border) 30%,transparent);
+  box-shadow:var(--av2-card-sh); animation:av2rise .5s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes av2rise{ from{ opacity:0; transform:translateY(14px) } }
+#authGate.auth-v2 .av2 .av2-copy{ animation:av2rise .6s .05s cubic-bezier(.2,.8,.2,1) both }
+#authGate.auth-v2 .av2 .av2-pill{
+  display:inline-flex; align-items:center; gap:6px; margin-bottom:16px; padding:4px 10px 4px 8px;
+  border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.3px;
+  color:#16a34a; background:rgba(22,163,74,.10); border:1px solid rgba(22,163,74,.22);
+}
+#authGate.auth-v2 .av2 .av2-pill svg{ width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+#authGate.auth-v2 .av2 .av2-form h2{ font-size:27px; letter-spacing:-.6px }
+#authGate.auth-v2 .av2 .av2-in{ position:relative }
+#authGate.auth-v2 .av2 .av2-ii{
+  position:absolute; left:13px; top:50%; transform:translateY(-50%); width:17px; height:17px; pointer-events:none;
+  stroke:var(--av2-faint); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; transition:stroke .15s;
+}
+#authGate.auth-v2 .av2 .av2-in:focus-within .av2-ii{ stroke:var(--av2-blue) }
+#authGate.auth-v2 .av2 .av2-field input[type=text],
+#authGate.auth-v2 .av2 .av2-field input[type=password]{
+  padding:12px 13px 12px 40px; border-radius:10px; border-width:1.5px;
+  border-color:color-mix(in srgb,var(--av2-border) 55%,transparent);
+  transition:border-color .15s,box-shadow .15s,background-color .15s;
+}
+#authGate.auth-v2 .av2 .av2-field input:hover{ border-color:var(--av2-border) }
+#authGate.auth-v2 .av2 .av2-field input:focus{
+  outline:none; background:var(--av2-surface); border-color:var(--av2-blue); box-shadow:0 0 0 4px rgba(59,130,246,.16);
+}
+#authGate.auth-v2 .av2 .av2-field input[aria-invalid="true"]{ border-color:var(--red,#e04848) }
+#authGate.auth-v2 .av2 .av2-field input[aria-invalid="true"]:focus{ box-shadow:0 0 0 4px rgba(224,72,72,.16) }
+#authGate.auth-v2 .av2 .av2-caps{ display:none; margin-top:6px; font-size:11.5px; font-weight:600; color:#b45309 }
+#authGate.auth-v2 .av2 .av2-caps.on{ display:block }
+#authGate.auth-v2 .av2 button.go{
+  margin-top:8px; padding:13px; border-radius:10px;
+  background:linear-gradient(180deg,var(--av2-blue) 0%,var(--av2-blue2) 100%);
+  box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 8px 20px -8px rgba(29,78,216,.7);
+  transition:transform .15s,box-shadow .15s,filter .15s,opacity .15s;
+}
+#authGate.auth-v2 .av2 button.go:hover:not(:disabled){
+  background:linear-gradient(180deg,var(--av2-blue) 0%,var(--av2-blue2) 100%); filter:brightness(1.07);
+  transform:translateY(-1px); box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 12px 26px -10px rgba(29,78,216,.8);
+}
+#authGate.auth-v2 .av2 button.go:active:not(:disabled){ transform:translateY(0); filter:brightness(.97) }
+#authGate.auth-v2 .av2 button.go .av2-arrow{ width:16px; height:16px; stroke:#fff; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; transition:transform .15s }
+#authGate.auth-v2 .av2 button.go:hover:not(:disabled) .av2-arrow{ transform:translateX(3px) }
+#authGate.auth-v2 .av2 button.go:disabled .av2-arrow{ display:none }
+#authGate.auth-v2 .av2 .av2-help{ border-top-color:color-mix(in srgb,var(--av2-border) 30%,transparent) }
+#authGate.auth-v2 .av2 .av2-sec{ padding:9px 11px; border-radius:9px; background:var(--av2-field) }
+/* short laptop screens: keep the whole branding panel on screen */
+@media (min-width:901px) and (max-height:720px){
+  #authGate.auth-v2 .av2 .av2-brand{ padding-top:30px; padding-bottom:26px; gap:18px }
+  #authGate.auth-v2 .av2 .av2-kicker{ display:none }
+  #authGate.auth-v2 .av2 .av2-brand h1{ font-size:clamp(26px,2.6vw,36px); margin-bottom:10px }
+  #authGate.auth-v2 .av2 .av2-brand .av2-lead{ margin-bottom:18px; font-size:13px }
+  #authGate.auth-v2 .av2 .av2-feats{ gap:7px }
+  #authGate.auth-v2 .av2 .av2-feats li{ padding:8px 12px }
+  #authGate.auth-v2 .av2 .av2-fic{ flex-basis:30px; height:30px }
+}
+@media (min-width:901px) and (max-height:560px){
+  #authGate.auth-v2 .av2 .av2-feats li > span:last-child > span{ display:none }
+}
+@media (max-width:900px){
+  #authGate.auth-v2 .av2 .av2-orb, #authGate.auth-v2 .av2 .av2-kicker{ display:none }
+  #authGate.auth-v2 .av2 .card.av2-form{ max-width:440px }
+}
+@media (max-width:560px){
+  #authGate.auth-v2 .av2 .card.av2-form{ padding:24px 20px 20px; border-radius:14px }
+  #authGate.auth-v2 .av2 .av2-form h2{ font-size:22px }
+  #authGate.auth-v2 .av2 .av2-field input[type=text],
+  #authGate.auth-v2 .av2 .av2-field input[type=password]{ font-size:16px }
+}
+@media (prefers-reduced-motion:reduce){
+  #authGate.auth-v2 .av2 .av2-orb, #authGate.auth-v2 .av2 .card.av2-form, #authGate.auth-v2 .av2 .av2-copy{ animation:none }
+  #authGate.auth-v2 .av2 .av2-feats li, #authGate.auth-v2 .av2 button.go{ transition:none }
+}
+
 </style>
 <style id="uiV3CSS">
 /* ═══════════════════════════════════════════════════════════════════════
@@ -11794,6 +11927,15 @@ const Auth=(function(){
         const err=document.getElementById('auErr'); if(err) err.textContent='';
       });
     });
+    /* Caps Lock warning on the password field — the most common cause of a
+       "wrong password" that is actually right. */
+    const caps=g.querySelector('#auCaps');
+    if(pw&&caps){
+      const chk=e=>{ const on=!!(e.getModifierState&&e.getModifierState('CapsLock'));
+        caps.textContent=on?'Caps Lock is on':''; caps.classList.toggle('on',on); };
+      pw.addEventListener('keydown',chk); pw.addEventListener('keyup',chk);
+      pw.addEventListener('blur',()=>{ caps.textContent=''; caps.classList.remove('on'); });
+    }
   }
   function showLogin(){
     injectCSS();
@@ -11830,9 +11972,11 @@ const Auth=(function(){
             <path d="M120 60 V340 M300 60 V340 M480 60 V340"/>
           </g>
         </svg>
+        <span class="av2-orb av2-orb1" aria-hidden="true"></span><span class="av2-orb av2-orb2" aria-hidden="true"></span>
         <div class="av2-bt"><span class="av2-logo-slot"></span><span class="av2-div"></span>
           <span class="av2-wm">Tendering System</span></div>
-        <div>
+        <div class="av2-copy">
+          <span class="av2-kicker"><i aria-hidden="true"></i>Procurement workspace</span>
           <h1>Smarter Procurement.<br><em>Better Project Control.</em></h1>
           <p class="av2-lead">Run a tender end to end — issue project-coded RFQs to vendors, collect
             quotations through secure links, compare rates side by side, and turn the award into a
@@ -11840,35 +11984,41 @@ const Auth=(function(){
           <ul class="av2-feats">
             ${feat(AV2_IC.tender,'Tenders &amp; RFQs','Issue enquiries to multiple vendors and track invitations, responses and deadlines.')}
             ${feat(AV2_IC.compare,'Commercial comparison','L1\u2013L5 ranking on evaluated totals, with quoted, negotiated and approved rates kept distinct.')}
-            ${feat(AV2_IC.approve,'Approvals &amp; work orders','Designation-based sign-off with financial limits and a full audit trail.')}
+            ${feat(AV2_IC.approve,'Approvals &amp; work orders','Step-by-step sign-off on every award, then a work order — with a full audit trail.')}
           </ul>
         </div>
         <div class="av2-bf">Primarc Projects Pvt. Ltd. \u00b7 Internal procurement system</div>
       </aside>
       <main class="av2-login">
         <form class="card av2-form" id="auForm" novalidate autocomplete="on">
+          <span class="av2-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.4-3 8.3-7 9.5C8 19.3 5 15.4 5 11V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>Secure sign-in</span>
           <h2>Welcome back</h2>
           <p class="av2-sub">Sign in to continue to the tendering system.</p>
           <div class="av2-field">
             <label for="auU">Username or email</label>
-            <input type="text" id="auU" name="username" autocomplete="username"
-              autocapitalize="none" spellcheck="false" aria-describedby="auUE" autofocus>
+            <div class="av2-in">
+              <svg class="av2-ii" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.4-3.6 4.4-5.5 8-5.5s6.6 1.9 8 5.5"/></svg>
+              <input type="text" id="auU" name="username" autocomplete="username"
+                autocapitalize="none" spellcheck="false" aria-describedby="auUE" autofocus>
+            </div>
             <span class="av2-fe" id="auUE"></span>
           </div>
           <div class="av2-field">
             <label for="auP">Password</label>
-            <div class="av2-pw">
+            <div class="av2-pw av2-in">
+              <svg class="av2-ii" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
               <input type="password" id="auP" name="password" autocomplete="current-password"
-                aria-describedby="auPE">
+                aria-describedby="auPE auCaps">
               <button type="button" class="av2-eye" id="auEye" aria-pressed="false"
                 aria-label="Show password" title="Show password"></button>
             </div>
             <span class="av2-fe" id="auPE"></span>
+            <span class="av2-caps" id="auCaps" aria-live="polite"></span>
           </div>
           ${canRemember?`<div class="row"><input type="checkbox" id="auR">`+
             `<label for="auR">Keep me signed in on this device</label></div>`:''}
           <button class="go" id="auGo" type="button">
-            <i class="av2-spin" aria-hidden="true"></i><span class="av2-go-t">Sign In</span></button>
+            <i class="av2-spin" aria-hidden="true"></i><span class="av2-go-t">Sign In</span><svg class="av2-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
           <div class="err" id="auErr" role="alert" aria-live="assertive"></div>
           <p class="av2-help">Forgotten your password? This system has no self-service reset \u2014
             ask an administrator to issue you a temporary one.</p>
