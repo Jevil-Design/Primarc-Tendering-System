@@ -31,9 +31,16 @@ let st = await page.evaluate(() => ({
   groups: [...document.querySelectorAll('#erpNav .erp-nav-sec')].map((s) => s.textContent),
   items: [...document.querySelectorAll('#erpNav a')].map((a) => a.textContent.replace(/[↗☆★\d]/g, '').trim()),
   focusable: [...document.querySelectorAll('#erpNav a')].every((a) => a.tabIndex === 0),
-  oldBar: !!document.querySelector('.erp-bar'), top: document.getElementById('pwsTitle').textContent }));
+  oldBar: !!document.querySelector('.erp-bar'), top: document.getElementById('pwsTitle').textContent,
+  asides: [...document.querySelectorAll('aside')].filter((a) => a.getBoundingClientRect().width > 0).map((a) => a.id),
+  inMain: !!document.querySelector('#pSidebar #sbAdminSub #erpNav') && !document.getElementById('erpSide'),
+  expanded: document.querySelector('#pSidebar button[data-sb="admin"]').getAttribute('aria-expanded'),
+  main: [...document.querySelectorAll('#pSidebar button[data-sb]')].map((b) => b.getAttribute('aria-label')) }));
+check('one sidebar only: admin sections live inside the main sidebar', st.asides.join() === 'pSidebar' && st.inMain, st.asides.join(','));
+check('Settings & Users expands its submenu in place', st.expanded === 'true');
 check('admin nav grouped by purpose', ['Users & Access', 'Organisation & Data', 'Audit & Maintenance'].every((g) => st.groups.includes(g)), st.groups.join(' | '));
-check('nav reaches existing features (Role Access, BOQ Master, Vendor Master, Deleted Items, System & Data)', ['Role Access', 'BOQ Master', 'Vendor Master', 'Deleted Items', 'System & Data'].every((x) => st.items.includes(x)), st.items.join(', '));
+check('submenu reaches Role Access and System & Data', ['Role Access', 'System & Data'].every((x) => st.items.includes(x)), st.items.join(', '));
+check('no item listed twice in the one sidebar (Projects, BOQ Master, Vendor Master, Deleted Items)', ['Projects', 'BOQ Master', 'Vendor Master', 'Deleted Items'].every((x) => !st.items.includes(x) && st.main.includes(x)), st.items.join(', '));
 check('nav links are keyboard-focusable', st.focusable);
 check('single header: no second admin bar; app top bar names the section', !st.oldBar && st.top === 'Dashboard', st.top);
 
@@ -49,7 +56,7 @@ check('no invented figures (Pending Approvals +3, Online now, Today\'s logins, S
 for (const v of ['dashboard', 'users', 'designations', 'security', 'departments', 'organization', 'projects', 'system', 'audit', 'notifications']) {
   const before = errs.length;
   await page.evaluate((x) => ERP.go(x), v); await sleep(350);
-  const ok = await page.evaluate(() => !!document.querySelector('#erpBody h1.erp-h') && document.querySelector('#erpNav a.on') !== null);
+  const ok = await page.evaluate(() => !!document.querySelector('#erpBody h1.erp-h') && (document.querySelector('#erpNav a.on') !== null || document.querySelector('#pSidebar button[data-sb="proj"].on') !== null));
   check(`section "${v}" renders`, ok && errs.length === before, errs.slice(before).join(' | '));
 }
 check('top bar follows the admin section', await page.evaluate(() => { ERP.go('security'); return new Promise((r) => setTimeout(() => r(document.getElementById('pwsTitle').textContent), 200)); }) === 'Passwords & Lockouts');
@@ -182,7 +189,13 @@ for (const [w, h] of [[1366, 768], [1024, 768], [390, 844]]) {
   }
   check(`admin: no page-level horizontal overflow at ${w}px`, !over.length, over.join('; '));
 }
-check('narrow screens: admin nav becomes a horizontal strip', await page.evaluate(() => getComputedStyle(document.getElementById('erpNav')).display === 'flex'));
+/* phone: one slide-out drawer (the admin sections inside it), closed until the menu button is pressed */
+st = await page.evaluate(() => getComputedStyle(document.getElementById('pSidebar')).visibility);
+await page.click('#sbBurger'); await sleep(400);
+const drawer = await page.evaluate(() => ({ vis: getComputedStyle(document.getElementById('pSidebar')).visibility, sub: !!document.querySelector('#pSidebar #erpNav a[data-v="users"]') }));
+await page.click('#erpNav a[data-v="users"]'); await sleep(500);
+const closed = await page.evaluate(() => !document.querySelector('.app').classList.contains('sb-open') && document.querySelector('#erpNav a.on').dataset.v === 'users');
+check('narrow screens: one drawer, opened by the menu button, closes after choosing a section', st === 'hidden' && drawer.vis === 'visible' && drawer.sub && closed, JSON.stringify({ st, drawer, closed }));
 
 check('no browser alert/confirm/prompt used by Administration', dialogs.length === 0, dialogs.join(' | '));
 check('no page errors', errs.length === 0, errs.join(' | '));

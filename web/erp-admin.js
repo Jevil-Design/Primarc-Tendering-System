@@ -319,44 +319,6 @@
     #admin{font-family:'Archivo',sans-serif}
     .erp-wrap{display:flex;width:100%;height:100%;overflow:hidden;background:var(--bg)}
 
-    /* side navigation */
-    .erp-side{width:220px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;transition:width .16s ease;position:relative;z-index:2}
-    .erp-side.collapsed{width:60px}
-    .erp-side-head{display:flex;flex-direction:column;gap:8px;padding:12px 10px 10px;border-bottom:1px solid var(--line)}
-    .erp-side-head .t{font-size:13px;font-weight:700;color:var(--ink);padding:0 4px;display:flex;align-items:center;gap:8px}
-    .erp-side-head .t svg{width:16px;height:16px;stroke:var(--accent);fill:none;stroke-width:2;flex-shrink:0}
-    .erp-side-head .t span{display:block;font-size:10.5px;font-weight:500;color:var(--faint);margin-top:1px}
-    .erp-findbtn{display:flex;align-items:center;gap:8px;width:100%;height:32px;padding:0 9px;background:var(--erp-fb);border:1px solid var(--erp-fl);border-radius:var(--erp-r-sm);color:var(--faint);font:inherit;font-size:12px;cursor:pointer;text-align:left}
-    .erp-findbtn:hover{border-color:var(--accent);color:var(--ink)}
-    .erp-findbtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
-    .erp-findbtn .kbd{margin-left:auto;font-size:10px;font-family:'Spline Sans Mono',monospace;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--faint)}
-    .erp-side.collapsed .t span,.erp-side.collapsed .t b,.erp-side.collapsed .erp-findbtn .lbl,.erp-side.collapsed .erp-findbtn .kbd,
-    .erp-side.collapsed .erp-nav-lbl,.erp-side.collapsed .erp-nav .pin,.erp-side.collapsed .erp-nav .ext,.erp-side.collapsed .erp-side-foot .txt{display:none}
-    .erp-side.collapsed .erp-findbtn{justify-content:center;padding:0}
-    .erp-side.collapsed .erp-side-head .t{justify-content:center}
-    .erp-nav{flex:1;overflow-y:auto;padding:6px 8px 12px}
-    .erp-nav-sec{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--faint);padding:12px 10px 4px}
-    .erp-nav a{display:flex;align-items:center;gap:9px;height:32px;padding:0 10px;border-radius:var(--erp-r-sm);color:var(--dim);font-size:12.5px;font-weight:600;cursor:pointer;text-decoration:none;position:relative;transition:background-color .12s,color .12s;margin-bottom:1px}
-    .erp-nav a svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;flex-shrink:0}
-    .erp-nav a:hover{background:var(--hi);color:var(--ink)}
-    .erp-nav a:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-    .erp-nav a.on{background:rgba(var(--accent-rgb,91,147,245),.10);color:var(--accent);font-weight:700}
-    .erp-nav a.on::before{content:'';position:absolute;left:-8px;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--accent)}
-    .erp-nav a .ext{margin-left:auto;font-size:11px;color:var(--faint)}
-    .erp-side.collapsed .erp-nav-sec{font-size:0;padding:0;height:1px;margin:8px 10px;background:var(--line)}
-    .erp-side.collapsed .erp-nav-sec:first-child{display:none}
-    .erp-nav a .pin{margin-left:auto;font-size:11px;color:var(--faint);opacity:0;transition:opacity .12s}
-    .erp-nav a:hover .pin,.erp-nav a:focus-visible .pin{opacity:.7}
-    .erp-nav a .pin.on{opacity:1;color:var(--accent2)}
-    .erp-nav a .cnt{margin-left:auto;font-size:10.5px;font-variant-numeric:tabular-nums;background:var(--panel3);color:var(--dim);padding:0 6px;border-radius:9px;line-height:17px}
-    .erp-nav a .cnt.hot{background:var(--accent);color:#fff}
-    .erp-side.collapsed .erp-nav a{justify-content:center;padding:0}
-    .erp-side.collapsed .erp-nav a .cnt{display:none}
-    .erp-side-foot{padding:8px;border-top:1px solid var(--line)}
-    .erp-collapse{display:flex;align-items:center;gap:9px;width:100%;height:30px;background:none;border:none;color:var(--faint);font-size:11.5px;font-weight:600;padding:0 10px;border-radius:var(--erp-r-sm);cursor:pointer;font-family:inherit}
-    .erp-collapse:hover{background:var(--hi);color:var(--ink)}
-    .erp-collapse svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
-
     .erp-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
     .erp-iconbtn{position:relative;width:30px;height:30px;border-radius:var(--erp-r-sm);background:transparent;border:1px solid transparent;color:var(--dim);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:background-color .12s,color .12s}
     .erp-iconbtn:hover{background:var(--hi);color:var(--ink)}
@@ -639,19 +601,8 @@
     .erp-seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 
 
-    /* narrow screens: the admin nav becomes a scrolling tab strip above the page */
+    /* narrow screens */
     @media (max-width:860px){
-      .erp-wrap{flex-direction:column}
-      .erp-side,.erp-side.collapsed{width:auto;border-right:0;border-bottom:1px solid var(--line);flex-direction:row;align-items:center}
-      .erp-side-head{border-bottom:0;padding:6px 8px;flex-shrink:0}
-      .erp-side-head .t,.erp-findbtn .lbl,.erp-findbtn .kbd,.erp-side-foot{display:none}
-      .erp-findbtn{width:32px;justify-content:center;padding:0}
-      .erp-nav{display:flex;overflow-x:auto;overflow-y:hidden;padding:6px 8px;gap:2px;scrollbar-width:thin}
-      .erp-nav-sec{display:none!important}
-      .erp-nav a{flex-shrink:0;justify-content:flex-start!important;padding:0 10px!important}
-      .erp-nav a .erp-nav-lbl{display:inline!important}
-      .erp-nav a .pin,.erp-nav a .cnt:not(.hot),.erp-nav a .ext{display:none}
-      .erp-nav a.on::before{display:none}
       .erp-body{padding:14px}
       .erp-fgrid{grid-template-columns:1fr}
       .erp-field .erp-input{min-width:0;width:100%}
@@ -666,7 +617,22 @@
      ICONS
      ════════════════════════════════════════════════════════════════════ */
   const ICON = {
-    dashboard: '<path d="M3 13h8V3H3zM13 21h8V3h-8zM3 21h8v-6H3z"/>',
+    /* section icons: Lucide (lucide.dev, ISC licence), matching the main sidebar */
+    dashboard: '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+    nUsers: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    nRole: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+    nDesig: '<path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/>',
+    nLock: '<circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/>',
+    nDept: '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+    nOrg: '<rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>',
+    nProj: '<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v6"/>',
+    nTerms: '<path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/>',
+    nLib: '<path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/>',
+    nVendor: '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
+    nData: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/>',
+    nAudit: '<path d="M16 22h2a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><circle cx="8" cy="16" r="6"/><path d="M9.5 17.5 8 16.25V14"/>',
+    nBell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+    nTrash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/>',
     users: '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0M16 11.2a3 3 0 0 0 0-6M21 20a5 5 0 0 0-3.5-4.8"/>',
     user: '<circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/>',
     desig: '<path d="M12 3 4 7v6c0 4.5 3.5 7 8 8 4.5-1 8-3.5 8-8V7z"/><path d="M9.2 12l1.9 1.9 3.7-4"/>',
@@ -679,7 +645,7 @@
     bell: '<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>',
     org: '<rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-2h12v2"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
-    search: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
     edit: '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
     trash: '<path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
     lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
@@ -733,29 +699,31 @@
     { sec: 'Overview' },
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
     { sec: 'Users & Access' },
-    { id: 'users', label: 'Users', icon: 'users', cnt: () => users().length },
-    { act: 'roleAccess', label: 'Role Access', icon: 'key', tip: 'Sign-in roles and what each role may do — this is what the app enforces' },
-    { id: 'designations', label: 'Designations', icon: 'desig', cnt: () => desigs().length },
-    { id: 'security', label: 'Passwords & Lockouts', icon: 'security' },
+    { id: 'users', label: 'Users', icon: 'nUsers', cnt: () => users().length },
+    { act: 'roleAccess', label: 'Role Access', icon: 'nRole', tip: 'Sign-in roles and what each role may do — this is what the app enforces' },
+    { id: 'designations', label: 'Designations', icon: 'nDesig', cnt: () => desigs().length },
+    { id: 'security', label: 'Passwords & Lockouts', icon: 'nLock' },
     { sec: 'Organisation & Data' },
-    { id: 'departments', label: 'Departments', icon: 'dept', cnt: () => depts().length },
-    { id: 'organization', label: 'Organization', icon: 'org' },
-    { id: 'projects', label: 'Projects', icon: 'project', cnt: () => projects().length },
-    { id: 'majorterms', label: 'Major Terms', icon: 'audit' },
-    { ext: 'bmaster', label: 'BOQ Master', icon: 'audit', tip: 'Opens the BOQ Master library' },
-    { ext: 'vmaster', label: 'Vendor Master', icon: 'user', tip: 'Opens the Vendor Master' },
-    { id: 'system', label: 'System & Data', icon: 'settings' },
+    { id: 'departments', label: 'Departments', icon: 'nDept', cnt: () => depts().length },
+    { id: 'organization', label: 'Organization', icon: 'nOrg' },
+    /* dup: already an item in the app's main sidebar, so the admin submenu
+       (which lives in that same sidebar) does not list it twice. It stays
+       here for the admin dashboard tiles and the Ctrl+K palette. */
+    { id: 'projects', label: 'Projects', icon: 'nProj', cnt: () => projects().length, dup: true },
+    { id: 'majorterms', label: 'Major Terms', icon: 'nTerms' },
+    { ext: 'bmaster', label: 'BOQ Master', icon: 'nLib', tip: 'Opens the BOQ Master library', dup: true },
+    { ext: 'vmaster', label: 'Vendor Master', icon: 'nVendor', tip: 'Opens the Vendor Master', dup: true },
+    { id: 'system', label: 'System & Data', icon: 'nData' },
     { sec: 'Audit & Maintenance' },
-    { id: 'audit', label: 'Audit Trail', icon: 'audit' },
-    { id: 'notifications', label: 'Notifications', icon: 'bell', cnt: () => notifs().filter(n => !n.read).length, hot: true },
-    { ext: 'del', label: 'Deleted Items', icon: 'trash', tip: 'Opens Deleted Items' }
+    { id: 'audit', label: 'Audit Trail', icon: 'nAudit' },
+    { id: 'notifications', label: 'Notifications', icon: 'nBell', cnt: () => notifs().filter(n => !n.read).length, hot: true },
+    { ext: 'del', label: 'Deleted Items', icon: 'nTrash', tip: 'Opens Deleted Items', dup: true }
   ];
   const TITLES = { dashboard: 'Administration', users: 'Users', designations: 'Designations', departments: 'Departments', organization: 'Organization', projects: 'Projects', majorterms: 'Major Terms', security: 'Passwords & Lockouts', audit: 'Audit Trail', notifications: 'Notifications', system: 'System & Data' };
 
   const S = {
     view: 'dashboard',
     rendered: false,
-    collapsed: load('erp_side_collapsed', false),
     pinned: load('erp_pinned', []),
     u: { q: '', dept: '', desig: '', status: '', sort: 'name', dir: 1, page: 1, per: 8, sel: [] },
     auditQ: '', auditMod: '',
@@ -770,28 +738,17 @@
   function renderShell() {
     const root = document.getElementById('admin');
     if (!root) return;
-    /* One header for the whole workspace: the app's top bar already shows
-       "Administration / <section>", so the old second bar (breadcrumb +
-       search + bell) is gone. Search moved into the side panel; unread
-       notifications show as a count on the Notifications item. */
-    root.innerHTML = `
-      <div class="erp-wrap">
-        <aside class="erp-side ${S.collapsed ? 'collapsed' : ''}" id="erpSide" aria-label="Administration sections">
-          <div class="erp-side-head">
-            <div class="t">${ic('security')}<b>Administration<span>Users, access &amp; settings</span></b></div>
-            <button type="button" class="erp-findbtn" id="erpGlobal" title="Search sections, users and actions (Ctrl/⌘ K)">${ic('search')}<span class="lbl">Search admin…</span><span class="kbd">⌘K</span></button>
-          </div>
-          <nav class="erp-nav" id="erpNav"></nav>
-          <div class="erp-side-foot">
-            <button type="button" class="erp-collapse" id="erpCollapse" aria-expanded="${S.collapsed ? 'false' : 'true'}">${ic(S.collapsed ? 'chevR' : 'chevL')}<span class="txt">Collapse</span></button>
-          </div>
-        </aside>
-        <div class="erp-main">
-          <div class="erp-body" id="erpBody"></div>
-        </div>
-      </div>`;
-    document.getElementById('erpCollapse').onclick = () => { S.collapsed = !S.collapsed; save('erp_side_collapsed', S.collapsed); document.getElementById('erpSide').classList.toggle('collapsed', S.collapsed); const b = document.getElementById('erpCollapse'); b.innerHTML = ic(S.collapsed ? 'chevR' : 'chevL') + '<span class="txt">Collapse</span>'; b.setAttribute('aria-expanded', S.collapsed ? 'false' : 'true'); };
-    document.getElementById('erpGlobal').onclick = openCmd;
+    /* ONE sidebar for the whole app. The console's sections are drawn into
+       the main sidebar's Administration submenu (#sbAdminSub); this page is
+       just the content area. (It used to build its own <aside> here, which
+       sat beside the main sidebar as a second one.) Only administrators get
+       the sections — everyone else sees the access-denied page. */
+    root.innerHTML = `<div class="erp-wrap"><div class="erp-main"><div class="erp-body" id="erpBody"></div></div></div>`;
+    const host = document.getElementById('sbAdminSub');
+    if (host && canAdmin()) {
+      host.innerHTML = `<button type="button" class="sb-find" id="erpGlobal" data-tip="Search admin (Ctrl/⌘ K)" aria-label="Search admin sections, users and actions (Ctrl/⌘ K)">${ic('search')}<span>Search admin…</span><kbd>⌘K</kbd></button><nav class="erp-nav" id="erpNav" aria-label="Administration sections"></nav>`;
+      document.getElementById('erpGlobal').onclick = openCmd;
+    } else if (host) host.innerHTML = '';
     renderNav();
     refreshBadge();
   }
@@ -810,10 +767,11 @@
     // pinned section
     if (S.pinned.length) {
       h += `<div class="erp-nav-sec">Pinned</div>`;
-      S.pinned.forEach(id => { const it = NAV.find(n => n.id === id); if (it) h += navLink(it, true); });
+      S.pinned.forEach(id => { const it = NAV.find(n => n.id === id && !n.dup); if (it) h += navLink(it, true); });
     }
     NAV.forEach(it => {
       if (it.sec) { h += `<div class="erp-nav-sec">${it.sec}</div>`; return; }
+      if (it.dup) return;
       h += navLink(it, false);
     });
     nav.innerHTML = h;
@@ -823,14 +781,14 @@
   }
   function navLink(it, isPinned) {
     if (it.act || it.ext) {
-      return `<a href="#" data-x="${it.act || it.ext}" title="${esc(it.tip || it.label)}">${ic(it.icon)}<span class="erp-nav-lbl">${esc(it.label)}</span>${it.ext ? '<span class="ext" aria-hidden="true">↗</span>' : ''}</a>`;
+      return `<a href="#" data-x="${it.act || it.ext}" data-tip="${esc(it.label)}" title="${esc(it.tip || it.label)}">${ic(it.icon)}<span class="erp-nav-lbl">${esc(it.label)}</span>${it.ext ? '<span class="ext" aria-hidden="true">↗</span>' : ''}</a>`;
     }
     const n = it.cnt ? it.cnt() : 0;
     const cnt = it.cnt && (n || !it.hot) ? `<span class="cnt${it.hot && n ? ' hot' : ''}"${it.hot ? ` aria-label="${n} unread"` : ''}>${n}</span>` : '';
     const pinned = S.pinned.includes(it.id);
     const pin = isPinned || it.cnt ? '' : `<span class="pin ${pinned ? 'on' : ''}" data-pin="${it.id}" title="${pinned ? 'Unpin' : 'Pin to top'}" role="button" aria-label="${pinned ? 'Unpin' : 'Pin'} ${esc(it.label)}">${pinned ? '★' : '☆'}</span>`;
     const on = S.view === it.id;
-    return `<a href="#" data-v="${it.id}" class="${on ? 'on' : ''}"${on ? ' aria-current="page"' : ''} title="${esc(it.label)}">${ic(it.icon)}<span class="erp-nav-lbl">${esc(it.label)}</span>${cnt || pin}</a>`;
+    return `<a href="#" data-v="${it.id}" class="${on ? 'on' : ''}"${on ? ' aria-current="page"' : ''} data-tip="${esc(it.label)}">${ic(it.icon)}<span class="erp-nav-lbl">${esc(it.label)}</span>${cnt || pin}</a>`;
   }
   function togglePin(id) { const i = S.pinned.indexOf(id); if (i >= 0) S.pinned.splice(i, 1); else S.pinned.push(id); save('erp_pinned', S.pinned); renderNav(); }
 

@@ -1288,12 +1288,12 @@
    Blue is used for informational accents instead.
    ═══════════════════════════════════════════════════════════════════════ */
 :root{
-  --sb-w:248px; --sb-w-min:76px;
-  --sb-bg:#0d1a30; --sb-bg2:#070f1e; --sb-line:#22324f;
-  --sb-ink:#f4f7fc; --sb-dim:#b9c6dc; --sb-grp:#7d90b2; --sb-hi:#1a2b47;
-  --sb-active:rgba(255,106,44,.18); --sb-active2:rgba(255,106,44,.06);
+  --sb-w:252px; --sb-w-min:72px;
+  --sb-bg:#0f1c33; --sb-bg2:#0a1426; --sb-line:rgba(148,163,184,.13);
+  --sb-ink:#f3f6fb; --sb-dim:#a9b7ce; --sb-grp:#6c81a6; --sb-hi:rgba(148,163,184,.09);
+  --sb-acc:#7aa7ff; --sb-active:rgba(96,140,255,.20); --sb-active2:rgba(96,140,255,.05);
 }
-html[data-theme="light"]{ --sb-bg:#11213b; --sb-bg2:#0a1528; --sb-line:#263a5c; }
+html[data-theme="light"]{ --sb-bg:#10203a; --sb-bg2:#0b172c }
 
 /* ── layout ───────────────────────────────────────────────────────────── */
 .app.has-sb{
@@ -1305,112 +1305,198 @@ html[data-theme="light"]{ --sb-bg:#11213b; --sb-bg2:#0a1528; --sb-line:#263a5c; 
      parented into them. */
   grid-template-rows:auto auto minmax(0,1fr);
   height:100vh;
+  transition:grid-template-columns .2s ease;
 }
-.app.has-sb.sb-min{ --sb-w:var(--sb-w-min); }
+/* .sb-rail = icons-only rail. Set by the shell script from the user's
+   collapse preference and the screen width, so the rules live in one place. */
+.app.has-sb.sb-rail{ --sb-w:var(--sb-w-min); }
 .app.has-sb > #pSidebar{ grid-column:1; grid-row:1 / span 3; }
 .app.has-sb > .topbar{ grid-column:2; grid-row:1; }
 .app.has-sb > #pwsHead{ grid-column:2; grid-row:2; min-width:0; }
 .app.has-sb > .view{ grid-column:2; grid-row:3; min-width:0; min-height:0; }
 /* #admin is a .view too, so it is covered by the rule above. */
 
-/* ── sidebar ──────────────────────────────────────────────────────────── */
+/* ── sidebar ──────────────────────────────────────────────────────────────
+   ONE navigation panel for the whole app. Administration's sections are a
+   submenu inside it (#sbAdminSub) — it no longer draws a sidebar of its own. */
 #pSidebar{
-  background:linear-gradient(180deg,var(--sb-bg),var(--sb-bg2));
+  background:linear-gradient(180deg,var(--sb-bg) 0%,var(--sb-bg2) 100%);
   border-right:1px solid var(--sb-line);
-  /* lifts the rail off the workspace so it reads as the primary navigation */
-  box-shadow:6px 0 22px -6px rgba(3,8,20,.55);
-  display:flex; flex-direction:column; min-height:0; z-index:120;
-  font-family:'Archivo',system-ui,sans-serif;
+  box-shadow:4px 0 18px -8px rgba(3,8,20,.5);
+  display:flex; flex-direction:column; min-height:0; min-width:0; overflow:hidden; z-index:120;
+  font-family:'Archivo',system-ui,sans-serif; color:var(--sb-dim);
 }
+#pSidebar svg{ stroke:currentColor; fill:none; stroke-linecap:round; stroke-linejoin:round }
+
+/* brand */
 #pSidebar .sb-top{
-  height:58px; flex-shrink:0; display:flex; align-items:center; gap:11px;
-  padding:0 16px; border-bottom:1px solid var(--sb-line);
+  height:60px; flex-shrink:0; display:flex; align-items:center; gap:10px;
+  padding:0 18px; border-bottom:1px solid var(--sb-line);
 }
 #pSidebar .sb-mark{
-  width:36px; height:36px; border-radius:10px; flex-shrink:0;
-  background:linear-gradient(135deg,#ff7a3d,var(--accent) 55%,#d9531c); color:#fff; font-weight:800; font-size:16px;
-  box-shadow:0 4px 14px -3px rgba(255,106,44,.55), inset 0 1px 0 rgba(255,255,255,.25);
-  display:flex; align-items:center; justify-content:center; letter-spacing:-.5px;
+  display:none; width:34px; height:34px; border-radius:9px; flex-shrink:0;
+  background:var(--brand,#ff6a2c); color:#fff; font-weight:800; font-size:16px; letter-spacing:-.5px;
+  align-items:center; justify-content:center; box-shadow:inset 0 1px 0 rgba(255,255,255,.22);
 }
-#pSidebar .sb-name{ min-width:0 }
-#pSidebar .sb-name b{ display:block; font-size:14px; color:var(--sb-ink); font-weight:700; letter-spacing:.2px; white-space:nowrap }
-#pSidebar .sb-name i{ display:block; font-size:10px; color:var(--sb-grp); font-style:normal; text-transform:uppercase; letter-spacing:.7px; white-space:nowrap }
-#pSidebar .sb-scroll{ flex:1; overflow-y:auto; overflow-x:hidden; padding:10px 10px 12px }
+#pSidebar .sb-name{ min-width:0; display:flex; flex-direction:column; gap:5px }
+#pSidebar .sb-logo{ display:block; line-height:0 }
+#pSidebar .sb-logo svg{ height:17px; width:auto; display:block }
+#pSidebar .sb-logo svg path, #pSidebar .sb-logo svg .s0{ fill:#fff; stroke:none }
+#pSidebar .sb-logo b{ font-size:16px; font-weight:800; letter-spacing:1.5px; color:#fff; line-height:1 }
+#pSidebar .sb-name i{
+  display:block; font-size:9.5px; font-style:normal; font-weight:700; letter-spacing:1.6px;
+  text-transform:uppercase; color:var(--sb-grp); white-space:nowrap; line-height:1;
+}
+
+/* navigation */
+#pSidebar .sb-scroll{
+  flex:1; overflow-y:auto; overflow-x:hidden; padding:6px 10px 14px;
+  scrollbar-width:thin; scrollbar-color:rgba(148,163,184,.22) transparent;
+}
 #pSidebar .sb-grp{
-  font-size:10px; text-transform:uppercase; letter-spacing:1.1px; font-weight:800;
-  color:var(--sb-grp); padding:13px 12px 6px; white-space:nowrap;
+  font-size:10px; text-transform:uppercase; letter-spacing:1.2px; font-weight:700;
+  color:var(--sb-grp); padding:16px 12px 6px; white-space:nowrap;
 }
-#pSidebar .sb-grp:first-child{ padding-top:4px }
+#pSidebar .sb-grp:first-child{ padding-top:10px }
 #pSidebar button.sb-i{
-  width:100%; display:flex; align-items:center; gap:10px;
-  background:none; border:0; border-radius:8px; cursor:pointer;
-  padding:8px 12px; margin:1px 0; color:var(--sb-dim);
+  position:relative; width:100%; height:38px; display:flex; align-items:center; gap:11px;
+  background:none; border:0; border-radius:9px; cursor:pointer;
+  padding:0 12px; margin:1px 0; color:var(--sb-dim);
   font:inherit; font-size:13.5px; font-weight:600; text-align:left;
-  transition:background .12s, color .12s;
+  transition:background-color .15s ease, color .15s ease;
 }
+#pSidebar button.sb-i svg{ width:18px; height:18px; flex-shrink:0; stroke-width:1.9; transition:color .15s ease }
+#pSidebar button.sb-i .sb-t{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 #pSidebar button.sb-i:hover{ background:var(--sb-hi); color:var(--sb-ink) }
-#pSidebar button.sb-i:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px }
+#pSidebar button.sb-i:focus-visible{ outline:2px solid var(--sb-acc); outline-offset:-2px }
 #pSidebar button.sb-i.on{
   background:linear-gradient(90deg,var(--sb-active),var(--sb-active2)); color:#fff; font-weight:700;
-  box-shadow:inset 0 0 0 1px rgba(255,106,44,.28);
+  box-shadow:inset 0 0 0 1px rgba(122,167,255,.22);
 }
-#pSidebar button.sb-i.on svg{ color:var(--accent); stroke-width:2.1 }
+#pSidebar button.sb-i.on svg{ color:var(--sb-acc); stroke-width:2.1 }
 #pSidebar button.sb-i.on::before{
-  content:''; position:absolute; left:-10px; width:4px; height:26px;
-  border-radius:0 4px 4px 0; background:var(--accent); box-shadow:0 0 10px rgba(255,106,44,.6);
+  content:''; position:absolute; left:-10px; top:9px; bottom:9px; width:3px;
+  border-radius:0 3px 3px 0; background:var(--sb-acc);
 }
-#pSidebar button.sb-i{ position:relative }
-#pSidebar button.sb-i svg{ width:20px; height:20px; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round }
-#pSidebar button.sb-i .sb-t{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 #pSidebar button.sb-i .sb-ct{
-  margin-left:auto; flex-shrink:0; font-size:10px; font-weight:700;
-  background:var(--sb-hi); color:var(--sb-dim); border-radius:9px; padding:1px 6px; min-width:18px; text-align:center; font-variant-numeric:tabular-nums;
+  margin-left:auto; flex-shrink:0; font-size:10px; font-weight:700; line-height:17px;
+  background:rgba(148,163,184,.14); color:var(--sb-dim); border-radius:9px; padding:0 6px;
+  min-width:18px; text-align:center; font-variant-numeric:tabular-nums;
 }
 #pSidebar button.sb-i.on .sb-ct{ background:rgba(255,255,255,.16); color:#fff }
-#pSidebar button.sb-i .sb-ct.warn{ background:var(--accent); color:#fff }
+#pSidebar button.sb-i .sb-ct.warn{ background:#e8770f; color:#fff }
+#pSidebar button.sb-i .sb-chev{ width:14px; height:14px; margin-left:auto; flex-shrink:0; opacity:.6; stroke-width:2.2; transition:transform .2s ease }
+#pSidebar button.sb-i[aria-expanded="true"] .sb-chev{ transform:rotate(180deg) }
+
+/* Administration submenu (inside the same sidebar) */
+#sbAdminSub{ margin:2px 0 8px 20px; padding:2px 0 2px 8px; border-left:1px solid var(--sb-line) }
+/* while a sub-section is the active page, the parent shows context, not a second "you are here" */
+#pSidebar button.sb-i.on[aria-expanded="true"]{ background:none; box-shadow:none }
+#pSidebar button.sb-i.on[aria-expanded="true"]::before{ display:none }
+#sbAdminSub[hidden]{ display:none }
+#pSidebar .sb-find{
+  width:100%; height:32px; display:flex; align-items:center; gap:9px; margin:2px 0 4px; padding:0 10px;
+  background:rgba(148,163,184,.07); border:1px solid var(--sb-line); border-radius:8px; cursor:pointer;
+  color:var(--sb-grp); font:inherit; font-size:12px; font-weight:500; text-align:left;
+  transition:background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+#pSidebar .sb-find:hover{ color:var(--sb-ink); background:var(--sb-hi); border-color:rgba(148,163,184,.25) }
+#pSidebar .sb-find:focus-visible{ outline:2px solid var(--sb-acc); outline-offset:-2px }
+#pSidebar .sb-find svg{ width:15px; height:15px; flex-shrink:0; stroke-width:2 }
+#pSidebar .sb-find kbd{ margin-left:auto; font:600 10px 'Archivo',system-ui,sans-serif; padding:1px 5px; border-radius:4px; border:1px solid var(--sb-line); color:var(--sb-grp) }
+#pSidebar #erpNav{ display:block; padding:0; overflow:visible }
+#pSidebar #erpNav .erp-nav-sec{
+  font-size:9.5px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+  color:var(--sb-grp); opacity:.85; padding:10px 10px 4px; white-space:nowrap;
+}
+#pSidebar #erpNav a{
+  position:relative; display:flex; align-items:center; gap:10px; height:32px; padding:0 9px; margin:1px 0;
+  border-radius:8px; color:var(--sb-dim); font-size:12.5px; font-weight:600; text-decoration:none; white-space:nowrap;
+  transition:background-color .15s ease, color .15s ease;
+}
+#pSidebar #erpNav a svg{ width:16px; height:16px; flex-shrink:0; stroke-width:1.9 }
+#pSidebar #erpNav a .erp-nav-lbl{ overflow:hidden; text-overflow:ellipsis }
+#pSidebar #erpNav a:hover{ background:var(--sb-hi); color:var(--sb-ink) }
+#pSidebar #erpNav a:focus-visible{ outline:2px solid var(--sb-acc); outline-offset:-2px }
+#pSidebar #erpNav a.on{ background:var(--sb-active); color:#fff; font-weight:700 }
+#pSidebar #erpNav a.on svg{ color:var(--sb-acc) }
+#pSidebar #erpNav a.on::before{ content:''; position:absolute; left:-9px; top:7px; bottom:7px; width:2px; border-radius:2px; background:var(--sb-acc) }
+#pSidebar #erpNav a .cnt{
+  margin-left:auto; font-size:10px; font-weight:700; line-height:16px; padding:0 6px; border-radius:8px;
+  background:rgba(148,163,184,.14); color:var(--sb-dim); font-variant-numeric:tabular-nums;
+}
+#pSidebar #erpNav a .cnt.hot{ background:#e8770f; color:#fff }
+#pSidebar #erpNav a .pin{ margin-left:auto; font-size:11px; color:var(--sb-grp); opacity:0; transition:opacity .15s ease; cursor:pointer }
+#pSidebar #erpNav a:hover .pin, #pSidebar #erpNav a:focus-visible .pin{ opacity:.8 }
+#pSidebar #erpNav a .pin.on{ opacity:1; color:#fbbf24 }
+
+/* footer: who is signed in + collapse */
 #pSidebar .sb-foot{
-  flex-shrink:0; border-top:1px solid var(--sb-line); padding:11px 12px;
-  display:flex; align-items:center; gap:8px;
+  flex-shrink:0; border-top:1px solid var(--sb-line); padding:10px 12px;
+  display:flex; align-items:center; gap:10px;
+}
+#pSidebar .sb-av{
+  width:32px; height:32px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,#3b82f6,#1d4ed8); color:#fff; font-size:12px; font-weight:800; letter-spacing:.3px;
 }
 #pSidebar .sb-foot .sb-who{ min-width:0; flex:1 }
-#pSidebar .sb-foot .sb-who b{ display:block; font-size:11.5px; color:var(--sb-ink); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-#pSidebar .sb-foot .sb-who i{ display:block; font-size:9.5px; color:var(--sb-dim); font-style:normal; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+#pSidebar .sb-foot .sb-who b{ display:block; font-size:12px; color:var(--sb-ink); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+#pSidebar .sb-foot .sb-who i{ display:block; margin-top:2px; font-size:10px; color:var(--sb-grp); font-style:normal; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 #pSidebar .sb-tog{
-  background:none; border:1px solid var(--sb-line); border-radius:7px; cursor:pointer;
-  color:var(--sb-ink); width:32px; height:32px; flex-shrink:0; background:var(--sb-hi);
-  display:flex; align-items:center; justify-content:center;
+  width:32px; height:32px; flex-shrink:0; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  background:transparent; border:1px solid var(--sb-line); border-radius:8px; color:var(--sb-dim);
+  transition:background-color .15s ease, color .15s ease;
 }
 #pSidebar .sb-tog:hover{ color:var(--sb-ink); background:var(--sb-hi) }
-#pSidebar .sb-tog svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+#pSidebar .sb-tog:focus-visible{ outline:2px solid var(--sb-acc); outline-offset:1px }
+#pSidebar .sb-tog svg{ width:17px; height:17px; stroke-width:1.9; transition:transform .2s ease }
+.sb-rail #pSidebar .sb-tog svg{ transform:scaleX(-1) }
 
-/* collapsed rail: icons only */
-.sb-min #pSidebar .sb-name,
-.sb-min #pSidebar .sb-t,
-.sb-min #pSidebar .sb-who{ display:none }
-.sb-min #pSidebar .sb-top{ justify-content:center; padding:0 }
-.sb-min #pSidebar button.sb-i{ justify-content:center; padding:9px 0 }
-.sb-min #pSidebar .sb-foot{ justify-content:center }
-/* group labels become dividers, so the four sections stay visible */
-.sb-min #pSidebar .sb-grp{ font-size:0; padding:0; height:1px; margin:8px 12px; background:var(--sb-line) }
-.sb-min #pSidebar .sb-grp:first-child{ display:none }
+/* ── icons-only rail ─────────────────────────────────────────────────── */
+.sb-rail #pSidebar .sb-name, .sb-rail #pSidebar .sb-t, .sb-rail #pSidebar .sb-who,
+.sb-rail #pSidebar .sb-av, .sb-rail #pSidebar .sb-chev,
+.sb-rail #pSidebar #erpNav .erp-nav-lbl, .sb-rail #pSidebar #erpNav .pin, .sb-rail #pSidebar #erpNav .ext,
+.sb-rail #pSidebar #erpNav .cnt:not(.hot), .sb-rail #pSidebar .sb-find span, .sb-rail #pSidebar .sb-find kbd{ display:none }
+.sb-rail #pSidebar .sb-mark{ display:flex }
+.sb-rail #pSidebar .sb-top{ justify-content:center; padding:0 }
+.sb-rail #pSidebar .sb-scroll{ padding-left:8px; padding-right:8px }
+.sb-rail #pSidebar button.sb-i{ justify-content:center; padding:0 }
+.sb-rail #pSidebar button.sb-i.on::before{ left:-8px }
+/* group labels become thin dividers, so the sections stay visible */
+.sb-rail #pSidebar .sb-grp{ font-size:0; padding:0; height:1px; margin:9px 10px; background:var(--sb-line) }
+.sb-rail #pSidebar .sb-grp:first-child{ display:none }
 /* counts become a dot — only for items that need action */
-.sb-min #pSidebar .sb-ct{ position:absolute; top:7px; right:13px; margin:0; padding:0; min-width:0; width:9px; height:9px; font-size:0; border-radius:50%; box-shadow:0 0 0 2px var(--sb-bg) }
-.sb-min #pSidebar .sb-ct:not(.warn){ display:none }
+.sb-rail #pSidebar .sb-ct{ position:absolute; top:6px; right:9px; margin:0; padding:0; min-width:0; width:8px; height:8px; font-size:0; border-radius:50%; box-shadow:0 0 0 2px var(--sb-bg) }
+.sb-rail #pSidebar .sb-ct:not(.warn){ display:none }
+.sb-rail #sbAdminSub{ margin:2px 0 8px; padding:4px 0; border-left:0; border-radius:10px; background:rgba(148,163,184,.06) }
+.sb-rail #pSidebar .sb-find{ justify-content:center; padding:0; background:none; border-color:transparent }
+.sb-rail #pSidebar #erpNav .erp-nav-sec{ font-size:0; padding:0; height:1px; margin:6px 10px; background:var(--sb-line); opacity:1 }
+.sb-rail #pSidebar #erpNav .erp-nav-sec:first-child{ display:none }
+.sb-rail #pSidebar #erpNav a{ justify-content:center; padding:0 }
+.sb-rail #pSidebar #erpNav a.on::before{ display:none }
+.sb-rail #pSidebar #erpNav a .cnt.hot{ position:absolute; top:5px; right:8px; width:7px; height:7px; padding:0; font-size:0; border-radius:50% }
+.sb-rail #pSidebar .sb-foot{ justify-content:center; padding:10px 0 }
+
 /* label flyout for the icon rail (positioned by JS: the nav scrolls, so a CSS ::after would be clipped) */
 #sbTip{ position:fixed; z-index:400; pointer-events:none; opacity:0; transform:translateX(-4px);
-  transition:opacity .1s, transform .1s; background:#0a1426; color:#f4f7fc; border:1px solid #2a3c5e;
+  transition:opacity .12s ease, transform .12s ease; background:#0a1426; color:#f4f7fc; border:1px solid #2a3c5e;
   font:600 12.5px 'Archivo',system-ui,sans-serif; padding:7px 11px; border-radius:7px; white-space:nowrap;
   box-shadow:0 8px 24px rgba(0,0,0,.4) }
 #sbTip.on{ opacity:1; transform:none }
-/* short laptop screens (≈768px tall): keep all 15 destinations on screen without scrolling */
+#sbTip b{ color:#9dbdff; font-weight:700; margin-left:6px }
+
+/* short laptop screens (≈768px tall): keep every destination on screen without scrolling */
 @media (max-height:800px){
-  #pSidebar .sb-scroll{ padding-top:6px; padding-bottom:6px }
-  #pSidebar button.sb-i{ padding-top:6px; padding-bottom:6px }
-  #pSidebar .sb-grp{ padding-top:9px; padding-bottom:4px }
-  .sb-min #pSidebar button.sb-i, .app.has-sb:not(.sb-open) #pSidebar button.sb-i{ padding-top:7px; padding-bottom:7px }
-  .sb-min #pSidebar .sb-grp{ margin:6px 12px }
+  #pSidebar .sb-top{ height:54px }
+  #pSidebar .sb-scroll{ padding-top:4px; padding-bottom:8px }
+  #pSidebar button.sb-i{ height:34px }
+  #pSidebar .sb-grp{ padding-top:11px; padding-bottom:4px }
+  .sb-rail #pSidebar .sb-grp{ margin:6px 10px }
+  #pSidebar #erpNav a{ height:30px }
 }
-#sbTip b{ color:#ff8a52; font-weight:700; margin-left:6px }
+@media (prefers-reduced-motion:reduce){
+  .app.has-sb, #pSidebar *, #sbTip{ transition:none !important }
+}
 
 /* ── workspace header: compact single-row breadcrumb + title + description ─── */
 .pws-head{
@@ -1444,36 +1530,22 @@ html[data-theme="light"] .pws-head .pws-desc{ color:#64748b }
 html[data-theme="light"] .pws-desc-sep, html[data-theme="light"] .pws-crumb-sep{ color:#94a3b8 }
 
 /* ── responsive ───────────────────────────────────────────────────────── */
-@media (max-width:1180px){ .app.has-sb{ --sb-w:var(--sb-w-min) }
-  .app.has-sb #pSidebar .sb-name, .app.has-sb #pSidebar .sb-t,
-  .app.has-sb #pSidebar .sb-who{ display:none }
-  .app.has-sb #pSidebar .sb-grp{ font-size:0; padding:0; height:1px; margin:8px 12px; background:var(--sb-line) }
-  .app.has-sb #pSidebar .sb-grp:first-child{ display:none }
-  .app.has-sb #pSidebar .sb-ct{ position:absolute; top:7px; right:13px; margin:0; padding:0; min-width:0; width:9px; height:9px; font-size:0; border-radius:50%; box-shadow:0 0 0 2px var(--sb-bg) }
-  .app.has-sb #pSidebar .sb-ct:not(.warn){ display:none }
-  .app.has-sb #pSidebar .sb-top{ justify-content:center; padding:0 }
-  .app.has-sb #pSidebar button.sb-i{ justify-content:center; padding:9px 0 }
-  .app.has-sb #pSidebar .sb-foot{ justify-content:center } }
-
-/* Below 860px the rail becomes an off-canvas drawer so the table keeps its
-   width; .sb-open is toggled by the hamburger in the top bar. */
+/* 861–1180px: the rail is forced (the shell script adds .sb-rail); the
+   collapse button opens the full panel as an overlay instead of squeezing
+   the content. */
+@media (min-width:861px) and (max-width:1180px){
+  .app.has-sb.sb-open{ --sb-w:var(--sb-w-min) }
+  .app.has-sb.sb-open > #pSidebar{ position:fixed; inset:0 auto 0 0; width:252px; box-shadow:8px 0 30px rgba(0,0,0,.35) }
+}
+/* ≤860px: one slide-out drawer, opened by the menu button in the top bar. */
 @media (max-width:860px){
-  .app.has-sb{ grid-template-columns:minmax(0,1fr) }
+  .app.has-sb{ grid-template-columns:minmax(0,1fr); transition:none }
   .app.has-sb > #pSidebar{
-    position:fixed; inset:0 auto 0 0; width:var(--sb-w-min);
-    transform:translateX(-100%); transition:transform .18s ease; box-shadow:4px 0 24px rgba(0,0,0,.4);
+    position:fixed; inset:0 auto 0 0; width:min(280px,86vw);
+    transform:translateX(-100%); transition:transform .22s ease, visibility .22s;
+    visibility:hidden; box-shadow:none;
   }
-  .app.has-sb.sb-open > #pSidebar{ transform:none; width:248px }
-  .app.has-sb.sb-open > #pSidebar .sb-grp,
-  .app.has-sb.sb-open > #pSidebar .sb-name,
-  .app.has-sb.sb-open > #pSidebar .sb-t,
-  .app.has-sb.sb-open > #pSidebar .sb-ct,
-  .app.has-sb.sb-open > #pSidebar .sb-who{ display:revert }
-  .app.has-sb.sb-open > #pSidebar .sb-grp{ font-size:10px; padding:13px 12px 6px; height:auto; margin:0; background:none; display:block }
-  .app.has-sb.sb-open > #pSidebar .sb-ct{ position:static; width:auto; height:auto; min-width:18px; padding:1px 6px; font-size:10px; border-radius:9px; box-shadow:none; margin-left:auto }
-  .app.has-sb.sb-open > #pSidebar .sb-ct:not(.warn){ display:revert }
-  .app.has-sb.sb-open > #pSidebar .sb-top{ justify-content:flex-start; padding:0 16px }
-  .app.has-sb.sb-open > #pSidebar button.sb-i{ justify-content:flex-start; padding:8px 12px }
+  .app.has-sb.sb-open > #pSidebar{ transform:none; visibility:visible; box-shadow:8px 0 30px rgba(0,0,0,.4) }
   .app.has-sb > .topbar{ grid-column:1 }
   .app.has-sb > #pwsHead{ grid-column:1 }
   .app.has-sb > .view{ grid-column:1 }
@@ -1482,8 +1554,8 @@ html[data-theme="light"] .pws-desc-sep, html[data-theme="light"] .pws-crumb-sep{
   .pws-desc-sep{ display:none }
 }
 #sbScrim{ display:none }
-@media (max-width:860px){
-  .app.has-sb.sb-open #sbScrim{ display:block; position:fixed; inset:0; z-index:119; background:rgba(0,0,0,.45) }
+@media (max-width:1180px){
+  .app.has-sb.sb-open #sbScrim{ display:block; position:fixed; inset:0; z-index:119; background:rgba(3,8,20,.45) }
 }
 #sbBurger{ display:none }
 @media (max-width:860px){ #sbBurger{ display:flex } }
@@ -2078,17 +2150,6 @@ table.boqt tr:hover td,table.cmpt tr:hover td,table.cbt tr:hover td{background:v
 .toast.t-err{border-left-color:#f87171}
 .toast.t-warn{border-left-color:#fbbf24}
 
-/* ── sidebar: blue active state, brand mark stays orange ─────────────── */
-#pSidebar{background:#0f1b2e}
-html[data-theme="light"] #pSidebar{background:#10203a}
-#pSidebar .sb-mark{background:var(--brand);box-shadow:none}
-#pSidebar button.sb-i.on{box-shadow:inset 0 0 0 1px rgba(108,156,255,.30)}
-#pSidebar button.sb-i.on svg{color:#9dbdff}
-#pSidebar button.sb-i.on::before{background:#7aa7ff;box-shadow:none}
-#pSidebar button.sb-i .sb-ct.warn{background:#e8770f}
-#sbTip b{color:#9dbdff}
-#pSidebar button.sb-i:focus-visible,#pSidebar .sb-tog:focus-visible{outline:2px solid #9dbdff;outline-offset:-2px}
-
 /* ── top bar: one compact band carrying the page title ───────────────────
    The shell script moves #pwsHead (breadcrumb, title, description, page
    actions) in here; the logo row it replaces is already in the sidebar. */
@@ -2111,7 +2172,6 @@ html[data-theme="light"] #pSidebar{background:#10203a}
    QM's setNav() and the sidebar's active-state detection read them. */
 .app.has-sb #qmSubnav{display:none}
 /* closed off-canvas drawer: no shadow bleeding in at the left edge, and out of the tab order */
-@media (max-width:860px){ .app.has-sb:not(.sb-open) > #pSidebar{box-shadow:none;visibility:hidden} }
 /* phones: the page title keeps its room; secondary top-bar tools are reachable elsewhere
    (Settings & Users in the sidebar, Open file in the BOQ File menu) */
 @media (max-width:600px){
@@ -12678,22 +12738,23 @@ return api;
   function app(){ return document.querySelector('.app'); }
 
   /* ── icons ──────────────────────────────────────────────────────────── */
+  /* Lucide icon paths (lucide.dev, ISC licence) — one family, one stroke style. */
   var I={
-    dash:'<path d="M3 13h8V3H3zM13 9h8V3h-8zM13 21h8v-8h-8zM3 21h8v-4H3z"/>',
-    proj:'<path d="M3 21V8l9-5 9 5v13M9 21v-6h6v6"/>',
-    tender:'<path d="M14 3v4a1 1 0 0 0 1 1h4M7 3h8l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 13h6M9 17h4"/>',
-    rfq:'<path d="M4 4h16v5H4zM4 13h7v7H4zM15 13h5v7h-5z"/>',
-    vendor:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M17 11l2 2 3-3"/>',
-    boq:'<path d="M5 3h14v18H5zM9 8h6M9 12h6M9 16h3"/>',
-    quote:'<path d="M12 2v20M17 6H9.5a2.5 2.5 0 0 0 0 5h5a2.5 2.5 0 0 1 0 5H6"/>',
-    cs:'<path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6"/>',
-    bid:'<path d="M3 17l5-6 4 3 5-7 4 5"/><circle cx="8" cy="11" r="1.4"/>',
-    appr:'<path d="M20 6 9 17l-5-5"/>',
-    wo:'<path d="M10 3h4l.5 2.6 2.3 1 2.4-1.2 2 3.4-2 1.7.0 2.6 2 1.7-2 3.4-2.4-1.2-2.3 1L14 21h-4l-.5-2.6-2.3-1-2.4 1.2-2-3.4 2-1.7v-2.6l-2-1.7 2-3.4 2.4 1.2 2.3-1z"/><circle cx="12" cy="12" r="2.6"/>',
-    rep:'<path d="M4 20V10m5 10V4m5 16v-7m5 7V8"/>',
-    audit:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
-    trash:'<path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/>',
-    set:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7.5 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 2.6 7.5a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H7a1.6 1.6 0 0 0 1-1.5V1a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V7a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>'
+    dash:'<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+    proj:'<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/><path d="M8 10v4"/><path d="M12 10v2"/><path d="M16 10v6"/>',
+    tender:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+    rfq:'<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+    cs:'<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+    bid:'<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>',
+    appr:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/>',
+    wo:'<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
+    boq:'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 9v12"/><path d="M15 9v12"/>',
+    lib:'<path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/>',
+    vendor:'<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
+    rep:'<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+    audit:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+    trash:'<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/>',
+    set:'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>'
   };
   var svg=function(p){ return '<svg viewBox="0 0 24 24" aria-hidden="true">'+p+'</svg>'; };
 
@@ -12717,7 +12778,7 @@ return api;
     ]],
     ['Masters',[
       ['boq',    'BOQ Builder',           I.boq,    {mode:'create'}],
-      ['bmaster','BOQ Master',            I.quote,  {mode:'compare'}],
+      ['bmaster','BOQ Master',            I.lib,    {mode:'compare'}],
       ['vmaster','Vendor Master',         I.vendor, {mode:'quote', q:'vmaster',    count:'vendorsOnFile'}],
       ['vanal',  'Vendor Analysis',       I.rep,    {mode:'quote', q:'vendors'}]
     ]],
@@ -12735,28 +12796,41 @@ return api;
     var aside=document.createElement('aside');
     aside.id='pSidebar';
     aside.setAttribute('aria-label','Main navigation');
-    var h='<div class="sb-top"><div class="sb-mark">P</div>'
-        + '<div class="sb-name"><b>Primarc</b><i>Tendering</i></div></div>'
-        + '<nav class="sb-scroll">';
+    var h='<div class="sb-top"><div class="sb-mark" aria-hidden="true">P</div>'
+        + '<div class="sb-name"><span class="sb-logo" id="sbLogo"></span><i>Tendering System</i></div></div>'
+        + '<nav class="sb-scroll" aria-label="Sections">';
     NAV.forEach(function(g){
       h+='<div class="sb-grp">'+g[0]+'</div>';
       g[1].forEach(function(r){
-        h+='<button class="sb-i" type="button" data-sb="'+r[0]+'" aria-label="'+r[1]+'">'
+        var sub=r[0]==='admin';
+        h+='<button class="sb-i" type="button" data-sb="'+r[0]+'" aria-label="'+r[1]+'"'
+          + (sub?' aria-controls="sbAdminSub" aria-expanded="false"':'')+'>'
           + svg(r[2])+'<span class="sb-t">'+r[1]+'</span>'
           + (r[3].count?'<span class="sb-ct" data-ct="'+r[3].count+'"'+(r[3].warn?' data-warn="1"':'')+'></span>':'')
+          + (sub?'<svg class="sb-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>':'')
           + '</button>';
+        /* Administration's own sections are a submenu of this item, filled by
+           erp-admin.js — the admin console no longer draws a second sidebar. */
+        if(sub) h+='<div id="sbAdminSub" role="group" aria-label="Administration sections" hidden></div>';
       });
     });
     h+='</nav><div class="sb-foot">'
+      + '<span class="sb-av" id="sbAv" aria-hidden="true"></span>'
       + '<div class="sb-who"><b id="sbWho">—</b><i id="sbRole"></i></div>'
-      + '<button class="sb-tog" id="sbTog" type="button" title="Collapse / expand sidebar" aria-label="Collapse or expand sidebar">'
-      + '<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button></div>';
+      + '<button class="sb-tog" id="sbTog" type="button" title="Collapse sidebar" aria-label="Collapse sidebar" aria-expanded="true">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/></svg></button></div>';
     aside.innerHTML=h;
     a.insertBefore(aside,a.firstChild);
+    /* the real Primarc wordmark, reused from the top bar (no second copy of the paths) */
+    try{
+      var src=document.querySelector('.topbar .brand-logo'), slot=el('sbLogo');
+      if(src&&slot){ var c=src.cloneNode(true); c.removeAttribute('class'); c.removeAttribute('aria-label'); c.setAttribute('aria-hidden','true'); slot.appendChild(c); slot.setAttribute('aria-label','Primarc'); }
+      else if(slot){ slot.innerHTML='<b>PRIMARC</b>'; }
+    }catch(e){}
 
     var scrim=document.createElement('div'); scrim.id='sbScrim';
     a.appendChild(scrim);
-    scrim.addEventListener('click',function(){ a.classList.remove('sb-open'); });
+    scrim.addEventListener('click',function(){ a.classList.remove('sb-open'); syncRail(); });
 
     a.classList.add('has-sb');
 
@@ -12766,10 +12840,11 @@ return api;
     document.body.appendChild(tip);
     var hideTip=function(){ tip.classList.remove('on'); };
     var showTip=function(e){
-      var b=e.target.closest&&e.target.closest('#pSidebar button.sb-i');
-      if(!b||aside.offsetWidth>140){ hideTip(); return; }
-      var ct=b.querySelector('.sb-ct'), n=ct&&ct.style.display!=='none'?ct.textContent:'';
-      tip.innerHTML=''; tip.appendChild(document.createTextNode(b.getAttribute('aria-label')||''));
+      var b=e.target.closest&&e.target.closest('#pSidebar button.sb-i, #pSidebar #erpNav a, #pSidebar .sb-find, #pSidebar .sb-tog');
+      if(!b||!a.classList.contains('sb-rail')){ hideTip(); return; }
+      var ct=b.querySelector('.sb-ct, .cnt.hot'), n=ct&&ct.style.display!=='none'?ct.textContent:'';
+      var lb=b.getAttribute('data-tip')||b.getAttribute('aria-label')||((b.querySelector('.erp-nav-lbl')||b).textContent||'').trim();
+      tip.innerHTML=''; tip.appendChild(document.createTextNode(lb));
       if(n){ var c=document.createElement('b'); c.textContent=n; tip.appendChild(c); }
       var r=b.getBoundingClientRect();
       tip.style.left=(r.right+10)+'px'; tip.style.top=(r.top+r.height/2-tip.offsetHeight/2)+'px';
@@ -12783,13 +12858,38 @@ return api;
 
     aside.addEventListener('click',function(e){
       var b=e.target.closest('button[data-sb]');
-      if(b){ goto(b.dataset.sb); a.classList.remove('sb-open'); return; }
+      if(b){ goto(b.dataset.sb); a.classList.remove('sb-open'); syncRail(); return; }
+      /* a submenu link navigates through erp-admin.js's own handler; just close the drawer */
+      if(e.target.closest('#sbAdminSub a') && !e.target.closest('.pin')){ a.classList.remove('sb-open'); syncRail(); return; }
       if(e.target.closest('#sbTog')){
-        if(window.matchMedia('(max-width:860px)').matches){ a.classList.toggle('sb-open'); return; }
-        a.classList.toggle('sb-min');
-        try{ localStorage.setItem(SB_KEY, a.classList.contains('sb-min')?'1':'0'); }catch(e2){}
+        /* below 1180px the panel opens over the content (or as the phone drawer) */
+        if(MQ_NARROW.matches){ a.classList.toggle('sb-open'); }
+        else{
+          a.classList.toggle('sb-min');
+          try{ localStorage.setItem(SB_KEY, a.classList.contains('sb-min')?'1':'0'); }catch(e2){}
+        }
+        syncRail();
       }
     });
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape' && a.classList.contains('sb-open')){ a.classList.remove('sb-open'); syncRail(); }
+    });
+    syncRail();
+  }
+
+  /* One place decides rail vs full panel: the user's collapse choice, the
+     screen width, and whether the overlay/drawer is open. */
+  var MQ_NARROW=window.matchMedia('(max-width:1180px)'), MQ_PHONE=window.matchMedia('(max-width:860px)');
+  function syncRail(){
+    var a=app(); if(!a) return;
+    if(!MQ_NARROW.matches) a.classList.remove('sb-open');
+    var open=a.classList.contains('sb-open');
+    var rail=!MQ_PHONE.matches && !open && (MQ_NARROW.matches || a.classList.contains('sb-min'));
+    a.classList.toggle('sb-rail', rail);
+    var t=el('sbTog'); if(!t) return;
+    var lbl=MQ_PHONE.matches ? 'Close menu' : (rail ? 'Expand sidebar' : 'Collapse sidebar');
+    t.title=lbl; t.setAttribute('aria-label',lbl); t.setAttribute('aria-expanded', rail?'false':'true');
+    var bg=el('sbBurger'); if(bg) bg.setAttribute('aria-expanded', open?'true':'false');
   }
 
   /* ── navigate ───────────────────────────────────────────────────────── */
@@ -12835,8 +12935,8 @@ return api;
     if(m==='admin'){
       /* The console marks its own active section; map it back so the
          sidebar highlights Projects rather than Settings. */
-      var av=document.querySelector('#erpNav a[data-v].on');
-      return (av && av.dataset.v==='projects') ? 'proj' : 'admin';
+      var ES=window.__ERP_INTERNAL&&window.__ERP_INTERNAL.S;
+      return (ES && ES.view==='projects') ? 'proj' : 'admin';
     }
     if(m==='quote'){
       var on=document.querySelector('#qmSubnav button[data-q].on');
@@ -12863,7 +12963,7 @@ return api;
     vanal:'Vendor participation and quoting behaviour across tenders.',
     audit:'Append-only record of who changed what, and when.',
     del:'Soft-deleted records, restorable until permanently removed.',
-    admin:'Users, roles, permissions, projects and system configuration.'
+    admin:'Users, sign-in access, organisation data and audit.'
   };
 
   function paint(){
@@ -12873,11 +12973,27 @@ return api;
       b.classList.toggle('on', b.dataset.sb===key);
       if(b.dataset.sb===key) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
     });
-    var head=el('pwsHead'); if(!head) return;
     var view=document.querySelector('.view.on'), onHome=!!(view && view.id==='home');
-    /* Inside Administration the title is the admin section on screen (the
-       admin page no longer repeats it in a second header bar of its own). */
-    var adm=(view && view.id==='admin') ? document.querySelector('#erpNav a[data-v].on .erp-nav-lbl') : null;
+    /* Administration submenu: open while the console is on screen (and only
+       when it has sections — the console fills it for administrators only). */
+    var inAdm=!!(view && view.id==='admin'), sub=el('sbAdminSub');
+    var wasHidden=!sub||sub.hidden;
+    if(sub) sub.hidden=!(inAdm && sub.children.length);
+    var admBtn=document.querySelector('#pSidebar button[data-sb="admin"]');
+    if(admBtn) admBtn.setAttribute('aria-expanded', (sub && !sub.hidden)?'true':'false');
+    /* Settings is the last item, so its submenu opens below the fold: bring
+       it into view once, when it opens (not on every repaint). */
+    if(sub && wasHidden && !sub.hidden && admBtn){
+      var sc=admBtn.closest('.sb-scroll');
+      if(sc) sc.scrollTop=Math.max(0, admBtn.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 8);
+    }
+    var head=el('pwsHead'); if(!head) return;
+    /* Inside Administration the title is the admin section on screen. */
+    var adm=null;
+    if(inAdm && key==='admin'){
+      var EI=window.__ERP_INTERNAL, lbl=document.querySelector('#erpNav a[data-v].on .erp-nav-lbl');
+      adm={ textContent: lbl ? lbl.textContent : ((EI && EI.TITLES && EI.TITLES[EI.S.view]) || 'Administration') };
+    }
     var group=adm ? 'Administration' : (meta.group||'Workspace');
     var crumb=el('pwsCrumb');
     if(crumb) crumb.innerHTML='<span class="pws-c-brand">Primarc</span><i class="pws-c-sep">/</i><span class="pws-c-grp">'+esc(group)+'</span>';
@@ -12921,6 +13037,7 @@ return api;
     var chip=document.querySelector('#authChip .an'), rl=document.querySelector('#authChip .ar');
     w.textContent=(s&&(s.name||s.username))||(chip&&chip.textContent)||'Signed in';
     r.textContent=(s&&s.role)||(rl&&rl.textContent)||'';
+    var av=el('sbAv'); if(av){ var nm=(w.textContent||'').trim(); av.textContent=nm && nm!=='Signed in' ? nm.split(/\s+/).map(function(p){ return p.charAt(0); }).join('').slice(0,2).toUpperCase() : ''; }
   }
 
   /* ── wire up ────────────────────────────────────────────────────────── */
@@ -12960,7 +13077,8 @@ return api;
       bg.id='sbBurger'; bg.className='theme-tog'; bg.type='button';
       bg.title='Menu'; bg.setAttribute('aria-label','Open navigation');
       bg.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
-      bg.addEventListener('click',function(){ app().classList.toggle('sb-open'); });
+      bg.setAttribute('aria-controls','pSidebar'); bg.setAttribute('aria-expanded','false');
+      bg.addEventListener('click',function(){ app().classList.toggle('sb-open'); syncRail(); });
       tb.insertBefore(bg, tb.firstChild);
     }
 
@@ -12989,9 +13107,7 @@ return api;
         if(st==='resynced'||st==='saved'||st==='restricted'){ counts(); dashboard(); who(); }
       });
     }
-    window.addEventListener('resize',function(){
-      if(!window.matchMedia('(max-width:860px)').matches) app().classList.remove('sb-open');
-    });
+    window.addEventListener('resize',syncRail);
     window.PShell={ go:goto, refresh:function(){ paint(); counts(); dashboard(); }, metrics:counts };
   }
 
